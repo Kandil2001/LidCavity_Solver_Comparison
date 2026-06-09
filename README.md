@@ -273,7 +273,7 @@ The repository is prepared as a clean comparison hub. The next practical step is
 
 **Ahmed Kandil**
 
-- Email: kandil.ahmed.amr@gmail.com
+- Email: a.akandil@outlook.com
 - GitHub: Kandil2001
 - Portfolio: kandil2001.github.io
 - LinkedIn: ahmed-kandil03
