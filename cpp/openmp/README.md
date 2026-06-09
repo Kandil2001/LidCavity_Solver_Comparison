@@ -23,13 +23,13 @@ make run N=64 RE=100 SCHEME=central PRESSURE=RBGS OMP_NUM_THREADS=4
 
 | Path | Purpose |
 |---|---|
-| `Makefile` | Build, run, and scaling commands |
+| `Makefile` | Build and run commands |
 | `src/lid_cavity.cpp` | Single translation-unit entry file |
 | `src/app/` | Command-line interface |
 | `src/common/` | Shared structs and utilities |
-| `src/core/` | OpenMP-enabled operators and solver loop |
+| `src/core/` | Operators and solver loop |
 | `src/post/` | Validation and CSV output |
-| `postprocess/` | Plotting and scaling scripts |
+| `postprocess/` | Plotting scripts |
 | `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
@@ -42,6 +42,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 

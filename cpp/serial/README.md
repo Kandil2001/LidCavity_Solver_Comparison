@@ -42,6 +42,7 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
+
 ## Notes
 
 - This is usually the cleanest compiled implementation to show first.

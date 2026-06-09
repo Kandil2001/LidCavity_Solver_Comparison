@@ -3,7 +3,7 @@ function result = run_single_case()
 
 addpath("src/core");
 addpath("src/validation");
-addpath("src/postprocess");
+addpath("postprocess");
 
 cfg = default_config();
 cfg.maxIter = 500;

@@ -3,7 +3,7 @@
 **Role:** Case-level MPI implementation  
 **Language/platform:** C++ + MPI
 
-This folder runs independent C++ benchmark cases across MPI ranks.
+This folder uses MPI to distribute independent benchmark cases across ranks while using the C++ solver for each case.
 
 ## Run
 
@@ -22,16 +22,15 @@ mpirun -np 4 bin/mpi_case_driver --mode quick --solver ./bin/lid_cavity
 
 | Path | Purpose |
 |---|---|
-| `Makefile` | Build, run, and merge commands |
-| `src/lid_cavity.cpp` | Serial C++ solver binary source |
-| `src/mpi_case_driver.c` | MPI case scheduler |
+| `Makefile` | Build and run commands |
+| `src/lid_cavity.cpp` | Single translation-unit entry file |
 | `src/app/` | Command-line interface |
 | `src/common/` | Shared structs and utilities |
 | `src/core/` | Operators and solver loop |
 | `src/post/` | Validation and CSV output |
-| `tools/` | MPI result merging utilities |
-| `postprocess/` | Plotting and scaling scripts |
+| `postprocess/` | Plotting scripts |
 | `results/` | Generated CSV, figures, scaling, and logs |
+| `tools/` | MPI result merging helpers |
 
 ## Output
 
@@ -43,6 +42,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 

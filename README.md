@@ -7,63 +7,30 @@
 ![CUDA](https://img.shields.io/badge/CUDA-NVIDIA%20GPU-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-A portfolio-style CFD comparison project for the two-dimensional incompressible lid-driven cavity benchmark.
+A clean multi-platform CFD benchmark for the two-dimensional incompressible lid-driven cavity problem.
 
-The same problem is solved in MATLAB, Python, C, C++, OpenMP, MPI, and CUDA. The goal is to keep the physical and numerical setup as consistent as possible, then compare implementation style, runtime, residual behaviour, validation error, and output structure.
+The same numerical problem is solved in MATLAB, Python, C, C++, OpenMP, MPI, and CUDA. The aim is not to build a commercial CFD package, but to show the same solver idea moving from a readable reference workflow to faster CPU, parallel, and GPU implementations.
 
-This repository is not a commercial CFD solver. It is a clean benchmark project that shows how one numerical method can be rebuilt across different programming platforms.
+## Project idea
+
+The repository is built around one benchmark and one comparison philosophy:
+
+> Keep the physical setup as consistent as possible, then compare implementation style, runtime, convergence behaviour, validation error, and output structure.
+
+The project is useful as a CFD learning project, a numerical-methods portfolio piece, and a starting point for later OpenFOAM, LBM, or domain-decomposition projects.
 
 ## At a glance
 
 | Part | What it shows |
 |---|---|
-| MATLAB | Reference workflow and validation baseline |
-| Python | Readable implementation and post-processing-friendly structure |
+| MATLAB | Reference workflow, looped and vectorized cases, validation baseline |
+| Python | Readable implementation and post-processing-friendly code |
 | C | Low-level serial CPU baseline |
 | C++ | Structured compiled-code baseline |
 | OpenMP | Shared-memory CPU parallelism |
-| MPI | Case-level parallel runs for parameter studies |
-| CUDA | NVIDIA GPU implementation prototype |
+| MPI | Case-level parallel parameter studies |
+| CUDA | NVIDIA GPU prototype |
 | Comparison tools | Side-by-side CSV reports and plots |
-
-## What is included
-
-- MATLAB reference workflow
-- Python serial solver
-- Python MPI case runner
-- C serial solver
-- C OpenMP solver
-- C MPI case runner
-- C++ serial solver
-- C++ OpenMP solver
-- C++ MPI case runner
-- CUDA solver for NVIDIA GPUs
-- Root helper scripts for smoke and quick CPU checks
-- Comparison scripts for matching finished cases across implementations
-- Short documentation for results, HPC usage, and repository structure
-
-## Consistent project structure
-
-Each implementation is organised using the same idea:
-
-```text
-README.md        local explanation and run commands
-Makefile         standard run interface
-src/             solver source code
-postprocess/     plotting or post-processing scripts
-results/         generated outputs
-```
-
-The standard output folders are:
-
-```text
-results/data/      summary CSV files, field CSV files, residual histories
-results/figures/   generated plots
-results/scaling/   OpenMP, MPI, or CUDA scaling tables
-results/logs/      optional logs from longer runs
-```
-
-The MATLAB folder now also follows this structure with its solver code under `matlab/src/`.
 
 ## Repository structure
 
@@ -78,21 +45,38 @@ docs/            project notes and running guides
 scripts/         root-level helper scripts
 ```
 
-Each solver folder is kept close to a standalone mini-repository. This makes the main repo useful as a comparison hub while still allowing each implementation to be moved into its own GitHub repo later.
+Each implementation follows the same general layout:
+
+```text
+README.md        explains that implementation
+Makefile         common build/run commands
+src/             solver source code
+postprocess/     plotting or post-processing scripts
+results/         generated outputs, mostly ignored by Git
+```
+
+The result folders are also consistent:
+
+```text
+results/data/      CSV summaries, field data, residual histories
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling tables
+results/logs/      optional logs from long runs
+```
 
 ## Implementations
 
 | Folder | Implementation | Main use |
 |---|---|---|
-| `matlab/` | MATLAB | Reference workflow, validation, plotting |
+| `matlab/` | MATLAB | Reference workflow, validation, and plotting |
 | `python/serial/` | Python / NumPy | Readable serial implementation |
-| `python/mpi/` | Python + MPI | Case-level parallel benchmark runner |
+| `python/mpi/` | Python + mpi4py | Case-level MPI benchmark runner |
 | `c/serial/` | C | Low-level serial CPU baseline |
 | `c/openmp/` | C + OpenMP | Shared-memory CPU scaling |
-| `c/mpi/` | C + MPI | Case-level parallel benchmark runner |
+| `c/mpi/` | C + MPI | Case-level MPI benchmark runner |
 | `cpp/serial/` | C++ | Structured compiled-code baseline |
 | `cpp/openmp/` | C++ + OpenMP | Shared-memory CPU scaling |
-| `cpp/mpi/` | C++ + MPI | Case-level parallel benchmark runner |
+| `cpp/mpi/` | C++ + MPI | Case-level MPI benchmark runner |
 | `cuda/` | CUDA C++ | NVIDIA GPU prototype |
 | `comparison/` | Python scripts | Compare summaries, runtimes, and validation metrics |
 
@@ -105,7 +89,7 @@ The benchmark is the classical lid-driven cavity flow:
 - no-slip side and bottom walls
 - incompressible flow
 - Reynolds-number based comparison cases
-- velocity centerline validation against Ghia et al. data
+- velocity centerline validation against the Ghia et al. benchmark data
 
 The solver follows a SIMPLE-style pressure-correction workflow:
 
@@ -125,7 +109,7 @@ make help
 make smoke-cpu
 ```
 
-`smoke-cpu` is the safest first command. It runs small checks and skips optional tools that are not installed.
+`smoke-cpu` is the safest first command. It runs small CPU checks and skips optional tools that are not installed.
 
 For a larger CPU run:
 
@@ -133,28 +117,28 @@ For a larger CPU run:
 make quick-cpu
 ```
 
-To run one implementation directly:
+Run one implementation directly:
 
 ```bash
 cd cpp/serial
 make quick
 ```
 
-For OpenMP:
+Run an OpenMP version:
 
 ```bash
 cd cpp/openmp
 make quick OMP_NUM_THREADS=4
 ```
 
-For MPI:
+Run an MPI version on a machine with MPI installed:
 
 ```bash
 cd c/mpi
 make quick NP=4
 ```
 
-For CUDA, use a machine with an NVIDIA GPU and CUDA toolkit:
+Run CUDA on a machine with an NVIDIA GPU and CUDA toolkit:
 
 ```bash
 cd cuda
@@ -167,7 +151,7 @@ make smoke
 |---|---|
 | `smoke` | Very small test to check that the code builds and starts correctly |
 | `quick` | Small benchmark run for fast checking |
-| `medium` | Larger run with more cases where supported |
+| `medium` | Larger check with more cases |
 | `full` | Full benchmark study, intended for longer runs |
 | `single` | One selected case from the command line |
 
@@ -203,11 +187,11 @@ mesh size, Reynolds number, convection scheme, pressure solver
 
 | File | Why it matters |
 |---|---|
-| `README.md` | Main project explanation |
-| `docs/PROJECT_OVERVIEW.md` | Short numerical and project overview |
-| `docs/IMPLEMENTATION_LAYOUT.md` | Consistent folder layout across platforms |
-| `docs/RESULTS_GUIDE.md` | Explains generated CSV and plot files |
-| `docs/RUNNING_ON_HPC.md` | Notes for running on university machines |
+| `README.md` | Main project overview |
+| `docs/PROJECT_OVERVIEW.md` | Numerical and project summary |
+| `docs/IMPLEMENTATION_LAYOUT.md` | Standard folder layout across implementations |
+| `docs/RESULTS_GUIDE.md` | Explanation of generated CSV and plot files |
+| `docs/RUNNING_ON_HPC.md` | Notes for running on university/HPC machines |
 | `comparison/README.md` | How the comparison scripts are used |
 
 ## Requirements
@@ -258,7 +242,7 @@ The MPI versions currently use case-level parallelism. Each MPI rank receives in
 
 ### CUDA
 
-The CUDA version needs an NVIDIA GPU and CUDA toolkit. On a CPU-only university machine, skip the `cuda/` folder and use the CPU solvers.
+The CUDA version needs an NVIDIA GPU and CUDA toolkit. On a CPU-only machine, skip the `cuda/` folder and use the CPU solvers.
 
 ### Numerical differences
 

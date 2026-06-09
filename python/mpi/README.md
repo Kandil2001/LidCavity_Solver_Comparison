@@ -27,6 +27,7 @@ mpirun -np 4 python3 src/mpi_case_driver.py --mode quick --no-fields
 | `src/lidcavity/` | Shared solver package |
 | `postprocess/` | Plotting and scaling scripts |
 | `results/` | Generated CSV, figures, scaling, and logs |
+| `requirements.txt` | Python dependencies |
 
 ## Output
 
@@ -38,6 +39,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 

@@ -2,7 +2,7 @@
 """
 Post-processing for serial lid-driven cavity CSV outputs.
 
-This script reads the CSV files written by src/lid_cavity.cpp and recreates
+This script reads the CSV files written by src/lid_cavity.py and recreates
 MATLAB-style figures:
 
 Case-level figures:
@@ -23,7 +23,7 @@ Study-level figures:
   - case quality summary
 
 Example:
-  python3 postprocess/plot_cpp_results.py --all-cases --summaries all
+  python3 postprocess/plot_results.py --all-cases --summaries all
 """
 
 from __future__ import annotations

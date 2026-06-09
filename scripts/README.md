@@ -1,32 +1,10 @@
-# Helper Scripts
+# Root Helper Scripts
 
-This folder contains root-level scripts that run several solver folders from one command.
-
-## Scripts
+This folder contains small shell scripts used by the root `Makefile`.
 
 | Script | Purpose |
 |---|---|
-| `run_smoke_cpu.sh` | Runs small CPU checks and skips missing optional tools |
-| `run_quick_cpu.sh` | Runs quick CPU benchmarks and skips missing optional tools |
+| `run_smoke_cpu.sh` | Run the smallest CPU checks and skip missing optional tools |
+| `run_quick_cpu.sh` | Run a larger quick CPU check and skip missing optional tools |
 
-## Usage
-
-From the repository root:
-
-```bash
-make smoke-cpu
-make quick-cpu
-```
-
-or directly:
-
-```bash
-bash scripts/run_smoke_cpu.sh
-bash scripts/run_quick_cpu.sh
-```
-
-## Notes
-
-- The scripts are written for Linux-style terminals.
-- On Windows, WSL is recommended.
-- MATLAB, MPI, and CUDA are skipped if the required commands are not available.
+The scripts are written for Linux-style shells. On Windows, use WSL, Git Bash, or run the individual solver folders manually.

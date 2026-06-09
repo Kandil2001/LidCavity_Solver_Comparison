@@ -23,7 +23,7 @@ Study-level figures:
   - case quality summary
 
 Example:
-  python3 postprocess/plot_cpp_results.py --all-cases --summaries all
+  python3 postprocess/plot_results.py --all-cases --summaries all
 """
 
 from __future__ import annotations

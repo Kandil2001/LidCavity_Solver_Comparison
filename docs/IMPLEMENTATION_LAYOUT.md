@@ -8,7 +8,7 @@ Most implementation folders follow this pattern:
 
 ```text
 README.md        What this implementation does and how to run it
-Makefile         Common run commands
+Makefile         Common build/run commands
 src/             Solver source code
 postprocess/     Plotting or post-processing scripts
 results/         Generated outputs, kept mostly empty in Git
@@ -23,15 +23,19 @@ results/scaling/   OpenMP, MPI, or CUDA scaling tables
 results/logs/      optional logs from long runs
 ```
 
-## MATLAB note
+## MATLAB layout
 
-The MATLAB implementation also uses the same idea, but its solver functions are grouped inside `matlab/src/`:
+MATLAB follows the same idea as the compiled and Python implementations. The only difference is that MATLAB scripts are grouped inside `src/app/` and solver functions are grouped by role:
 
 ```text
-matlab/src/core/          numerical operations and SIMPLE loop
-matlab/src/studies/       parametric-study drivers
-matlab/src/validation/    Ghia benchmark data and validation helpers
-matlab/src/postprocess/   MATLAB plotting functions
+matlab/README.md
+matlab/Makefile
+matlab/src/app/          entry scripts and configuration
+matlab/src/core/         numerical operations and SIMPLE loop
+matlab/src/studies/      single-case and parametric-study drivers
+matlab/src/validation/   Ghia benchmark data and validation helpers
+matlab/postprocess/      MATLAB plotting functions
+matlab/results/          generated output folders
 ```
 
-This keeps the MATLAB folder consistent with the other platforms while still keeping the MATLAB workflow readable.
+The old duplicate MATLAB folders (`core/`, `post/`, `studies/`, and `validation/` at the MATLAB root) were removed so there is only one source layout.

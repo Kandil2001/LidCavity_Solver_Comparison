@@ -3,7 +3,7 @@
 **Role:** Reference workflow  
 **Language/platform:** MATLAB
 
-This folder contains the reference MATLAB implementation. It keeps the numerical workflow easy to read and is useful for checking the other implementations.
+This folder contains the MATLAB reference implementation. It keeps the numerical workflow easy to inspect and is useful for checking the other implementations.
 
 ## Run
 
@@ -16,20 +16,19 @@ make medium
 ## Single case example
 
 ```bash
-matlab -batch "run_mode('quick')"
+make single
 ```
 
 ## Folder layout
 
 | Path | Purpose |
 |---|---|
-| `Makefile` | Common MATLAB run commands |
-| `run_smoke.m / run_quick.m / run_medium.m` | Mode entry scripts |
+| `Makefile` | MATLAB run commands |
+| `src/app/` | Entry scripts and configuration |
 | `src/core/` | Numerical operators and SIMPLE loop |
 | `src/studies/` | Single-case and parametric-study drivers |
 | `src/validation/` | Ghia centerline validation data and checks |
-| `src/postprocess/` | MATLAB plotting functions |
-| `postprocess/` | README and post-processing note |
+| `postprocess/` | MATLAB plotting functions |
 | `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
@@ -43,9 +42,10 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
+
 ## Notes
 
-- This is the easiest implementation to follow when checking the numerical method.
-- The folder is now organised with a `src/` tree like the other implementations.
+- MATLAB is the reference workflow. It contains both looped and vectorized study options.
+- The source now lives only under `src/`, so the folder is not duplicated.
 
 For the full project overview, see the root `README.md`.

@@ -8,4 +8,6 @@ This folder contains the C++ versions of the lid-driven cavity solver.
 | `openmp/` | Shared-memory CPU parallel version |
 | `mpi/` | Case-level MPI runner for parameter studies |
 
-All C++ folders use the same basic style: `Makefile`, `src/`, `postprocess/`, and `results/`.
+All C++ folders follow the same structure: `README.md`, `Makefile`, `src/`, `postprocess/`, and `results/`.
+
+Use the serial C++ version as the clean compiled baseline, then compare against OpenMP and MPI.

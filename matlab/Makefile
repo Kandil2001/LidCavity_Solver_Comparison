@@ -1,24 +1,38 @@
 SHELL := /bin/bash
+MATLAB ?= matlab
+MATLAB_ENTRY := addpath('src/app')
 
-.PHONY: run smoke quick medium full plots clean
+.PHONY: help run smoke quick medium full single plots clean
 
-run:
-	matlab -batch "run_smoke"
+help:
+	@echo "MATLAB reference solver"
+	@echo "  make smoke    smallest check"
+	@echo "  make quick    quick benchmark"
+	@echo "  make medium   medium benchmark"
+	@echo "  make full     full benchmark"
+	@echo "  make single   one debug case"
+	@echo "  make plots    regenerate MATLAB plots from existing results"
+	@echo "  make clean    remove generated outputs"
+
+run: smoke
 
 smoke:
-	matlab -batch "run_smoke"
+	$(MATLAB) -batch "$(MATLAB_ENTRY); run_smoke"
 
 quick:
-	matlab -batch "run_quick"
+	$(MATLAB) -batch "$(MATLAB_ENTRY); run_quick"
 
 medium:
-	matlab -batch "run_medium"
+	$(MATLAB) -batch "$(MATLAB_ENTRY); run_medium"
 
 full:
-	matlab -batch "run_mode('full')"
+	$(MATLAB) -batch "$(MATLAB_ENTRY); run_full"
+
+single:
+	$(MATLAB) -batch "$(MATLAB_ENTRY); addpath('src/studies'); run_single_case"
 
 plots:
-	matlab -batch "generate_all_plots_from_results"
+	$(MATLAB) -batch "$(MATLAB_ENTRY); generate_all_plots_from_results"
 
 clean:
 	rm -rf results/data results/figures results/scaling results/logs

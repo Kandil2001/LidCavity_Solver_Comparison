@@ -3,7 +3,7 @@
 **Role:** Compiled serial CPU implementation  
 **Language/platform:** C
 
-This folder contains the serial C implementation. It is a low-level baseline for runtime comparison.
+This folder contains the serial C implementation. It is the low-level CPU baseline used for runtime and output comparison.
 
 ## Run
 
@@ -41,6 +41,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 

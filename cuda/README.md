@@ -30,6 +30,7 @@ make run N=64 RE=100 SCHEME=upwind MAX_ITER=500 POISSON_ITER=300
 | `src/post/` | CSV output |
 | `postprocess/` | Scaling plotting scripts |
 | `results/` | Generated CSV, figures, scaling, and logs |
+| `requirements.txt` | Python dependencies for plotting |
 
 ## Output
 
@@ -41,6 +42,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 

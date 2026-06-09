@@ -27,6 +27,7 @@ make run N=64 RE=100 SCHEME=central PRESSURE=RBGS
 | `src/lidcavity/` | Python package with config, operators, solver, IO, and validation |
 | `postprocess/` | Plotting scripts |
 | `results/` | Generated CSV, figures, scaling, and logs |
+| `requirements.txt` | Python dependencies |
 
 ## Output
 
@@ -38,6 +39,7 @@ results/figures/   generated plots
 results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
+
 
 ## Notes
 
