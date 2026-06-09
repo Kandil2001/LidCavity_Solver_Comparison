@@ -1,0 +1,37 @@
+# build output
+bin/
+build/
+*.o
+*.exe
+*.out
+
+# generated results and logs
+results/data/
+results/figures/
+results/logs/
+results/scaling/
+**/results/data/
+**/results/figures/
+**/results/logs/
+**/results/scaling/
+*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# matlab
+*.asv
+*.m~
+
+# editor/os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# packaged archives
+dist/
+*.zip
