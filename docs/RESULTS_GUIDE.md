@@ -1,75 +1,35 @@
 # Results guide
 
-Each implementation writes its own result files under its own folder. This keeps the solvers independent and avoids mixing unfinished runs.
+Each implementation writes outputs to its own `results/` folder. This avoids mixing files from different languages and makes comparisons easier.
 
-Typical output folders:
-
-```text
-results/data/      CSV summaries, fields, and residual histories
-results/figures/   plots from the post-processing scripts
-results/scaling/   scaling tables for parallel versions
-```
-
-## Main summary file
-
-A run usually creates a file like:
+## Standard result folders
 
 ```text
-results/data/study_summary_quick.csv
+results/data/      CSV summaries, field data, residual histories, validation data
+results/figures/   velocity plots, residual plots, validation plots
+results/scaling/   OpenMP, MPI, or CUDA scaling tables
+results/logs/      optional long-run logs
 ```
 
-For MATLAB the mode name includes `_matlab`, for example:
+## Comparison workflow
 
-```text
-results/data/study_summary_quick_matlab.csv
-```
-
-## Field files
-
-Field files are named by case setup. A typical file name contains:
-
-```text
-N, Re, scheme, pressure solver, implementation
-```
-
-This is useful because the comparison scripts match cases by setup, not by the order in which they were run.
-
-## Comparison outputs
-
-After running serial implementations, use:
+1. Run at least one serial implementation.
+2. Run another implementation with the same mode.
+3. From the repository root, run:
 
 ```bash
 make compare-serial MODE=quick
 make report-serial MODE=quick
 ```
 
-The output goes to:
+The comparison scripts match cases by setup:
 
 ```text
-comparison/results/
+mesh size, Reynolds number, convection scheme, pressure solver
 ```
 
-The most useful files are:
+This is safer than matching only by case number or file order.
 
-- `comparison_summary.csv`
-- `benchmark_report.md`
-- `runtime_pivot_by_case.csv`
-- `aggregate_by_implementation.csv`
-- runtime plots as `.png`
+## Git policy
 
-## What to upload to GitHub
-
-Good files to keep:
-
-- source code,
-- Makefiles,
-- README files,
-- selected final reports,
-- selected final plots.
-
-Usually do not commit:
-
-- raw full field CSV files from every run,
-- temporary logs,
-- local build folders,
-- Python cache folders.
+Generated result files are ignored by Git by default. Keep only selected final plots or tables that are worth showing in the main README.

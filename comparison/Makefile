@@ -12,6 +12,6 @@ report:
 	$(PYTHON) benchmark_report.py --help
 
 clean:
-	rm -rf results
-	mkdir -p results
-	touch results/.gitkeep
+	rm -rf results/data results/figures results/scaling results/logs
+	mkdir -p results/data results/figures results/scaling results/logs
+	touch results/.gitkeep results/data/.gitkeep results/figures/.gitkeep results/scaling/.gitkeep results/logs/.gitkeep

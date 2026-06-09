@@ -1,61 +1,46 @@
 # Python Serial Solver
 
-**Role in the project:** readable serial implementation and post-processing-friendly baseline.
+**Role:** Readable serial implementation  
+**Language/platform:** Python / NumPy
 
-This folder contains the Python / NumPy version of the lid-driven cavity solver. It is easier to read than the C and C++ versions and is useful for checking the numerical workflow before moving to faster compiled code.
-
-## What this folder contains
-
-| Path | Purpose |
-|---|---|
-| `src/lid_cavity.py` | Main launcher |
-| `src/lidcavity/` | Solver package |
-| `postprocess/` | Plotting scripts |
-| `requirements.txt` | Python dependencies |
-| `results/` | Generated data and plots |
-
-## Setup
-
-```bash
-make install
-```
-
-or manually:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
+This folder contains the serial Python implementation. It is useful for readable code, quick checks, and post-processing-friendly CSV output.
 
 ## Run
 
 ```bash
 make smoke
 make quick
-make run N=128 RE=400 SCHEME=upwind PRESSURE=RBGS
-make plot
 ```
 
-Direct command example:
+## Single case example
 
 ```bash
-python3 src/lid_cavity.py --single --N 128 --Re 400 --scheme upwind --pressure RBGS
+make run N=64 RE=100 SCHEME=central PRESSURE=RBGS
 ```
+
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | Common run commands |
+| `src/lid_cavity.py` | Command-line entry point |
+| `src/lidcavity/` | Python package with config, operators, solver, IO, and validation |
+| `postprocess/` | Plotting scripts |
+| `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
 
+Generated files follow the same convention used across the repository:
+
 ```text
-results/data/      CSV summaries, fields, residuals
+results/data/      CSV field data, residual histories, and summary tables
 results/figures/   generated plots
-```
-
-Typical summary file:
-
-```text
-results/data/study_summary_quick.csv
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- Good first folder for checking the algorithm in a readable language.
-- Slower than C/C++ for larger cases, but easier to debug.
-- Output files are designed to be compared with the other implementations.
+- Use this version when readability matters more than maximum speed.
+
+For the full project overview, see the root `README.md`.

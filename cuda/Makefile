@@ -1,7 +1,7 @@
 NVCC ?= nvcc
 BIN = bin/lid_cavity_cuda
 
-.PHONY: build run smoke clean
+.PHONY: build run smoke quick clean
 
 build:
 	mkdir -p bin
@@ -13,7 +13,10 @@ run: build
 smoke: build
 	$(BIN) --mode smoke
 
+quick: build
+	$(BIN) --mode quick
+
 clean:
-	rm -rf bin results/data results/figures
-	mkdir -p results
-	touch results/.gitkeep
+	rm -rf bin results/data results/figures results/scaling results/logs results/mpi_raw __pycache__ src/__pycache__
+	mkdir -p results/data results/figures results/scaling results/logs
+	touch results/.gitkeep results/data/.gitkeep results/figures/.gitkeep results/scaling/.gitkeep results/logs/.gitkeep

@@ -1,52 +1,51 @@
-# C++ MPI Runner
+# C++ MPI Case Runner
 
-**Role in the project:** run independent C++ benchmark cases in parallel with MPI.
+**Role:** Case-level MPI implementation  
+**Language/platform:** C++ + MPI
 
-This folder builds the C++ solver and a small MPI case driver. MPI ranks receive different benchmark cases, run them independently, and then the outputs are merged.
+This folder runs independent C++ benchmark cases across MPI ranks.
 
-This is useful for large parameter studies. It is not a domain-decomposition CFD solver yet.
-
-## Requirements
-
-```text
-g++
-mpicc
-mpirun
-python3
-```
-
-Check the machine:
+## Run
 
 ```bash
-which mpicc
-which mpirun
-```
-
-## Build and run
-
-```bash
-make build
 make smoke NP=2
 make quick NP=4
-make merge
 ```
 
-Direct command example:
+## Single case example
 
 ```bash
 mpirun -np 4 bin/mpi_case_driver --mode quick --solver ./bin/lid_cavity
-python3 tools/merge_mpi_results.py
 ```
+
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | Build, run, and merge commands |
+| `src/lid_cavity.cpp` | Serial C++ solver binary source |
+| `src/mpi_case_driver.c` | MPI case scheduler |
+| `src/app/` | Command-line interface |
+| `src/common/` | Shared structs and utilities |
+| `src/core/` | Operators and solver loop |
+| `src/post/` | Validation and CSV output |
+| `tools/` | MPI result merging utilities |
+| `postprocess/` | Plotting and scaling scripts |
+| `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
 
+Generated files follow the same convention used across the repository:
+
 ```text
-results/mpi_raw/   raw per-rank outputs
-results/data/      merged summary outputs
+results/data/      CSV field data, residual histories, and summary tables
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- MPI is used here for case-level parallelism.
-- It is useful when many independent cases need to be run.
-- Domain decomposition can be added later as a separate development step.
+- This is case-level parallelism, not domain decomposition.
+
+For the full project overview, see the root `README.md`.

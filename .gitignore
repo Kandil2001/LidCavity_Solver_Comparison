@@ -6,15 +6,19 @@ build/
 *.out
 
 # generated results and logs
-results/data/
-results/figures/
-results/logs/
-results/scaling/
-**/results/data/
-**/results/figures/
-**/results/logs/
-**/results/scaling/
+results/data/*
+results/figures/*
+results/logs/*
+results/scaling/*
+**/results/data/*
+**/results/figures/*
+**/results/logs/*
+**/results/scaling/*
 *.log
+
+# keep empty result folders visible on GitHub
+!results/**/.gitkeep
+!**/results/**/.gitkeep
 
 # python
 __pycache__/

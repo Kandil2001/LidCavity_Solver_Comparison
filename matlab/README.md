@@ -1,66 +1,51 @@
-# MATLAB Solver
+# MATLAB Reference Solver
 
-**Role in the project:** reference workflow and validation baseline.
+**Role:** Reference workflow  
+**Language/platform:** MATLAB
 
-This folder contains the MATLAB version of the lid-driven cavity solver. It is used as the clearest starting point before comparing the same benchmark with Python, C, C++, OpenMP, MPI, and CUDA.
-
-The MATLAB code is intentionally kept readable. It contains the main solver workflow, validation against Ghia et al. centerline data, and plotting routines.
-
-## What this folder contains
-
-| Path | Purpose |
-|---|---|
-| `main.m` | Main entry point |
-| `run_smoke.m` | Smallest test run |
-| `run_quick.m` | Small benchmark run |
-| `run_medium.m` | Larger benchmark run |
-| `core/` | Numerical solver routines |
-| `studies/` | Parametric-study runners and CSV export |
-| `validation/` | Ghia validation data and functions |
-| `post/` | Plotting functions |
-| `results/` | Generated data and figures |
+This folder contains the reference MATLAB implementation. It keeps the numerical workflow easy to read and is useful for checking the other implementations.
 
 ## Run
-
-From this folder:
 
 ```bash
 make smoke
 make quick
 make medium
-make plots
 ```
 
-The direct MATLAB commands are:
+## Single case example
 
 ```bash
-matlab -batch "run_smoke"
-matlab -batch "run_quick"
-matlab -batch "run_medium"
+matlab -batch "run_mode('quick')"
 ```
+
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | Common MATLAB run commands |
+| `run_smoke.m / run_quick.m / run_medium.m` | Mode entry scripts |
+| `src/core/` | Numerical operators and SIMPLE loop |
+| `src/studies/` | Single-case and parametric-study drivers |
+| `src/validation/` | Ghia centerline validation data and checks |
+| `src/postprocess/` | MATLAB plotting functions |
+| `postprocess/` | README and post-processing note |
+| `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
 
-Generated files are written to:
+Generated files follow the same convention used across the repository:
 
 ```text
-results/data/
-results/figures/
-```
-
-Typical quick-run summary:
-
-```text
-results/data/study_summary_quick_matlab.csv
+results/data/      CSV field data, residual histories, and summary tables
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- This is the reference implementation for the comparison repo.
-- The code contains looped and vectorized MATLAB-style parts.
-- The focus is clarity first, then comparison with faster compiled implementations.
-- The output naming is slightly different from the other solvers because MATLAB summary files include `_matlab` in the file name.
+- This is the easiest implementation to follow when checking the numerical method.
+- The folder is now organised with a `src/` tree like the other implementations.
 
-## Back to main repo
-
-The full comparison workflow is described in the root `README.md`.
+For the full project overview, see the root `README.md`.

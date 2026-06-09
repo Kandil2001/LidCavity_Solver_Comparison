@@ -7,11 +7,11 @@
 ![CUDA](https://img.shields.io/badge/CUDA-NVIDIA%20GPU-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-A clean comparison project for the 2D incompressible lid-driven cavity benchmark.
+A portfolio-style CFD comparison project for the two-dimensional incompressible lid-driven cavity benchmark.
 
-The same CFD problem is solved in MATLAB, Python, C, C++, OpenMP, MPI, and CUDA. The goal is to keep the numerical setup as consistent as possible, then compare implementation style, runtime, residual behaviour, validation error, and output structure.
+The same problem is solved in MATLAB, Python, C, C++, OpenMP, MPI, and CUDA. The goal is to keep the physical and numerical setup as consistent as possible, then compare implementation style, runtime, residual behaviour, validation error, and output structure.
 
-This repository is not a commercial CFD solver. It is a portfolio-style benchmark that shows how a simple numerical method can grow from a clear reference implementation into faster CPU and GPU versions.
+This repository is not a commercial CFD solver. It is a clean benchmark project that shows how one numerical method can be rebuilt across different programming platforms.
 
 ## At a glance
 
@@ -20,15 +20,15 @@ This repository is not a commercial CFD solver. It is a portfolio-style benchmar
 | MATLAB | Reference workflow and validation baseline |
 | Python | Readable implementation and post-processing-friendly structure |
 | C | Low-level serial CPU baseline |
-| C++ | Cleaner compiled-code baseline |
+| C++ | Structured compiled-code baseline |
 | OpenMP | Shared-memory CPU parallelism |
 | MPI | Case-level parallel runs for parameter studies |
-| CUDA | GPU implementation for NVIDIA machines |
+| CUDA | NVIDIA GPU implementation prototype |
 | Comparison tools | Side-by-side CSV reports and plots |
 
 ## What is included
 
-- MATLAB reference workflow with looped and vectorized parts
+- MATLAB reference workflow
 - Python serial solver
 - Python MPI case runner
 - C serial solver
@@ -40,7 +40,30 @@ This repository is not a commercial CFD solver. It is a portfolio-style benchmar
 - CUDA solver for NVIDIA GPUs
 - Root helper scripts for smoke and quick CPU checks
 - Comparison scripts for matching finished cases across implementations
-- Short documentation for results, HPC usage, and project structure
+- Short documentation for results, HPC usage, and repository structure
+
+## Consistent project structure
+
+Each implementation is organised using the same idea:
+
+```text
+README.md        local explanation and run commands
+Makefile         standard run interface
+src/             solver source code
+postprocess/     plotting or post-processing scripts
+results/         generated outputs
+```
+
+The standard output folders are:
+
+```text
+results/data/      summary CSV files, field CSV files, residual histories
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling tables
+results/logs/      optional logs from longer runs
+```
+
+The MATLAB folder now also follows this structure with its solver code under `matlab/src/`.
 
 ## Repository structure
 
@@ -70,7 +93,7 @@ Each solver folder is kept close to a standalone mini-repository. This makes the
 | `cpp/serial/` | C++ | Structured compiled-code baseline |
 | `cpp/openmp/` | C++ + OpenMP | Shared-memory CPU scaling |
 | `cpp/mpi/` | C++ + MPI | Case-level parallel benchmark runner |
-| `cuda/` | CUDA C++ | NVIDIA GPU version |
+| `cuda/` | CUDA C++ | NVIDIA GPU prototype |
 | `comparison/` | Python scripts | Compare summaries, runtimes, and validation metrics |
 
 ## Numerical benchmark
@@ -86,7 +109,7 @@ The benchmark is the classical lid-driven cavity flow:
 
 The solver follows a SIMPLE-style pressure-correction workflow:
 
-1. set velocity and pressure boundary conditions
+1. apply velocity and pressure boundary conditions
 2. predict the velocity field
 3. solve the pressure-correction equation
 4. correct velocity and pressure
@@ -144,7 +167,7 @@ make smoke
 |---|---|
 | `smoke` | Very small test to check that the code builds and starts correctly |
 | `quick` | Small benchmark run for fast checking |
-| `medium` | Larger MATLAB run with more cases |
+| `medium` | Larger run with more cases where supported |
 | `full` | Full benchmark study, intended for longer runs |
 | `single` | One selected case from the command line |
 
@@ -154,18 +177,6 @@ Example single case:
 cd c/serial
 make run N=128 RE=400 SCHEME=upwind PRESSURE=RBGS
 ```
-
-## Output files
-
-Each implementation writes generated files inside its own folder:
-
-```text
-results/data/      summary CSV files, field CSV files, residual histories
-results/figures/   generated plots
-results/scaling/   scaling tables for OpenMP, MPI, or CUDA when available
-```
-
-Generated result folders are mostly ignored by Git. This keeps the repository clean and avoids uploading large temporary outputs.
 
 ## Comparing results
 
@@ -190,12 +201,11 @@ mesh size, Reynolds number, convection scheme, pressure solver
 
 ## What to look at first
 
-For a quick review of the project, open these files first:
-
 | File | Why it matters |
 |---|---|
 | `README.md` | Main project explanation |
 | `docs/PROJECT_OVERVIEW.md` | Short numerical and project overview |
+| `docs/IMPLEMENTATION_LAYOUT.md` | Consistent folder layout across platforms |
 | `docs/RESULTS_GUIDE.md` | Explains generated CSV and plot files |
 | `docs/RUNNING_ON_HPC.md` | Notes for running on university machines |
 | `comparison/README.md` | How the comparison scripts are used |
@@ -265,15 +275,23 @@ The repository is prepared as a clean comparison hub. The next practical step is
 - Compare MATLAB, Python, C, and C++ serial results first
 - Add OpenMP scaling discussion
 - Add MPI case-parallel scaling discussion
-- Run CUDA only on a GPU machine
+- Run CUDA on a GPU machine
 - Add OpenFOAM and LBM follow-up repositories later
 
-## Reference
+## References
 
-Ghia, U., Ghia, K. N., and Shin, C. T. (1982). *High-Re solutions for incompressible flow using the Navier-Stokes equations and a multigrid method*. Journal of Computational Physics, 48(3), 387-411.
+- Ghia, U., Ghia, K. N., and Shin, C. T. (1982). *High-Re solutions for incompressible flow using the Navier-Stokes equations and a multigrid method*. Journal of Computational Physics, 48(3), 387-411.
+- Patankar, S. V. (1980). *Numerical Heat Transfer and Fluid Flow*. Hemisphere Publishing.
+- Versteeg, H. K., and Malalasekera, W. (2007). *An Introduction to Computational Fluid Dynamics: The Finite Volume Method*. Pearson.
+- Ferziger, J. H., Peric, M., and Street, R. L. (2020). *Computational Methods for Fluid Dynamics*. Springer.
 
 ## Author
 
-Ahmed Kandil
+**Ahmed Kandil**
+
+- Email: kandil.ahmed.amr@gmail.com
+- GitHub: Kandil2001
+- Portfolio: kandil2001.github.io
+- LinkedIn: ahmed-kandil03
 
 Released under the MIT License.

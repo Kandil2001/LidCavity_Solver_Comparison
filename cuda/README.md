@@ -1,49 +1,50 @@
 # CUDA Solver
 
-**Role in the project:** NVIDIA GPU implementation.
+**Role:** Single-GPU prototype  
+**Language/platform:** CUDA C++
 
-This folder contains the CUDA version of the lid-driven cavity solver. It should only be built on a machine with an NVIDIA GPU and the CUDA toolkit.
+This folder contains the NVIDIA CUDA version. It is intended for GPU machines and is kept separate from the CPU smoke workflow.
 
-If the machine has no CUDA support, skip this folder. The CPU solvers can still be run normally.
-
-## Requirements
-
-```text
-NVIDIA GPU
-CUDA toolkit
-nvcc
-```
-
-Check the machine:
+## Run
 
 ```bash
-nvidia-smi
-nvcc --version
-```
-
-## Build and run
-
-```bash
-make build
 make smoke
-make run N=128 RE=400 MAX_ITER=500 POISSON_ITER=300
+make run N=64 RE=100
 ```
 
-Direct command example:
+## Single case example
 
 ```bash
-./bin/lid_cavity_cuda --N 128 --Re 400 --scheme upwind --maxIter 500 --poisson-maxIter 300
+make run N=64 RE=100 SCHEME=upwind MAX_ITER=500 POISSON_ITER=300
 ```
+
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | CUDA build and run commands |
+| `src/lid_cavity_cuda.cu` | Single translation-unit entry file |
+| `src/app/` | CLI, config, and main loop |
+| `src/common/` | CUDA utility helpers |
+| `src/kernels/` | GPU kernels |
+| `src/post/` | CSV output |
+| `postprocess/` | Scaling plotting scripts |
+| `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
 
+Generated files follow the same convention used across the repository:
+
 ```text
-results/data/      CSV summaries and field data
-results/figures/   generated plots when available
+results/data/      CSV field data, residual histories, and summary tables
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- CUDA is separate because it needs a different compiler and hardware.
-- Do not expect this folder to run on normal CPU-only university PCs.
-- Compare CUDA timing only with cases that use the same numerical setup.
+- Requires an NVIDIA GPU, CUDA toolkit, and `nvcc`.
+- The CUDA solver is a GPU prototype and should be compared carefully against the CPU baselines.
+
+For the full project overview, see the root `README.md`.

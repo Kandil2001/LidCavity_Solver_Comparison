@@ -5,7 +5,7 @@ NP ?= 4
 SOLVER = bin/lid_cavity
 DRIVER = bin/mpi_case_driver
 
-.PHONY: build run smoke quick merge clean
+.PHONY: build run smoke quick medium full merge clean
 
 build:
 	mkdir -p bin
@@ -22,10 +22,18 @@ quick: build
 	mpirun -np $(NP) $(DRIVER) --mode quick --solver ./$(SOLVER)
 	python3 tools/merge_mpi_results.py
 
+medium: build
+	mpirun -np $(NP) $(DRIVER) --mode medium --solver ./$(SOLVER)
+	python3 tools/merge_mpi_results.py
+
+full: build
+	mpirun -np $(NP) $(DRIVER) --mode full --solver ./$(SOLVER)
+	python3 tools/merge_mpi_results.py
+
 merge:
 	python3 tools/merge_mpi_results.py
 
 clean:
-	rm -rf bin results/data results/mpi_raw
-	mkdir -p results
-	touch results/.gitkeep
+	rm -rf bin results/data results/figures results/scaling results/logs results/mpi_raw __pycache__ src/__pycache__
+	mkdir -p results/data results/figures results/scaling results/logs
+	touch results/.gitkeep results/data/.gitkeep results/figures/.gitkeep results/scaling/.gitkeep results/logs/.gitkeep

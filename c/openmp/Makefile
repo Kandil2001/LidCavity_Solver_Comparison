@@ -3,7 +3,7 @@ CFLAGS ?= -std=c99 -O3 -march=native -Wall -Wextra -fopenmp
 BIN = bin/lid_cavity_c_openmp
 OMP_NUM_THREADS ?= 4
 
-.PHONY: build run smoke quick scaling plot clean
+.PHONY: build run smoke quick medium full scaling plot clean
 
 build:
 	mkdir -p bin
@@ -18,6 +18,12 @@ smoke: build
 quick: build
 	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode quick
 
+medium: build
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode medium
+
+full: build
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode full
+
 scaling: build
 	@mkdir -p results/scaling
 	@echo "Threads,Runtime_s" > results/scaling/openmp_scaling.csv
@@ -30,6 +36,6 @@ plot:
 	python3 postprocess/plot_results.py --all-cases --summaries all
 
 clean:
-	rm -rf bin results/data results/figures results/scaling
-	mkdir -p results
-	touch results/.gitkeep
+	rm -rf bin results/data results/figures results/scaling results/logs results/mpi_raw __pycache__ src/__pycache__
+	mkdir -p results/data results/figures results/scaling results/logs
+	touch results/.gitkeep results/data/.gitkeep results/figures/.gitkeep results/scaling/.gitkeep results/logs/.gitkeep

@@ -1,47 +1,50 @@
 # C OpenMP Solver
 
-**Role in the project:** shared-memory CPU parallel version of the C solver.
+**Role:** Shared-memory CPU implementation  
+**Language/platform:** C + OpenMP
 
-This folder adds OpenMP to the C implementation. It is used to compare the serial C baseline with a multi-threaded CPU version on the same machine.
+This folder adds OpenMP parallel regions to the C solver for shared-memory CPU scaling tests.
 
-## Requirements
-
-```text
-gcc with OpenMP support
-make
-python3 for plotting
-```
-
-Check OpenMP support:
+## Run
 
 ```bash
-gcc -fopenmp --version
-```
-
-## Build and run
-
-```bash
-make build
 make smoke OMP_NUM_THREADS=4
 make quick OMP_NUM_THREADS=4
-make run N=128 RE=400 SCHEME=upwind PRESSURE=RBGS OMP_NUM_THREADS=4
+make scaling
 ```
 
-## Scaling check
+## Single case example
 
 ```bash
-make scaling
-make plot
+make run N=64 RE=100 SCHEME=central PRESSURE=RBGS OMP_NUM_THREADS=4
 ```
 
-Scaling output:
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | Build, run, and scaling commands |
+| `src/lid_cavity.c` | Single translation-unit entry file |
+| `src/app/` | Command-line interface |
+| `src/common/` | Shared structs and utilities |
+| `src/core/` | OpenMP-enabled operators and solver loop |
+| `src/post/` | Validation and CSV output |
+| `postprocess/` | Plotting and scaling scripts |
+| `results/` | Generated CSV, figures, scaling, and logs |
+
+## Output
+
+Generated files follow the same convention used across the repository:
 
 ```text
-results/scaling/openmp_scaling.csv
+results/data/      CSV field data, residual histories, and summary tables
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- This is shared-memory parallelism, so it runs on one node or one workstation.
-- Try thread counts such as 1, 2, 4, 8, 16 depending on the machine.
-- Compare against `c/serial/` before interpreting speedup.
+- Use this version to compare thread scaling against the serial C baseline.
+
+For the full project overview, see the root `README.md`.

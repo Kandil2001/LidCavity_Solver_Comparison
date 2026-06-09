@@ -1,46 +1,49 @@
 # C++ Serial Solver
 
-**Role in the project:** structured compiled-code baseline.
+**Role:** Compiled serial CPU implementation  
+**Language/platform:** C++
 
-This folder contains the serial C++ implementation of the lid-driven cavity solver. It is intended to be readable, modular, and faster than the MATLAB/Python reference versions for larger cases.
+This folder contains the structured serial C++ implementation. It is the main compiled-code baseline.
 
-## What this folder contains
+## Run
+
+```bash
+make smoke
+make quick
+```
+
+## Single case example
+
+```bash
+make run N=64 RE=100 SCHEME=central PRESSURE=RBGS
+```
+
+## Folder layout
 
 | Path | Purpose |
 |---|---|
-| `src/lid_cavity.cpp` | Main build target |
-| `src/core/` | Solver and numerical operators |
-| `src/common/` | Shared helper routines |
-| `src/app/` | Command-line handling |
-| `src/post/` | Validation and output routines |
+| `Makefile` | Build and run commands |
+| `src/lid_cavity.cpp` | Single translation-unit entry file |
+| `src/app/` | Command-line interface |
+| `src/common/` | Shared structs and utilities |
+| `src/core/` | Operators and solver loop |
+| `src/post/` | Validation and CSV output |
 | `postprocess/` | Plotting scripts |
-| `results/` | Generated outputs |
-
-## Build and run
-
-```bash
-make build
-make smoke
-make quick
-make run N=128 RE=400 SCHEME=upwind PRESSURE=RBGS
-make plot
-```
-
-Direct command example:
-
-```bash
-./bin/lid_cavity --single --N 128 --Re 400 --scheme upwind --pressure RBGS
-```
+| `results/` | Generated CSV, figures, scaling, and logs |
 
 ## Output
 
+Generated files follow the same convention used across the repository:
+
 ```text
-results/data/      CSV summaries, fields, residuals
+results/data/      CSV field data, residual histories, and summary tables
 results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
 ```
 
 ## Notes
 
-- This is the main compiled-code baseline.
-- Use it as the reference before testing C++ OpenMP or C++ MPI.
-- It is also useful for comparing against the separate `LidCavity_CPP` repository.
+- This is usually the cleanest compiled implementation to show first.
+
+For the full project overview, see the root `README.md`.

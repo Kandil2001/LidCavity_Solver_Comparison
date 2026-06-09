@@ -12,10 +12,10 @@ mode = lower(string(mode));
 
 clc; close all;
 
-addpath("core");
-addpath("studies");
-addpath("validation");
-addpath("post");
+addpath("src/core");
+addpath("src/studies");
+addpath("src/validation");
+addpath("src/postprocess");
 
 cfg = default_config(mode);
 

@@ -7,10 +7,10 @@ function generate_all_plots_from_results()
 
 clc; close all;
 
-addpath("core");
-addpath("studies");
-addpath("validation");
-addpath("post");
+addpath("src/core");
+addpath("src/studies");
+addpath("src/validation");
+addpath("src/postprocess");
 
 cfg = default_config("full");
 cfg.make_figures = true;
