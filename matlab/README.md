@@ -42,10 +42,10 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
-
 ## Notes
 
 - MATLAB is the reference workflow. It contains both looped and vectorized study options.
-- The source now lives only under `src/`, so the folder is not duplicated.
+- The maintained MATLAB workflow is under `src/` with plotting utilities in `postprocess/`.
+- Root-level MATLAB files are kept only as simple compatibility entry points for people who open the folder directly in MATLAB.
 
 For the full project overview, see the root `README.md`.
