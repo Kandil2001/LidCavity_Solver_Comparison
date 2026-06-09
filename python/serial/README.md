@@ -40,9 +40,9 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
-
 ## Notes
 
 - Use this version when readability matters more than maximum speed.
+- The serial Python study contains two serial labels: `serial_python_vectorized` and `serial_python_looped`. The vectorized label refers to NumPy-style array operations, while the looped label is kept as a clearer step-by-step baseline.
 
 For the full project overview, see the root `README.md`.
