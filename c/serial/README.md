@@ -42,9 +42,9 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
-
 ## Notes
 
 - The source is split into small fragments and included into one translation unit to keep the build simple.
+- The labels `serial_c_looped` and `serial_c_vectorized` are comparison labels. Both are serial C paths. Real shared-memory and distributed-memory parallelism are handled in the separate `openmp/` and `mpi/` folders.
 
 For the full project overview, see the root `README.md`.
