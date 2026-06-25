@@ -138,13 +138,19 @@ The looped Python, looped Octave, and Python MPI runs are included in the CSV su
 
 ![Median runtime by solver](comparison/figures/report_pngs/02_median_runtime_complete_solvers_only.png)
 
-### Representative physics result
+### Ghia centerline validation, clearer low-Re benchmark case
+
+The lower-Reynolds-number case gives the clearest visual validation against the Ghia benchmark data, so it is used here as the first validation example.
+
+![Ghia u centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_u.png)
+
+![Ghia v centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_v.png)
+
+### Representative high-Re flow physics
+
+The higher-Reynolds-number case is kept as the main physics visualization because it shows the primary cavity vortex and secondary corner structure more clearly.
 
 ![Streamlines](comparison/figures/physics_final/case_001_N128_Re1000_central_RBSOR_openmp_cpp_streamlines.png)
-
-### Ghia validation example
-
-![Ghia u validation](comparison/figures/physics_final/case_001_N128_Re1000_central_RBSOR_openmp_cpp_ghia_u.png)
 
 ## Interpretation
 
