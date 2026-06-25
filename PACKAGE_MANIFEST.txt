@@ -1,0 +1,19 @@
+Lid-Driven Cavity Solver Comparison - Final Package
+
+Included:
+- C, C++, Python, Octave/MATLAB solver code
+- Serial, OpenMP, MPI implementations
+- Slurm job scripts
+- Comparison scripts
+- Final runtime/convergence/quality CSV summaries
+- Final PNG plots
+- Physics plot folders if generated
+- README/docs if present
+
+Excluded:
+- temporary work folders
+- build folders and object files
+- Python virtual environments
+- caches
+- old zip/tar archives
+- huge raw temporary MPI folders

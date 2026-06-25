@@ -66,7 +66,7 @@ struct Config {
     std::vector<int> re_list = {100, 400, 1000};
     std::vector<std::string> schemes = {"upwind", "central"};
     std::vector<std::string> pressure_solvers = {"RBGS", "RBSOR"};
-    std::vector<std::string> implementations = {"openmp_cpp_looped"};
+    std::vector<std::string> implementations = {"openmp_cpp"};
 
     double validation_u_L2_limit_Re100 = 0.030;
     double validation_v_L2_limit_Re100 = 0.030;
@@ -149,11 +149,11 @@ static std::string normalize_implementation(std::string s) {
     s = lower(s);
     // MATLAB has two implementations: vectorized and loop. This C++ OpenMP package
     // intentionally contains one shared-memory loop kernel. For convenience,
-    // MATLAB labels are accepted as aliases, but CSV output uses openmp_cpp_looped.
-    if (s == "serial" || s == "openmp_cpp_looped" || s == "cpp" || s == "loop" || s == "vectorized") {
-        return "openmp_cpp_looped";
+    // MATLAB labels are accepted as aliases, but CSV output uses openmp_cpp.
+    if (s == "serial" || s == "openmp_cpp" || s == "openmp_cpp_looped" || s == "openmp_cpp_vectorized" || s == "cpp" || s == "loop" || s == "vectorized") {
+        return "openmp_cpp";
     }
-    throw std::runtime_error("Unknown implementation: " + s + " (use openmp_cpp_looped)");
+    throw std::runtime_error("Unknown implementation: " + s + " (use openmp_cpp)");
 }
 
 static double max_abs(const Matrix& m) {

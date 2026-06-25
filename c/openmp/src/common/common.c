@@ -5,10 +5,9 @@
  * university clusters, WSL, or a normal Linux terminal. It follows the same
  * CSV contract and case definitions as the MATLAB, C++, and Python solvers.
  *
- * The two implementation labels are benchmark labels only:
- *   - openmp_c_looped
- *   - openmp_c_vectorized_style
- * The labels are OpenMP CPU baselines. The vectorized-style label uses contiguous arrays and compiler auto-vectorization/SIMD where possible.
+ * This is one shared-memory C baseline. Older looped/vectorized-style labels
+ * are accepted as aliases for backward compatibility, but they run the same
+ * OpenMP solver path.
  */
 
 #include <stdio.h>
@@ -189,18 +188,14 @@ static void strupper_copy(char *dst, const char *src, size_t n) {
 static void normalize_c_implementation(char *dst, const char *src, size_t n) {
     char tmp[64];
     strlower_copy(tmp, src, sizeof(tmp));
-    if (strcmp(tmp, "openmp_c_vectorized_style") == 0 || strcmp(tmp, "openmp_vectorized") == 0 ||
-        strcmp(tmp, "c_openmp_vectorized") == 0 || strcmp(tmp, "vectorized") == 0 ||
-        strcmp(tmp, "openmp_c_vectorized_style") == 0 || strcmp(tmp, "c_vectorized") == 0) {
-        snprintf(dst, n, "openmp_c_vectorized_style");
+    if (strcmp(tmp, "openmp_c") == 0 || strcmp(tmp, "c_openmp") == 0 ||
+        strcmp(tmp, "openmp") == 0 || strcmp(tmp, "openmp_c_looped") == 0 ||
+        strcmp(tmp, "openmp_c_vectorized_style") == 0 || strcmp(tmp, "openmp_vectorized") == 0 ||
+        strcmp(tmp, "c_vectorized") == 0 || strcmp(tmp, "loop") == 0 ||
+        strcmp(tmp, "looped") == 0 || strcmp(tmp, "vectorized") == 0) {
+        snprintf(dst, n, "openmp_c");
         return;
     }
-    if (strcmp(tmp, "openmp_c_looped") == 0 || strcmp(tmp, "c_openmp") == 0 ||
-        strcmp(tmp, "openmp") == 0 || strcmp(tmp, "looped") == 0 || strcmp(tmp, "loop") == 0 ||
-        strcmp(tmp, "openmp_c_looped") == 0 || strcmp(tmp, "serial_c") == 0 || strcmp(tmp, "c") == 0) {
-        snprintf(dst, n, "openmp_c_looped");
-        return;
-    }
-    die("Unknown implementation (use openmp_c_looped or openmp_c_vectorized_style)");
+    die("Unknown implementation (use openmp_c)");
 }
 

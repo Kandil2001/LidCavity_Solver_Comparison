@@ -13,7 +13,7 @@ function [phi, info] = pressure_poisson(rhs,dx,dy,solver_type,cfg)
 N = size(rhs,1);
 phi = zeros(N,N);
 
-solver_type = upper(string(solver_type));
+solver_type = upper(char(solver_type));
 den = 2*(dx^2 + dy^2);
 C = 2:N-1;
 [II,JJ] = ndgrid(C,C);
@@ -21,39 +21,41 @@ red = mod(II+JJ,2)==0;
 black = ~red;
 
 rhs2 = rhs;
-rhs_mean = mean(rhs2(C,C),"all");
+rhs_block = rhs2(C,C);
+rhs_mean = mean(rhs_block(:));
 rhs2(C,C) = rhs2(C,C) - rhs_mean;
 
 maxIter = cfg.poisson_maxIter;
-if isfield(cfg,"poisson_tol_abs")
+if isfield(cfg,'poisson_tol_abs')
     tol_abs = cfg.poisson_tol_abs;
 else
     tol_abs = 1e-8;
 end
-if isfield(cfg,"poisson_tol_rel")
+if isfield(cfg,'poisson_tol_rel')
     tol_rel = cfg.poisson_tol_rel;
 else
     tol_rel = 1e-4;
 end
-if isfield(cfg,"poisson_check_every")
+if isfield(cfg,'poisson_check_every')
     check_every = cfg.poisson_check_every;
 else
     check_every = 25;
 end
 
-if isfield(cfg,"sor_omega") && lower(string(cfg.sor_omega)) == "auto"
+if isfield(cfg,'sor_omega') && strcmp(lower(char(cfg.sor_omega)),'auto')
     omega = 2/(1 + sin(pi/(N-1)));
-    if isfield(cfg,"sor_omega_min")
+    if isfield(cfg,'sor_omega_min')
         omega = max(omega, cfg.sor_omega_min);
     end
-    if isfield(cfg,"sor_omega_max")
+    if isfield(cfg,'sor_omega_max')
         omega = min(omega, cfg.sor_omega_max);
     end
 else
     omega = cfg.sor_omega;
 end
 
-rhs_norm = max(1.0, max(abs(rhs2(C,C)),[],'all'));
+rhs_block = rhs2(C,C);
+rhs_norm = max(1.0, max(abs(rhs_block(:))));
 res_hist = zeros(maxIter,1);
 change_hist = zeros(maxIter,1);
 final_res = inf;
@@ -64,7 +66,7 @@ for it = 1:maxIter
 
     phi_old = phi;
 
-    if solver_type == "JACOBI"
+    if strcmp(solver_type,'JACOBI')
 
         phi_new = phi;
         phi_new(C,C) = ((phi(C+1,C)+phi(C-1,C))*dy^2 + ...
@@ -73,7 +75,7 @@ for it = 1:maxIter
         phi = phi_new;
         phi = apply_pressure_bc(phi);
 
-    elseif solver_type == "RBGS" || solver_type == "RBSOR"
+    elseif strcmp(solver_type,'RBGS') || strcmp(solver_type,'RBSOR')
 
         % Red update
         candidate = ((phi(C+1,C)+phi(C-1,C))*dy^2 + ...
@@ -81,7 +83,7 @@ for it = 1:maxIter
                      rhs2(C,C)*dx^2*dy^2) / den;
         block = phi(C,C);
 
-        if solver_type == "RBSOR"
+        if strcmp(solver_type,'RBSOR')
             block(red) = (1-omega)*block(red) + omega*candidate(red);
         else
             block(red) = candidate(red);
@@ -95,7 +97,7 @@ for it = 1:maxIter
                      rhs2(C,C)*dx^2*dy^2) / den;
         block = phi(C,C);
 
-        if solver_type == "RBSOR"
+        if strcmp(solver_type,'RBSOR')
             block(black) = (1-omega)*block(black) + omega*candidate(black);
         else
             block(black) = candidate(black);
@@ -104,7 +106,7 @@ for it = 1:maxIter
         phi = apply_pressure_bc(phi);
 
     else
-        error("Unknown pressure solver: %s", solver_type);
+        error('Unknown pressure solver: %s', solver_type);
     end
 
     final_change = max(abs(phi(:)-phi_old(:)));
@@ -140,5 +142,6 @@ N = size(phi,1);
 C = 2:N-1;
 lap = (phi(C,C+1) - 2*phi(C,C) + phi(C,C-1))/(dx^2) + ...
       (phi(C+1,C) - 2*phi(C,C) + phi(C-1,C))/(dy^2);
-res = max(abs(lap - rhs(C,C)),[],'all');
+residual_block = abs(lap - rhs(C,C));
+res = max(residual_block(:));
 end

@@ -31,7 +31,7 @@ static int build_cases(const char *mode, CaseDef *cases, int max_cases) {
     int res[3] = {100, 400, 1000}; int n_re = 3;
     const char *schemes[2] = {"upwind", "central"}; int n_scheme = 2;
     const char *pressures[2] = {"RBGS", "RBSOR"}; int n_pressure = 2;
-    const char *impls[2] = {"serial_c_vectorized", "serial_c_looped"}; int n_impl = 2;
+    const char *impls[1] = {"serial_c"}; int n_impl = 1;
 
     if (strcmp(mode, "smoke") == 0) { meshes[0] = 16; n_mesh = 1; res[0] = 100; n_re = 1; n_scheme = 1; n_pressure = 1; }
     else if (strcmp(mode, "quick") == 0) { n_mesh = 2; n_re = 2; }

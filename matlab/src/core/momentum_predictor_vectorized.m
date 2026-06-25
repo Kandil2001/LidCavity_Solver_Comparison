@@ -33,15 +33,15 @@ pE = p(C,E);  pW = p(C,W);  pN = p(Np,C);  pS = p(S,C);
 lap_u = (uE - 2*uC + uW)/dx^2 + (uN - 2*uC + uS)/dy^2;
 lap_v = (vE - 2*vC + vW)/dx^2 + (vN - 2*vC + vS)/dy^2;
 
-scheme = lower(string(scheme));
+scheme = lower(char(scheme));
 
-if scheme == "central"
+if strcmp(scheme,'central')
     du_dx = (uE - uW)/(2*dx);
     du_dy = (uN - uS)/(2*dy);
     dv_dx = (vE - vW)/(2*dx);
     dv_dy = (vN - vS)/(2*dy);
 
-elseif scheme == "upwind"
+elseif strcmp(scheme,'upwind')
     % Sign-based donor-cell upwind for each transported variable.
     du_dx = zeros(size(uC));
     du_dy = zeros(size(uC));
@@ -66,7 +66,7 @@ elseif scheme == "upwind"
     dv_dy(neg_v) = (vN(neg_v) - vC(neg_v))/dy;
 
 else
-    error("Unknown convection scheme: %s", scheme);
+    error('Unknown convection scheme: %s', scheme);
 end
 
 conv_u = uC .* du_dx + vC .* du_dy;

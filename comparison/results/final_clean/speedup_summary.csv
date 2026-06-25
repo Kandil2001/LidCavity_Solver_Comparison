@@ -1,0 +1,5 @@
+solver_group,speedup_vs_c_serial,speedup_vs_cpp_serial
+c_openmp_t4,2.054334198707328,
+c_mpi,0.9979195776635652,
+cpp_openmp_t4,,2.221482266682716
+cpp_mpi,,1.002251340049981

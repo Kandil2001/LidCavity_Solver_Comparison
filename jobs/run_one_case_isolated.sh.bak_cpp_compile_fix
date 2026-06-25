@@ -1,0 +1,125 @@
+#!/bin/bash
+set -euo pipefail
+
+solver="$1"
+cid="$2"
+threads="${3:-1}"
+
+source jobs/stromboli_data_first_env.sh
+
+mkdir -p work comparison/results/split comparison/results/split/histories
+
+case_params() {
+    local wanted="$1"
+    local id=0
+    for N in 32 64 128; do
+        for Re in 100 400 1000; do
+            for scheme in upwind central; do
+                for pressure in RBGS RBSOR; do
+                    id=$((id+1))
+                    if [ "$id" -eq "$wanted" ]; then
+                        echo "$N $Re $scheme $pressure"
+                        return 0
+                    fi
+                done
+            done
+        done
+    done
+    return 1
+}
+
+pad=$(printf "%03d" "$cid")
+read N Re scheme pressure < <(case_params "$cid")
+
+echo "Solver=$solver case=$cid N=$N Re=$Re scheme=$scheme pressure=$pressure threads=$threads"
+
+workdir="$PWD/work/${solver}_case_${pad}_${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID:-0}"
+rm -rf "$workdir"
+mkdir -p "$workdir"
+
+write_split_summary() {
+    local src="$1"
+    local dst="$2"
+    if [ ! -f "$src" ]; then
+        echo "Missing summary: $src"
+        find "$workdir" -name "*.csv" -print || true
+        exit 1
+    fi
+    head -n 1 "$src" > "$dst"
+    tail -n +2 "$src" | awk -F',' -v OFS=',' -v cid="$cid" '{$1=cid; print}' >> "$dst"
+}
+
+copy_histories() {
+    local folder="$1"
+    for h in "$folder"/results/data/*_history.csv; do
+        [ -f "$h" ] || continue
+        base=$(basename "$h")
+        cp -f "$h" "comparison/results/split/histories/${solver}_case_${pad}_${base}"
+    done
+}
+
+case "$solver" in
+    c_serial)
+        mkdir -p "$workdir/c"
+        cp -a c/serial "$workdir/c/serial"
+        (cd "$workdir/c/serial" && make run N="$N" RE="$Re" SCHEME="$scheme" PRESSURE="$pressure" NO_FIELDS=1)
+        write_split_summary "$workdir/c/serial/results/data/study_summary_single.csv" "comparison/results/split/c_serial_case_${pad}.csv"
+        copy_histories "$workdir/c/serial"
+        ;;
+    c_openmp)
+        mkdir -p "$workdir/c"
+        cp -a c/openmp "$workdir/c/openmp"
+        (cd "$workdir/c/openmp" && make run N="$N" RE="$Re" SCHEME="$scheme" PRESSURE="$pressure" NO_FIELDS=1 OMP_NUM_THREADS="$threads")
+        write_split_summary "$workdir/c/openmp/results/data/study_summary_single.csv" "comparison/results/split/c_openmp_t${threads}_case_${pad}.csv"
+        copy_histories "$workdir/c/openmp"
+        ;;
+    cpp_serial)
+        mkdir -p "$workdir/cpp"
+        cp -a cpp/serial "$workdir/cpp/serial"
+        (cd "$workdir/cpp/serial" && make run N="$N" RE="$Re" SCHEME="$scheme" PRESSURE="$pressure" NO_FIELDS=1)
+        write_split_summary "$workdir/cpp/serial/results/data/study_summary_single.csv" "comparison/results/split/cpp_serial_case_${pad}.csv"
+        copy_histories "$workdir/cpp/serial"
+        ;;
+    cpp_openmp)
+        mkdir -p "$workdir/cpp"
+        cp -a cpp/openmp "$workdir/cpp/openmp"
+        (cd "$workdir/cpp/openmp" && make run N="$N" RE="$Re" SCHEME="$scheme" PRESSURE="$pressure" NO_FIELDS=1 OMP_NUM_THREADS="$threads")
+        write_split_summary "$workdir/cpp/openmp/results/data/study_summary_single.csv" "comparison/results/split/cpp_openmp_t${threads}_case_${pad}.csv"
+        copy_histories "$workdir/cpp/openmp"
+        ;;
+    python_vectorized)
+        mkdir -p "$workdir/python"
+        cp -a python/serial "$workdir/python/serial"
+        (cd "$workdir/python/serial" && python3 src/lid_cavity.py --single --N "$N" --Re "$Re" --scheme "$scheme" --pressure "$pressure" --implementation serial_python_vectorized --no-fields)
+        write_split_summary "$workdir/python/serial/results/data/study_summary_single.csv" "comparison/results/split/python_vectorized_case_${pad}.csv"
+        copy_histories "$workdir/python/serial"
+        ;;
+    python_looped)
+        mkdir -p "$workdir/python"
+        cp -a python/serial "$workdir/python/serial"
+        (cd "$workdir/python/serial" && python3 src/lid_cavity.py --single --N "$N" --Re "$Re" --scheme "$scheme" --pressure "$pressure" --implementation serial_python_looped --no-fields)
+        write_split_summary "$workdir/python/serial/results/data/study_summary_single.csv" "comparison/results/split/python_looped_case_${pad}.csv"
+        copy_histories "$workdir/python/serial"
+        ;;
+    octave_vectorized)
+        mkdir -p "$workdir"
+        cp -a matlab "$workdir/matlab"
+        (cd "$workdir/matlab" && export LID_N="$N" LID_RE="$Re" LID_SCHEME="$scheme" LID_PRESSURE="$pressure" LID_IMPLEMENTATION="vectorized" && octave --quiet --eval "addpath('src/studies'); run_one_case_from_env")
+        write_split_summary "$workdir/matlab/results/data/study_summary_single.csv" "comparison/results/split/octave_vectorized_case_${pad}.csv"
+        copy_histories "$workdir/matlab"
+        ;;
+    octave_looped)
+        mkdir -p "$workdir"
+        cp -a matlab "$workdir/matlab"
+        (cd "$workdir/matlab" && export LID_N="$N" LID_RE="$Re" LID_SCHEME="$scheme" LID_PRESSURE="$pressure" LID_IMPLEMENTATION="loop" && octave --quiet --eval "addpath('src/studies'); run_one_case_from_env")
+        write_split_summary "$workdir/matlab/results/data/study_summary_single.csv" "comparison/results/split/octave_looped_case_${pad}.csv"
+        copy_histories "$workdir/matlab"
+        ;;
+    *)
+        echo "Unknown solver: $solver"
+        exit 1
+        ;;
+esac
+
+rm -rf "$workdir"
+echo "Finished solver=$solver case=$cid at $(date)"

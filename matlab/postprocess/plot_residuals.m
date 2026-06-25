@@ -13,6 +13,6 @@ title(sprintf('Residuals: N=%d Re=%d %s %s %s', ...
     result.N,result.Re,result.scheme,result.pressure_solver,result.implementation), ...
     'Interpreter','none');
 
-save_current_figure(fullfile(cfg.fig_dir, case_name + "_residuals"));
+save_current_figure(fullfile(cfg.fig_dir, [case_name '_residuals']));
 close;
 end

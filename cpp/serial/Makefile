@@ -1,27 +1,29 @@
 CXX ?= g++
-CXXFLAGS ?= -std=c++17 -O3 -march=native -Wall -Wextra -pedantic
+CXXFLAGS ?= -std=c++17 -O2  -Wall -Wextra -pedantic -g0
+NO_FIELDS ?= 0
+NO_FIELDS_FLAG := $(if $(filter 1 true yes,$(NO_FIELDS)),--no-fields,)
 BIN = bin/lid_cavity
 
 .PHONY: build run smoke quick medium full plot clean
 
 build:
 	mkdir -p bin
-	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(BIN)
+	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(BIN) -lstdc++fs
 
 run: build
-	$(BIN) --single --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),central) --pressure $(or $(PRESSURE),RBGS)
+	$(BIN) --single --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),central) --pressure $(or $(PRESSURE),RBGS) $(NO_FIELDS_FLAG)
 
 smoke: build
-	$(BIN) --mode smoke
+	$(BIN) --mode smoke $(NO_FIELDS_FLAG)
 
 quick: build
-	$(BIN) --mode quick
+	$(BIN) --mode quick $(NO_FIELDS_FLAG)
 
 medium: build
-	$(BIN) --mode medium
+	$(BIN) --mode medium $(NO_FIELDS_FLAG)
 
 full: build
-	$(BIN) --mode full
+	$(BIN) --mode full $(NO_FIELDS_FLAG)
 
 plot:
 	python3 postprocess/plot_results.py --all-cases --summaries all

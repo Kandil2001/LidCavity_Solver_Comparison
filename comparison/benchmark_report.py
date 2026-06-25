@@ -32,18 +32,21 @@ IMPLEMENTATION_NAME = {
     "vectorized": "MATLAB vectorized",
     "loop": "MATLAB loop",
     "serial_cpp": "C++ serial",
-    "serial_c": "C serial looped",
-    "serial_c_looped": "C serial looped",
-    "serial_c_vectorized": "C serial vectorized-style",
+    "serial_c": "C serial baseline",
+    "serial_c_looped": "C serial baseline",
+    "serial_c_vectorized": "C serial baseline",
     "serial_python": "Python serial vectorized/NumPy",
     "serial_python_vectorized": "Python serial vectorized/NumPy",
     "serial_python_looped": "Python serial looped",
     "python_numpy": "Python serial vectorized/NumPy",
-    "openmp_c_looped": "C OpenMP looped",
-    "openmp_c_vectorized_style": "C OpenMP vectorized-style",
-    "openmp_cpp_looped": "C++ OpenMP looped",
-    "mpi_c_case_parallel_looped": "C MPI case-parallel looped",
-    "mpi_c_case_parallel_vectorized": "C MPI case-parallel vectorized-style",
+    "openmp_c_looped": "C OpenMP baseline",
+    "openmp_c_vectorized_style": "C OpenMP baseline",
+    "openmp_c": "C OpenMP baseline",
+    "openmp_cpp": "C++ OpenMP",
+    "openmp_cpp_looped": "C++ OpenMP",
+    "mpi_c_case_parallel_looped": "C MPI case-parallel",
+    "mpi_c_case_parallel_vectorized": "C MPI case-parallel",
+    "mpi_c_case_parallel": "C MPI case-parallel",
     "mpi_cpp_case_parallel_cpp": "C++ MPI case-parallel",
     "mpi_python_case_parallel_vectorized": "Python MPI case-parallel NumPy",
     "mpi_python_case_parallel_looped": "Python MPI case-parallel looped",
@@ -103,7 +106,7 @@ def make_runtime_pivot(df: pd.DataFrame) -> pd.DataFrame:
     ).reset_index()
     pivot.columns.name = None
 
-    baseline_names = [c for c in ["C++ serial", "C serial vectorized-style", "C serial looped", "Python serial vectorized/NumPy", "Python serial looped", "MATLAB vectorized", "MATLAB loop"] if c in pivot.columns]
+    baseline_names = [c for c in ["C++ serial", "C serial baseline", "Python serial vectorized/NumPy", "Python serial looped", "MATLAB vectorized", "MATLAB loop"] if c in pivot.columns]
     for baseline in baseline_names:
         safe_base = baseline.replace(" ", "_").replace("/", "_").replace("+", "p")
         for col in [c for c in pivot.columns if c not in case_cols() and not c.startswith("Ratio_")]:
@@ -238,7 +241,7 @@ def write_markdown_report(
     lines.append("- `aggregate_by_*.csv`: grouped runtime and accuracy summaries.\n")
     lines.append("- `*.png`: runtime plots for README, GitHub, and LinkedIn.\n\n")
     lines.append("## Interpretation note\n\n")
-    lines.append("Use the internal `Runtime_s` column for solver-speed comparison. It measures the solver case itself, not the time spent writing CSV files or creating figures. For a clean ladder, read the results as: MATLAB vectorized/looped, C++ serial, C vectorized-style/looped, Python vectorized/looped, then later MPI/OpenMP/CUDA/OpenFOAM/LBM.\n")
+    lines.append("Use the internal `Runtime_s` column for solver-speed comparison. It measures the solver case itself, not the time spent writing CSV files or creating figures. For a clean ladder, read the results as: MATLAB vectorized/looped, Python vectorized/looped, C++ serial, C serial baseline, then later OpenMP/MPI/CUDA extensions.\n")
 
     out_path.write_text("".join(lines), encoding="utf-8")
 

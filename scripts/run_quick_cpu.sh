@@ -24,10 +24,10 @@ try_make() {
 
 echo "Running quick CPU benchmarks. This can take longer than the smoke check."
 
-if command -v matlab >/dev/null 2>&1; then
-    try_make matlab quick
+if command -v matlab >/dev/null 2>&1 || command -v octave >/dev/null 2>&1; then
+    try_make matlab quick ENGINE="${ENGINE:-auto}"
 else
-    echo "Skipping MATLAB quick run because matlab was not found."
+    echo "Skipping MATLAB/Octave quick run because neither matlab nor octave was found."
 fi
 
 try_make python/serial quick

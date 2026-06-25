@@ -13,9 +13,9 @@ function cfg = default_config(mode)
 %   cfg = default_config('smoke');
 
 if nargin < 1
-    mode = "quick";
+    mode = 'quick';
 end
-mode = lower(string(mode));
+mode = lower(char(mode));
 
 cfg.U_lid = 1.0;
 cfg.L = 1.0;
@@ -45,7 +45,7 @@ cfg.poisson_maxIter = 2500;
 cfg.poisson_tol_abs = 1e-8;
 cfg.poisson_tol_rel = 1e-4;
 cfg.poisson_check_every = 25;
-cfg.sor_omega = "auto";
+cfg.sor_omega = 'auto';
 cfg.sor_omega_min = 1.15;
 cfg.sor_omega_max = 1.90;
 
@@ -60,13 +60,14 @@ cfg.implementations = {'vectorized','loop'};
 cfg.make_figures = true;
 cfg.figure_every_case = true;
 cfg.export_csv = true;
-cfg.results_dir = "results";
-cfg.data_dir = fullfile("results","data");
-cfg.fig_dir = fullfile("results","figures");
+cfg.export_fields = true;
+cfg.results_dir = 'results';
+cfg.data_dir = fullfile('results','data');
+cfg.fig_dir = fullfile('results','figures');
 
 % Mode presets matching the C++ executable modes as closely as possible
 switch mode
-    case "smoke"
+    case 'smoke'
         cfg.meshes = 16;
         cfg.re_list = 100;
         cfg.schemes = {'upwind'};
@@ -80,7 +81,7 @@ switch mode
         cfg.make_figures = false;
         cfg.figure_every_case = false;
 
-    case "quick"
+    case 'quick'
         cfg.meshes = [32, 64];
         cfg.re_list = [100, 400];
         cfg.schemes = {'upwind','central'};
@@ -92,7 +93,7 @@ switch mode
         cfg.maxIter_central_bonus = 500;
         cfg.poisson_maxIter = 1200;
 
-    case "medium"
+    case 'medium'
         cfg.meshes = [32, 64];
         cfg.re_list = [100, 400, 1000];
         cfg.schemes = {'upwind','central'};
@@ -102,10 +103,10 @@ switch mode
         cfg.maxIter_N128_bonus = 0;
         cfg.poisson_maxIter = 1800;
 
-    case "full"
+    case 'full'
         % Keep full defaults above.
 
-    case "single"
+    case 'single'
         cfg.meshes = 64;
         cfg.re_list = 100;
         cfg.schemes = {'central'};
@@ -113,6 +114,6 @@ switch mode
         cfg.implementations = {'vectorized','loop'};
 
     otherwise
-        error("Unknown mode: %s. Use smoke, quick, medium, full, or single.", mode);
+        error('Unknown mode: %s. Use smoke, quick, medium, full, or single.', mode);
 end
 end

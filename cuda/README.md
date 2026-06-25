@@ -3,26 +3,71 @@
 **Role:** Single-GPU prototype  
 **Language/platform:** CUDA C++
 
-This folder contains the NVIDIA CUDA version. It is intended for GPU machines and is kept separate from the CPU smoke workflow.
+This folder contains the NVIDIA CUDA version. It is intended for GPU machines and is kept separate from the normal CPU workflow because it requires both the CUDA toolkit and an accessible NVIDIA GPU.
+
+## What this CUDA version is
+
+The CUDA solver is a GPU prototype for the same lid-driven cavity benchmark. It is useful for learning, comparison, and basic GPU performance testing. It should not be oversold as identical to every CPU solver variant because the pressure correction uses a GPU-friendly Jacobi-style iteration.
+
+## Check CUDA availability
+
+```bash
+make check-cuda
+```
+
+This checks for:
+
+```text
+nvcc
+nvidia-smi
+an accessible NVIDIA GPU
+```
+
+On a CPU-only login node, this check will fail and the CUDA run should be skipped or moved to a GPU node.
 
 ## Run
 
 ```bash
 make smoke
-make run N=64 RE=100
+make quick
+make run N=64 RE=100 SCHEME=upwind PRESSURE=JACOBI
 ```
 
-## Single case example
+The run modes are:
+
+| Mode | Purpose |
+|---|---|
+| `smoke` | tiny GPU check, no field output |
+| `quick` | small GPU benchmark, no field output |
+| `medium` | larger GPU run |
+| `full` | longer GPU run |
+
+## CUDA performance sweep
 
 ```bash
-make run N=64 RE=100 SCHEME=upwind MAX_ITER=500 POISSON_ITER=300
+make scaling
 ```
+
+or from the repository root:
+
+```bash
+make scaling-cuda
+```
+
+This runs a block-size performance sweep and writes:
+
+```text
+cuda/results/scaling/cuda_block_size_scaling.csv
+comparison/results/figures/scaling/
+```
+
+This is **GPU tuning**, not the same as OpenMP strong scaling or MPI case-level scaling.
 
 ## Folder layout
 
 | Path | Purpose |
 |---|---|
-| `Makefile` | CUDA build and run commands |
+| `Makefile` | CUDA build/run/scaling commands |
 | `src/lid_cavity_cuda.cu` | Single translation-unit entry file |
 | `src/app/` | CLI, config, and main loop |
 | `src/common/` | CUDA utility helpers |
@@ -32,21 +77,18 @@ make run N=64 RE=100 SCHEME=upwind MAX_ITER=500 POISSON_ITER=300
 | `results/` | Generated CSV, figures, scaling, and logs |
 | `requirements.txt` | Python dependencies for plotting |
 
-## Output
+## Notes for Stromboli
 
-Generated files follow the same convention used across the repository:
+From the repository root, the Stromboli helper includes CUDA automatically when it detects `nvcc` and a usable NVIDIA GPU:
 
-```text
-results/data/      CSV field data, residual histories, and summary tables
-results/figures/   generated plots
-results/scaling/   OpenMP, MPI, or CUDA scaling files when available
-results/logs/      optional run logs
+```bash
+bash scripts/run_stromboli_all.sh smoke
 ```
 
+To skip CUDA explicitly:
 
-## Notes
-
-- Requires an NVIDIA GPU, CUDA toolkit, and `nvcc`.
-- The CUDA solver is a GPU prototype and should be compared carefully against the CPU baselines.
+```bash
+RUN_CUDA=0 bash scripts/run_stromboli_all.sh smoke
+```
 
 For the full project overview, see the root `README.md`.

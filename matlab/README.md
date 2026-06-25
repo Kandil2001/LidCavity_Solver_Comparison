@@ -1,16 +1,32 @@
 # MATLAB Reference Solver
 
 **Role:** Reference workflow  
-**Language/platform:** MATLAB
+**Language/platform:** MATLAB or GNU Octave
 
-This folder contains the MATLAB reference implementation. It keeps the numerical workflow easy to inspect and is useful for checking the other implementations.
+This folder contains the MATLAB/Octave reference implementation. It keeps the numerical workflow easy to inspect and is useful for checking the other implementations.
 
 ## Run
+
+Auto-detect MATLAB first, then GNU Octave:
 
 ```bash
 make smoke
 make quick
 make medium
+```
+
+Force GNU Octave, useful on Stromboli or other university machines without MATLAB:
+
+```bash
+make smoke ENGINE=octave
+make quick ENGINE=octave
+make medium ENGINE=octave
+```
+
+Force MATLAB:
+
+```bash
+make smoke ENGINE=matlab
 ```
 
 ## Single case example
@@ -42,10 +58,19 @@ results/scaling/   OpenMP, MPI, or CUDA scaling files when available
 results/logs/      optional run logs
 ```
 
+
+## GNU Octave notes
+
+- The same solver source is used for MATLAB and GNU Octave.
+- Octave writes the same CSV summary files used by the comparison scripts.
+- Octave skips figure generation by default because cluster sessions are often headless.
+- To force plots in Octave, run with `OCTAVE_MAKE_FIGURES=1`.
+- MATLAB users still get the normal table workflow and MATLAB `.fig` files.
+
 ## Notes
 
-- MATLAB is the reference workflow. It contains both looped and vectorized study options.
+- MATLAB/Octave is the reference workflow. It contains both looped and vectorized study options.
 - The maintained MATLAB workflow is under `src/` with plotting utilities in `postprocess/`.
-- Root-level MATLAB files are kept only as simple compatibility entry points for people who open the folder directly in MATLAB.
+- Root-level MATLAB files are kept only as simple compatibility entry points for people who open the folder directly in MATLAB or Octave. The maintained solver code is under `src/`.
 
 For the full project overview, see the root `README.md`.

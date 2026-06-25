@@ -5,22 +5,22 @@ function result = solve_lid_cavity(N,Re,scheme,pressure_solver,implementation,cf
 % uses the same outer iteration bonuses, relaxation parameters, time-step
 % limits, and pressure-solver controls as the C++ serial version.
 
-implementation = lower(string(implementation));
-scheme = lower(string(scheme));
-pressure_solver = upper(string(pressure_solver));
+implementation = lower(char(implementation));
+scheme = lower(char(scheme));
+pressure_solver = upper(char(pressure_solver));
 
 L = cfg.L;
 dx = L/(N-1);
 dy = dx;
 
 localMaxIter = cfg.maxIter;
-if isfield(cfg,"maxIter_N128_bonus") && N >= 128
+if isfield(cfg,'maxIter_N128_bonus') && N >= 128
     localMaxIter = localMaxIter + cfg.maxIter_N128_bonus;
 end
-if isfield(cfg,"maxIter_Re1000_bonus") && Re >= 1000
+if isfield(cfg,'maxIter_Re1000_bonus') && Re >= 1000
     localMaxIter = localMaxIter + cfg.maxIter_Re1000_bonus;
 end
-if isfield(cfg,"maxIter_central_bonus") && scheme == "central"
+if isfield(cfg,'maxIter_central_bonus') && strcmp(scheme,'central')
     localMaxIter = localMaxIter + cfg.maxIter_central_bonus;
 end
 
@@ -39,7 +39,7 @@ poisson_relative_residual = zeros(localMaxIter,1);
 poisson_converged = false(localMaxIter,1);
 
 tic_total = tic;
-status = "maxIter";
+status = 'maxIter';
 stagnation_counter = 0;
 prev_mass = inf;
 
@@ -48,15 +48,15 @@ for iter = 1:localMaxIter
     u_old = u;
     v_old = v;
 
-    if implementation == "vectorized"
+    if strcmp(implementation,'vectorized')
         [u_star,v_star,dt] = momentum_predictor_vectorized(u,v,p,Re,scheme,cfg);
-    elseif implementation == "loop"
+    elseif strcmp(implementation,'loop')
         [u_star,v_star,dt] = momentum_predictor_loop(u,v,p,Re,scheme,cfg);
     else
-        error("Unknown implementation: %s", implementation);
+        error('Unknown implementation: %s', implementation);
     end
 
-    if isfield(cfg,"dt_min")
+    if isfield(cfg,'dt_min')
         dt = max(dt, cfg.dt_min);
     end
 
@@ -85,18 +85,18 @@ for iter = 1:localMaxIter
     [Ru(iter),Rv(iter),Rc_mass(iter),Rc_div(iter)] = velocity_residuals(u,v,u_old,v_old,dx,dy,cfg.U_lid,cfg.L);
     dt_hist(iter) = dt;
     poisson_iters(iter) = pinfo.iter;
-    if isfield(pinfo,"final_relative_residual")
+    if isfield(pinfo,'final_relative_residual')
         poisson_relative_residual(iter) = pinfo.final_relative_residual;
     else
         poisson_relative_residual(iter) = NaN;
     end
-    if isfield(pinfo,"converged")
+    if isfield(pinfo,'converged')
         poisson_converged(iter) = pinfo.converged;
     end
 
     if any(~isfinite(u(:))) || any(~isfinite(v(:))) || any(~isfinite(p(:))) || ...
        max([Ru(iter),Rv(iter),Rc_div(iter)]) > cfg.diverged_limit
-        status = "diverged";
+        status = 'diverged';
         break;
     end
 
@@ -108,7 +108,7 @@ for iter = 1:localMaxIter
     prev_mass = Rc_mass(iter);
 
     if Rc_mass(iter) < cfg.tol_continuity && max(Ru(iter),Rv(iter)) < cfg.tol_velocity
-        status = "converged";
+        status = 'converged';
         break;
     end
 end

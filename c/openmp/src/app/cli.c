@@ -15,7 +15,7 @@ static void config_defaults(Config *cfg) {
     int re[] = {100,400,1000}; cfg->n_re = 3; for (int i=0;i<3;++i) cfg->re_list[i]=re[i];
     cfg->n_schemes = 2; snprintf(cfg->schemes[0],32,"upwind"); snprintf(cfg->schemes[1],32,"central");
     cfg->n_pressure = 2; snprintf(cfg->pressure_solvers[0],32,"RBGS"); snprintf(cfg->pressure_solvers[1],32,"RBSOR");
-    cfg->n_impl = 2; snprintf(cfg->implementations[0],32,"openmp_c_vectorized_style"); snprintf(cfg->implementations[1],32,"openmp_c_looped");
+    cfg->n_impl = 1; snprintf(cfg->implementations[0],32,"openmp_c");
     cfg->validation_u_L2_limit_Re100 = 0.030; cfg->validation_v_L2_limit_Re100 = 0.030;
     cfg->validation_u_L2_limit_Re400 = 0.090; cfg->validation_v_L2_limit_Re400 = 0.120;
     cfg->validation_u_L2_limit_Re1000 = 0.160; cfg->validation_v_L2_limit_Re1000 = 0.180;
@@ -41,13 +41,13 @@ static void configure_mode(Config *cfg, const char *mode_in) {
         cfg->n_re = 1; cfg->re_list[0] = 100;
         cfg->n_schemes = 1; snprintf(cfg->schemes[0],32,"central");
         cfg->n_pressure = 1; snprintf(cfg->pressure_solvers[0],32,"RBGS");
-        cfg->n_impl = 2; snprintf(cfg->implementations[0],32,"openmp_c_vectorized_style"); snprintf(cfg->implementations[1],32,"openmp_c_looped");
+        cfg->n_impl = 1; snprintf(cfg->implementations[0],32,"openmp_c");
     } else if (strcmp(mode, "smoke") == 0) {
         cfg->n_meshes = 1; cfg->meshes[0] = 16;
         cfg->n_re = 1; cfg->re_list[0] = 100;
         cfg->n_schemes = 1; snprintf(cfg->schemes[0],32,"upwind");
         cfg->n_pressure = 1; snprintf(cfg->pressure_solvers[0],32,"RBGS");
-        cfg->n_impl = 2; snprintf(cfg->implementations[0],32,"openmp_c_vectorized_style"); snprintf(cfg->implementations[1],32,"openmp_c_looped");
+        cfg->n_impl = 1; snprintf(cfg->implementations[0],32,"openmp_c");
         cfg->maxIter = 20; cfg->maxIter_N128_bonus = 0; cfg->maxIter_Re1000_bonus = 0; cfg->maxIter_central_bonus = 0; cfg->poisson_maxIter = 50;
     } else {
         die("Unknown mode (use quick, medium, full, single, or smoke)");
@@ -57,8 +57,7 @@ static void configure_mode(Config *cfg, const char *mode_in) {
 static void print_usage(const char *exe) {
     printf("Usage:\n");
     printf("  %s --mode quick|medium|full|single|smoke\n", exe);
-    printf("  %s --single --N 64 --Re 100 --scheme central --pressure RBGS --implementation openmp_c_looped\n", exe);
-    printf("  %s --single --N 64 --Re 100 --scheme central --pressure RBGS --implementation openmp_c_vectorized_style\n\n", exe);
+    printf("  %s --single --N 64 --Re 100 --scheme central --pressure RBGS --implementation openmp_c\n\n", exe);
     printf("Options:\n");
     printf("  --no-fields              Do not write full field CSV files\n");
     printf("  --maxIter VALUE          Override base outer iterations\n");
@@ -84,7 +83,7 @@ int main(int argc, char **argv) {
     int single_Re = 100;
     char single_scheme[32] = "central";
     char single_pressure[32] = "RBGS";
-    char single_impl[32] = "openmp_c_looped";
+    char single_impl[32] = "openmp_c";
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) { print_usage(argv[0]); return 0; }

@@ -5,11 +5,9 @@
  * university clusters, WSL, or a normal Linux terminal. It follows the same
  * CSV contract and case definitions as the MATLAB, C++, and Python solvers.
  *
- * The two implementation labels are benchmark labels only:
- *   - serial_c_looped
- *   - serial_c_vectorized
- * Both paths are serial C. Real OpenMP/MPI/CUDA versions should live in
- * separate folders so the benchmark ladder remains honest and easy to read.
+ * C is kept as one honest compiled serial baseline. Older labels such as
+ * serial_c_looped and serial_c_vectorized are accepted as aliases for backward
+ * compatibility, but they run the same C solver path.
  */
 
 #include <stdio.h>
@@ -183,17 +181,14 @@ static void strupper_copy(char *dst, const char *src, size_t n) {
 static void normalize_c_implementation(char *dst, const char *src, size_t n) {
     char tmp[64];
     strlower_copy(tmp, src, sizeof(tmp));
-    if (strcmp(tmp, "serial_c_vectorized") == 0 || strcmp(tmp, "c_vectorized") == 0 ||
-        strcmp(tmp, "vectorized_c") == 0 || strcmp(tmp, "vectorized") == 0) {
-        snprintf(dst, n, "serial_c_vectorized");
+    if (strcmp(tmp, "serial_c") == 0 || strcmp(tmp, "c") == 0 ||
+        strcmp(tmp, "serial") == 0 || strcmp(tmp, "serial_c_looped") == 0 ||
+        strcmp(tmp, "serial_c_vectorized") == 0 || strcmp(tmp, "c_looped") == 0 ||
+        strcmp(tmp, "c_vectorized") == 0 || strcmp(tmp, "loop") == 0 ||
+        strcmp(tmp, "looped") == 0 || strcmp(tmp, "vectorized") == 0) {
+        snprintf(dst, n, "serial_c");
         return;
     }
-    if (strcmp(tmp, "serial_c_looped") == 0 || strcmp(tmp, "c_looped") == 0 ||
-        strcmp(tmp, "looped_c") == 0 || strcmp(tmp, "looped") == 0 || strcmp(tmp, "loop") == 0 ||
-        strcmp(tmp, "serial_c") == 0 || strcmp(tmp, "c") == 0 || strcmp(tmp, "serial") == 0) {
-        snprintf(dst, n, "serial_c_looped");
-        return;
-    }
-    die("Unknown implementation (use serial_c_vectorized or serial_c_looped)");
+    die("Unknown implementation (use serial_c)");
 }
 

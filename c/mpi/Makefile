@@ -5,7 +5,7 @@ NP ?= 4
 SOLVER = bin/lid_cavity_c
 DRIVER = bin/mpi_case_driver
 
-.PHONY: build run smoke quick medium full merge clean
+.PHONY: build run smoke quick medium full scaling merge clean
 
 build:
 	mkdir -p bin
@@ -29,6 +29,9 @@ medium: build
 full: build
 	mpirun -np $(NP) $(DRIVER) --mode full --solver ./$(SOLVER)
 	python3 tools/merge_mpi_results.py
+
+scaling:
+	../../scripts/run_parallel_scaling.py --targets c_mpi --ranks $(or $(RANKS),1,2,4) --mode $(or $(MODE),smoke)
 
 merge:
 	python3 tools/merge_mpi_results.py

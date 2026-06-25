@@ -12,7 +12,7 @@ dt = compute_dt(u,v,dx,dy,nu,cfg);
 
 u_star = u;
 v_star = v;
-scheme = lower(string(scheme));
+scheme = lower(char(scheme));
 
 for i = 2:N-1
     for j = 2:N-1
@@ -25,13 +25,13 @@ for i = 2:N-1
         lap_v = (v(i,j+1)-2*v(i,j)+v(i,j-1))/dx^2 + ...
                 (v(i+1,j)-2*v(i,j)+v(i-1,j))/dy^2;
 
-        if scheme == "central"
+        if strcmp(scheme,'central')
             du_dx = (u(i,j+1)-u(i,j-1))/(2*dx);
             du_dy = (u(i+1,j)-u(i-1,j))/(2*dy);
             dv_dx = (v(i,j+1)-v(i,j-1))/(2*dx);
             dv_dy = (v(i+1,j)-v(i-1,j))/(2*dy);
 
-        elseif scheme == "upwind"
+        elseif strcmp(scheme,'upwind')
             if uC >= 0
                 du_dx = (u(i,j)-u(i,j-1))/dx;
                 dv_dx = (v(i,j)-v(i,j-1))/dx;
@@ -48,7 +48,7 @@ for i = 2:N-1
                 dv_dy = (v(i+1,j)-v(i,j))/dy;
             end
         else
-            error("Unknown convection scheme: %s", scheme);
+            error('Unknown convection scheme: %s', scheme);
         end
 
         conv_u = uC*du_dx + vC*du_dy;

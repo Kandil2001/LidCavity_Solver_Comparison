@@ -47,5 +47,6 @@ results/logs/      optional run logs
 ## Notes
 
 - This is case-level parallelism, not domain decomposition.
+- Each rank receives independent benchmark cases and writes raw output that can be merged after the run.
 
 For the full project overview, see the root `README.md`.
