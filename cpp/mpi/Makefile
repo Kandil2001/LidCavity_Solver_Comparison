@@ -1,15 +1,15 @@
 CXX ?= g++
 MPICC ?= mpicc
-CXXFLAGS ?= -std=c++17 -O3 -march=native -Wall -Wextra -pedantic
+CXXFLAGS ?= -std=c++17 -O2  -Wall -Wextra -pedantic -g0
 NP ?= 4
 SOLVER = bin/lid_cavity
 DRIVER = bin/mpi_case_driver
 
-.PHONY: build run smoke quick medium full merge clean
+.PHONY: build run smoke quick medium full scaling merge clean
 
 build:
 	mkdir -p bin
-	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(SOLVER)
+	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(SOLVER) -lstdc++fs
 	$(MPICC) -std=c99 -O2 -Wall -Wextra src/mpi_case_driver.c -o $(DRIVER)
 
 run: smoke
@@ -29,6 +29,9 @@ medium: build
 full: build
 	mpirun -np $(NP) $(DRIVER) --mode full --solver ./$(SOLVER)
 	python3 tools/merge_mpi_results.py
+
+scaling:
+	../../scripts/run_parallel_scaling.py --targets cpp_mpi --ranks $(or $(RANKS),1,2,4) --mode $(or $(MODE),smoke)
 
 merge:
 	python3 tools/merge_mpi_results.py

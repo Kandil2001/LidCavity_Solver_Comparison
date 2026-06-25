@@ -45,6 +45,8 @@ results/logs/      optional run logs
 ## Notes
 
 - The source is split into small fragments and included into one translation unit to keep the build simple.
-- The labels `serial_c_looped` and `serial_c_vectorized` are comparison labels. Both are serial C paths. Real shared-memory and distributed-memory parallelism are handled in the separate `openmp/` and `mpi/` folders.
+- This is one compiled serial C baseline.
+- Older labels such as `serial_c_looped` and `serial_c_vectorized` are accepted as aliases only; they run the same C solver path.
+- Real shared-memory and distributed-memory parallelism are handled in the separate `openmp/` and `mpi/` folders.
 
 For the full project overview, see the root `README.md`.

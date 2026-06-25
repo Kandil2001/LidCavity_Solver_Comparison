@@ -1,7 +1,7 @@
 PYTHON ?= python3
 NP ?= 4
 
-.PHONY: install run smoke quick medium full clean
+.PHONY: install run smoke quick medium full scaling clean
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -19,6 +19,9 @@ medium:
 
 full:
 	mpirun -np $(NP) $(PYTHON) src/mpi_case_driver.py --mode full --no-fields
+
+scaling:
+	../../scripts/run_parallel_scaling.py --targets python_mpi --ranks $(or $(RANKS),1,2,4) --mode $(or $(MODE),smoke)
 
 clean:
 	rm -rf bin results/data results/figures results/scaling results/logs results/mpi_raw __pycache__ src/__pycache__

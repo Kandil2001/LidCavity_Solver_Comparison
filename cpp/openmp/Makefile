@@ -1,5 +1,7 @@
 CXX ?= g++
-CXXFLAGS ?= -std=c++17 -O3 -march=native -Wall -Wextra -pedantic -fopenmp
+CXXFLAGS ?= -std=c++17 -O2  -Wall -Wextra -pedantic -g0 -fopenmp
+NO_FIELDS ?= 0
+NO_FIELDS_FLAG := $(if $(filter 1 true yes,$(NO_FIELDS)),--no-fields,)
 BIN = bin/lid_cavity_openmp
 OMP_NUM_THREADS ?= 4
 
@@ -7,30 +9,25 @@ OMP_NUM_THREADS ?= 4
 
 build:
 	mkdir -p bin
-	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(BIN)
+	$(CXX) $(CXXFLAGS) src/lid_cavity.cpp -o $(BIN) -lstdc++fs
 
 run: build
-	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --single --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),central) --pressure $(or $(PRESSURE),RBGS)
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --single --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),central) --pressure $(or $(PRESSURE),RBGS) $(NO_FIELDS_FLAG)
 
 smoke: build
-	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode smoke
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode smoke $(NO_FIELDS_FLAG)
 
 quick: build
-	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode quick
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode quick $(NO_FIELDS_FLAG)
 
 medium: build
-	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode medium
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode medium $(NO_FIELDS_FLAG)
 
 full: build
-	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode full
+	OMP_NUM_THREADS=$(OMP_NUM_THREADS) $(BIN) --mode full $(NO_FIELDS_FLAG)
 
-scaling: build
-	@mkdir -p results/scaling
-	@echo "Threads,Runtime_s" > results/scaling/openmp_scaling.csv
-	@for t in 1 2 4 8; do \
-	  echo "threads=$$t"; \
-	  /usr/bin/time -f "$$t,%e" -a -o results/scaling/openmp_scaling.csv env OMP_NUM_THREADS=$$t $(BIN) --mode smoke >/dev/null; \
-	done
+scaling:
+	../../scripts/run_parallel_scaling.py --targets cpp_openmp --threads $(or $(THREADS),1,2,4,8) --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),upwind) --pressure $(or $(PRESSURE),RBGS)
 
 plot:
 	python3 postprocess/plot_results.py --all-cases --summaries all

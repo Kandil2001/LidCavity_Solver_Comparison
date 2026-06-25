@@ -7,25 +7,26 @@ function generate_all_plots_from_results()
 
 clc; close all;
 
-addpath("src/core");
-addpath("src/studies");
-addpath("src/validation");
-addpath("src/postprocess");
+addpath("src/app");
+addpath('src/core');
+addpath('src/studies');
+addpath('src/validation');
+addpath('postprocess');
 
-cfg = default_config("full");
+cfg = default_config('full');
 cfg.make_figures = true;
 cfg.figure_every_case = true;
 cfg.export_csv = true;
-cfg.results_dir = "results";
-cfg.data_dir = fullfile("results","data");
-cfg.fig_dir = fullfile("results","figures");
+cfg.results_dir = 'results';
+cfg.data_dir = fullfile('results','data');
+cfg.fig_dir = fullfile('results','figures');
 
-if ~exist(cfg.data_dir,"dir")
+if ~exist(cfg.data_dir,'dir')
     error("No MATLAB results/data folder found. Run the full benchmark first.");
 end
-if ~exist(cfg.fig_dir,"dir"); mkdir(cfg.fig_dir); end
+if ~exist(cfg.fig_dir,'dir'); mkdir(cfg.fig_dir); end
 
-files = dir(fullfile(cfg.data_dir, "case_*.mat"));
+files = dir(fullfile(cfg.data_dir, 'case_*.mat'));
 if isempty(files)
     error("No saved MATLAB case_*.mat files found in %s. Run the full benchmark first.", cfg.data_dir);
 end
@@ -33,11 +34,11 @@ end
 fprintf("\nGenerating MATLAB plots for %d saved cases...\n", numel(files));
 
 for k = 1:numel(files)
-    case_file = fullfile(files(k).folder, files(k).name);
+    case_file = fullfile(cfg.data_dir, files(k).name);
     [~, case_name, ~] = fileparts(case_file);
     S = load(case_file);
 
-    if ~isfield(S,"result")
+    if ~isfield(S,'result')
         warning("Skipping %s because it does not contain result.", files(k).name);
         continue;
     end
@@ -49,8 +50,8 @@ for k = 1:numel(files)
     plot_validation(S.result,cfg,case_name);
 end
 
-summary_csv = fullfile(cfg.data_dir, "study_summary_full_matlab.csv");
-if exist(summary_csv,"file")
+summary_csv = fullfile(cfg.data_dir, 'study_summary_full_matlab.csv');
+if exist(summary_csv,'file') && exist('readtable','file')
     T = readtable(summary_csv);
     plot_study_summary(T,cfg);
 end

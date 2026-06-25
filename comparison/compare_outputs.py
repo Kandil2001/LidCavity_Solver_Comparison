@@ -18,10 +18,10 @@ Default use after running all serial solvers:
 The script matches cases by physical/numerical setup, not by CaseID:
     N, Re, Scheme, PressureSolver
 
-MATLAB normally has two reference implementations (vectorized and loop). C and
-Python now also provide vectorized/looped serial baselines, while C++ remains a
-serial baseline. Every non-reference case is compared against every matching
-reference implementation.
+MATLAB normally has two reference implementations (vectorized and loop).
+Python provides NumPy-style and loop-style serial baselines. C and C++ are
+compiled serial baselines. Every non-reference case is compared against every
+matching reference implementation.
 """
 
 from __future__ import annotations

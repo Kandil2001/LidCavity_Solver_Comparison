@@ -4,14 +4,14 @@ This folder contains the C versions of the lid-driven cavity solver.
 
 | Folder | Purpose |
 |---|---|
-| `serial/` | Low-level serial CPU baseline |
-| `openmp/` | Shared-memory CPU parallel version |
+| `serial/` | Compiled serial CPU baseline |
+| `openmp/` | Shared-memory CPU threaded version |
 | `mpi/` | Case-level MPI runner for parameter studies |
 
 All C folders follow the same structure: `README.md`, `Makefile`, `src/`, `postprocess/`, and `results/`.
 
-## Note about serial labels
+## Important note about labels
 
-The serial C folder may write two labels: `serial_c_looped` and `serial_c_vectorized`. These are benchmark labels used to keep the comparison table aligned with the MATLAB and Python studies. Both paths are still plain serial C, not SIMD/vector-intrinsics code. The true parallel C versions are kept separately in `openmp/` and `mpi/`.
+The C solver is one compiled baseline. Older names such as `serial_c_looped`, `serial_c_vectorized`, `openmp_c_looped`, and `openmp_c_vectorized_style` are accepted as aliases for backward compatibility, but they are not separate C algorithms.
 
 Use the serial version first, then compare against OpenMP and MPI.

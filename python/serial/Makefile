@@ -1,4 +1,6 @@
 PYTHON ?= python3
+NO_FIELDS ?= 0
+NO_FIELDS_FLAG := $(if $(filter 1 true yes,$(NO_FIELDS)),--no-fields,)
 
 .PHONY: install run smoke quick medium full plot clean
 
@@ -9,16 +11,16 @@ run:
 	$(PYTHON) src/lid_cavity.py --single --N $(or $(N),64) --Re $(or $(RE),100) --scheme $(or $(SCHEME),central) --pressure $(or $(PRESSURE),RBGS)
 
 smoke:
-	$(PYTHON) src/lid_cavity.py --mode smoke
+	$(PYTHON) src/lid_cavity.py --mode smoke $(NO_FIELDS_FLAG)
 
 quick:
-	$(PYTHON) src/lid_cavity.py --mode quick
+	$(PYTHON) src/lid_cavity.py --mode quick $(NO_FIELDS_FLAG)
 
 medium:
-	$(PYTHON) src/lid_cavity.py --mode medium
+	$(PYTHON) src/lid_cavity.py --mode medium $(NO_FIELDS_FLAG)
 
 full:
-	$(PYTHON) src/lid_cavity.py --mode full
+	$(PYTHON) src/lid_cavity.py --mode full $(NO_FIELDS_FLAG)
 
 plot:
 	$(PYTHON) postprocess/plot_results.py --all-cases --summaries all

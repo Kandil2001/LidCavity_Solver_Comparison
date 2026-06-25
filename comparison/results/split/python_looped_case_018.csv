@@ -1,0 +1,2 @@
+CaseID,Implementation,N,Re,Scheme,PressureSolver,Status,Quality,Iterations,LocalMaxIter,FinalRu,FinalRv,FinalRcMass,FinalRcDiv,Runtime_s,AvgPoissonIterations,AvgPoissonRelResidual,PressureSaturationRatio,HasGhia,ValidationPass,Ghia_u_L2,Ghia_v_L2,Ghia_u_Linf,Ghia_v_Linf,Ghia_u_L2_Limit,Ghia_v_L2_Limit
+18,serial_python_looped,64,400,upwind,RBSOR,maxIter,needs_improvement,4000,4000,5.01951678896e-05,4.18930269079e-05,5.70311425107e-08,0.000226356604625,12598.8224477,204.80625,7.94659329116e-05,0,1,0,0.105668929138,0.135676090626,0.231682751762,0.222444253024,0.09,0.12

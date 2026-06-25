@@ -1,38 +1,38 @@
 SHELL := /bin/bash
-MATLAB ?= matlab
-MATLAB_ENTRY := addpath('src/app')
+ENGINE ?= auto
 
 .PHONY: help run smoke quick medium full single plots clean
 
 help:
-	@echo "MATLAB reference solver"
-	@echo "  make smoke    smallest check"
-	@echo "  make quick    quick benchmark"
-	@echo "  make medium   medium benchmark"
-	@echo "  make full     full benchmark"
-	@echo "  make single   one debug case"
-	@echo "  make plots    regenerate MATLAB plots from existing results"
-	@echo "  make clean    remove generated outputs"
+	@echo "MATLAB/Octave reference solver"
+	@echo "  make smoke                 smallest check"
+	@echo "  make quick                 quick benchmark"
+	@echo "  make medium                medium benchmark"
+	@echo "  make full                  full benchmark"
+	@echo "  make single                one debug case"
+	@echo "  make plots                 regenerate plots from existing results"
+	@echo "  make smoke ENGINE=octave   force GNU Octave instead of MATLAB"
+	@echo "  make clean                 remove generated outputs"
 
 run: smoke
 
 smoke:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); run_smoke"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh smoke
 
 quick:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); run_quick"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh quick
 
 medium:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); run_medium"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh medium
 
 full:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); run_full"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh full
 
 single:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); addpath('src/studies'); run_single_case"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh single
 
 plots:
-	$(MATLAB) -batch "$(MATLAB_ENTRY); generate_all_plots_from_results"
+	ENGINE=$(ENGINE) ./run_matlab_or_octave.sh plots
 
 clean:
 	rm -rf results/data results/figures results/scaling results/logs

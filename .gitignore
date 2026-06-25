@@ -39,3 +39,8 @@ Thumbs.db
 # packaged archives
 dist/
 *.zip
+.pytest_cache/
+*.mex*
+*.slxc
+slprj/
+*.mat

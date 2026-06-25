@@ -16,7 +16,8 @@ def main() -> int:
     for path in sorted(args.raw.glob("rank_*/case_*/results/data/study_summary_single.csv")):
         df = pd.read_csv(path)
         df["OriginalImplementation"] = df["Implementation"]
-        df["Implementation"] = args.prefix + "_" + df["OriginalImplementation"].astype(str).str.replace("serial_c_", "", regex=False)
+        base = df["OriginalImplementation"].astype(str).str.lower()
+        df["Implementation"] = base.map(lambda name: args.prefix if name == "serial_c" else args.prefix + "_" + name.replace("serial_c_", ""))
         frames.append(df)
     if not frames:
         raise SystemExit(f"No MPI summaries found under {args.raw}")

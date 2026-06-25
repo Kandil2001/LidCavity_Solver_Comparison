@@ -47,5 +47,7 @@ results/logs/      optional run logs
 ## Notes
 
 - Use this version to compare thread scaling against the serial C baseline.
+- This is one OpenMP C baseline; older looped/vectorized-style names are aliases only.
+- Very small cases may not show speedup because OpenMP overhead can dominate.
 
 For the full project overview, see the root `README.md`.

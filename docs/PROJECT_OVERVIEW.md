@@ -19,11 +19,23 @@ The cavity has a moving top lid and no-slip walls. The solver uses a SIMPLE-styl
 
 Centerline velocity profiles are compared against the classical Ghia et al. lid-driven cavity benchmark data where applicable.
 
-## Parallelisation levels
+The comparison is not expected to be bit-for-bit identical between languages. The useful checks are residual history, velocity fields, centerline profiles, validation error, and runtime trend.
 
-- Serial implementations: MATLAB, Python, C, C++
+## Implementation levels
+
+- Reference workflow: MATLAB
+- Readable serial workflow: Python / NumPy
+- Compiled serial baselines: C and C++
 - Shared-memory parallelism: C/OpenMP and C++/OpenMP
 - Case-level distributed runs: Python/MPI, C/MPI, C++/MPI
+- Automated studies: grid-convergence tables, Ghia centerline plots, OpenMP/MPI scaling plots
 - GPU prototype: CUDA
 
-The MPI versions currently distribute independent benchmark cases. They are not domain-decomposition CFD solvers yet.
+## Current limitations
+
+- The MPI versions are case-level runners, not domain-decomposition solvers.
+- The CUDA version is a GPU prototype and should be compared carefully with the CPU solvers.
+- Python serial and Python MPI can use the Python NumPy/vectorized-style and loop-style implementation labels.
+- C/C++ OpenMP and C/C++ MPI are single baseline implementations, not separate looped/vectorized algorithms.
+- The C solver is one compiled baseline; older looped/vectorized labels are aliases only.
+- Full benchmark conclusions should be added only after running the complete study on the target machine.

@@ -11,7 +11,13 @@ static RunConfig parse_args(int argc, char** argv) {
         else if (a=="--poisson-maxIter") c.poissonIter = std::stoi(need("--poisson-maxIter"));
         else if (a=="--block-size") c.blockSize = std::stoi(need("--block-size"));
         else if (a=="--no-fields") c.save_fields=false;
-        else if (a=="--mode") { c.mode = need("--mode"); if (c.mode=="smoke") { c.N=16; c.Re=100; c.maxIter=20; c.poissonIter=50; c.scheme="upwind"; } }
+        else if (a=="--mode") {
+            c.mode = need("--mode");
+            if (c.mode=="smoke") { c.N=16; c.Re=100; c.maxIter=20; c.poissonIter=50; c.scheme="upwind"; }
+            else if (c.mode=="quick") { c.N=64; c.Re=100; c.maxIter=500; c.poissonIter=300; c.scheme="upwind"; }
+            else if (c.mode=="medium") { c.N=96; c.Re=100; c.maxIter=1000; c.poissonIter=500; c.scheme="upwind"; }
+            else if (c.mode=="full") { c.N=128; c.Re=100; c.maxIter=2000; c.poissonIter=800; c.scheme="upwind"; }
+        }
     }
     return c;
 }

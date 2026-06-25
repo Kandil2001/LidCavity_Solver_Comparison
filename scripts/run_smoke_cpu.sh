@@ -24,10 +24,10 @@ try_make() {
 
 echo "Running CPU smoke checks. Missing optional tools are skipped."
 
-if command -v matlab >/dev/null 2>&1; then
-    try_make matlab smoke
+if command -v matlab >/dev/null 2>&1 || command -v octave >/dev/null 2>&1; then
+    try_make matlab smoke ENGINE="${ENGINE:-auto}"
 else
-    echo "Skipping MATLAB smoke check because matlab was not found."
+    echo "Skipping MATLAB/Octave smoke check because neither matlab nor octave was found."
 fi
 
 try_make python/serial smoke

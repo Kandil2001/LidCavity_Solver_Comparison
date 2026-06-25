@@ -1,12 +1,12 @@
 # Documentation
 
-This folder contains short notes for understanding and running the comparison project.
+Useful notes for the project:
 
 | File | Purpose |
 |---|---|
-| `PROJECT_OVERVIEW.md` | Short explanation of the numerical benchmark |
-| `IMPLEMENTATION_LAYOUT.md` | Standard folder layout used across implementations |
-| `RESULTS_GUIDE.md` | Explanation of generated CSV and plot folders |
-| `RUNNING_ON_HPC.md` | Practical notes for running on university/HPC machines |
-
-Keep this folder short and practical. The main project story should stay in the root `README.md`.
+| `PROJECT_OVERVIEW.md` | Short explanation of the numerical benchmark and implementation levels |
+| `IMPLEMENTATION_LAYOUT.md` | Folder structure and source-code layout |
+| `RESULTS_GUIDE.md` | How result files and comparison reports are organised |
+| `RUNNING_ON_HPC.md` | Notes for running the project on university/HPC machines |
+| `GITHUB_POLISH_CHECKLIST.md` | Checklist before sharing the repository |
+| `HOW_TO_PRESENT_THIS_PROJECT.md` | Honest wording for CV, LinkedIn, and interviews |

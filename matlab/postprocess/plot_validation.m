@@ -16,7 +16,7 @@ xlabel('u velocity at x=0.5');
 ylabel('y');
 legend('Solver','Ghia et al.','Location','best');
 title(sprintf('Vertical centerline validation, Re=%d', result.Re));
-save_current_figure(fullfile(cfg.fig_dir, case_name + "_ghia_u"));
+save_current_figure(fullfile(cfg.fig_dir, [case_name '_ghia_u']));
 close;
 
 figure('Visible','off');
@@ -27,6 +27,6 @@ xlabel('x');
 ylabel('v velocity at y=0.5');
 legend('Solver','Ghia et al.','Location','best');
 title(sprintf('Horizontal centerline validation, Re=%d', result.Re));
-save_current_figure(fullfile(cfg.fig_dir, case_name + "_ghia_v"));
+save_current_figure(fullfile(cfg.fig_dir, [case_name '_ghia_v']));
 close;
 end

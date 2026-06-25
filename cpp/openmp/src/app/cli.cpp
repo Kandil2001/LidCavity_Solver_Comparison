@@ -21,13 +21,13 @@ static void configure_mode(Config& cfg, const std::string& mode) {
         cfg.re_list = {100};
         cfg.schemes = {"central"};
         cfg.pressure_solvers = {"RBGS"};
-        cfg.implementations = {"openmp_cpp_looped"};
+        cfg.implementations = {"openmp_cpp"};
     } else if (m == "smoke") {
         cfg.meshes = {16};
         cfg.re_list = {100};
         cfg.schemes = {"upwind"};
         cfg.pressure_solvers = {"RBGS"};
-        cfg.implementations = {"openmp_cpp_looped"};
+        cfg.implementations = {"openmp_cpp"};
         cfg.maxIter = 20;
         cfg.maxIter_N128_bonus = 0;
         cfg.maxIter_Re1000_bonus = 0;
@@ -41,12 +41,12 @@ static void configure_mode(Config& cfg, const std::string& mode) {
 static void print_usage(const char* exe) {
     std::cout << "Usage:\n"
               << "  " << exe << " --mode quick|medium|full|single|smoke\n"
-              << "  " << exe << " --single --N 64 --Re 100 --scheme central --pressure RBGS --implementation openmp_cpp_looped\n\n"
+              << "  " << exe << " --single --N 64 --Re 100 --scheme central --pressure RBGS --implementation openmp_cpp\n\n"
               << "Options:\n"
               << "  --no-fields              Do not write full field CSV files\n"
               << "  --maxIter VALUE          Override base outer iterations\n"
               << "  --poisson-maxIter VALUE  Override pressure solver iterations\n"
-              << "\nImplementation note: this C++ package has one openmp_cpp_looped solver. MATLAB labels loop/vectorized are accepted as aliases only.\n";
+              << "\nImplementation note: this C++ package has one openmp_cpp solver. MATLAB labels loop/vectorized are accepted as aliases only.\n";
 }
 
 int main(int argc, char** argv) {
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     int single_Re = 100;
     std::string single_scheme = "central";
     std::string single_pressure = "RBGS";
-    std::string single_implementation = "openmp_cpp_looped";
+    std::string single_implementation = "openmp_cpp";
 
     try {
         for (int i = 1; i < argc; ++i) {

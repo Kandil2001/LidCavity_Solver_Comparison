@@ -1,0 +1,12 @@
+solver_group,rows_found,expected_rows,complete,missing_case_ids
+c_serial,36,36,True,none
+cpp_serial,36,36,True,none
+c_openmp_t4,36,36,True,none
+cpp_openmp_t4,36,36,True,none
+python_vectorized,36,36,True,none
+python_looped,20,36,False,15 19 21 23 25 26 27 28 29 30 31 32 33 34 35 36
+octave_vectorized,36,36,True,none
+octave_looped,34,36,False,33 35
+c_mpi,36,36,True,none
+cpp_mpi,36,36,True,none
+python_mpi,36,72,False,37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72
