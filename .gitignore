@@ -1,11 +1,22 @@
 # build output
 bin/
 build/
+obj/
 *.o
+*.so
+*.a
 *.exe
 *.out
 
-# generated results and logs
+# local / temporary benchmark outputs
+work/
+logs/
+tmp/
+scratch/
+*.log
+slurm-*.out
+
+# generated implementation results
 results/data/*
 results/figures/*
 results/logs/*
@@ -14,33 +25,56 @@ results/scaling/*
 **/results/figures/*
 **/results/logs/*
 **/results/scaling/*
-*.log
+
+# heavy raw benchmark outputs that should not be committed
+comparison/results/split/
+comparison/results/raw/
+comparison/results/final/
+comparison/results/*_raw/
+comparison/results/tmp/
+
+# keep selected final report outputs tracked
+!comparison/results/final_clean/
+!comparison/results/final_clean/**
+!comparison/results/physics_fields/
+!comparison/results/physics_fields/**
+!comparison/figures/final_clean/
+!comparison/figures/final_clean/**
+!comparison/figures/report_pngs/
+!comparison/figures/report_pngs/**
+!comparison/figures/physics_final/
+!comparison/figures/physics_final/**
 
 # keep empty result folders visible on GitHub
 !results/**/.gitkeep
 !**/results/**/.gitkeep
 
-# python
+# Python
 __pycache__/
 *.pyc
+.pytest_cache/
 .venv/
+venv/
+jobs/python_new/
 .ipynb_checkpoints/
 
-# matlab
+# MATLAB / Simulink
 *.asv
 *.m~
+*.mex*
+*.slxc
+slprj/
+*.mat
+
+# packaged archives
+*.zip
+*.tar
+*.tar.gz
+*.7z
+dist/
 
 # editor/os
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# packaged archives
-dist/
-*.zip
-.pytest_cache/
-*.mex*
-*.slxc
-slprj/
-*.mat
