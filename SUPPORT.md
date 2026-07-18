@@ -1,25 +1,39 @@
-# Support
+# Support and Community
 
-This is an educational CFD/HPC benchmark repository. Support is provided on a best-effort basis.
+This is a work-in-progress educational CFD/HPC benchmark. Support is provided on a best-effort basis.
 
-## Best ways to ask for help
+## Use GitHub Discussions for
 
-Use GitHub Issues for:
+- questions about numerical methods, setup, or interpretation
+- ideas for improving the benchmark
+- polls and community feedback
+- experiments or extensions based on the repository
+- general project conversation
 
-- reproducible build problems
-- documentation mistakes
-- plotting or post-processing issues
-- benchmark interpretation questions
-- suggestions for clearer result presentation
+The recommended categories are documented in [`docs/COMMUNITY.md`](docs/COMMUNITY.md): Announcements, General, Ideas, Polls, Q&A, and Show and tell.
+
+## Use GitHub Issues for
+
+- reproducible build or run failures
+- documentation errors
+- plotting or post-processing defects
+- missing files
+- specific implementation tasks
+- benchmark changes with a clear actionable outcome
 
 Please include:
 
 - operating system or cluster environment
-- compiler and Python versions
+- compiler, interpreter, and dependency versions
 - the command you ran
-- the relevant error message or output
-- affected implementation folder, if known
+- relevant parameters
+- the error message or unexpected output
+- the affected implementation folder
+
+## Benchmark interpretation
+
+Read [`docs/CURRENT_BENCHMARK_RESULTS.md`](docs/CURRENT_BENCHMARK_RESULTS.md) before opening an issue about runtime ranking, convergence, or validation status. The project is still being developed, and execution completion is not the same as numerical convergence.
 
 ## Security issues
 
-Please do not open public issues for security concerns. See [`SECURITY.md`](SECURITY.md).
+Do not open public issues for security concerns. Follow [`SECURITY.md`](SECURITY.md).
