@@ -1,15 +1,16 @@
 cff-version: 1.2.0
 title: "Lid-Driven Cavity Solver Comparison"
-message: "If you use this repository for learning, benchmarking, or comparison, please cite it using this metadata."
+message: "If you use this software or benchmark in academic work, please cite it using this metadata."
 type: software
 authors:
   - family-names: Kandil
     given-names: Ahmed
+    orcid: "https://orcid.org/0009-0007-2724-4565"
 repository-code: "https://github.com/Kandil2001/LidCavity_Solver_Comparison"
-url: "https://github.com/Kandil2001/LidCavity_Solver_Comparison"
+url: "https://kandil2001.github.io/"
 license: MIT
 keywords:
-  - CFD
+  - computational fluid dynamics
   - lid-driven cavity
   - numerical methods
   - high-performance computing
@@ -19,5 +20,4 @@ keywords:
   - Python
   - C++
   - MATLAB
-abstract: "A multi-language CFD/HPC benchmark for the two-dimensional incompressible lid-driven cavity problem, comparing MATLAB/Octave, Python, C, C++, OpenMP, MPI, and CUDA-style workflows."
-date-released: "2026-06-25"
+abstract: "A work-in-progress multi-language CFD/HPC benchmark for the two-dimensional incompressible lid-driven cavity problem, comparing MATLAB/Octave, Python, C, C++, OpenMP, MPI, and CUDA-oriented workflows."
