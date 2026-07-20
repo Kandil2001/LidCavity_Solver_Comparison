@@ -1,0 +1,80 @@
+name: Cross-language CPU smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install OpenMPI and Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openmpi-bin libopenmpi-dev
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt -r python/mpi/requirements.txt
+          python -m pip check
+
+      - name: Run available CPU smoke cases
+        env:
+          NP: "2"
+          OMP_NUM_THREADS: "2"
+        run: make smoke-cpu NP=2 OMP_NUM_THREADS=2
+
+      - name: Verify solver-group outputs
+        run: |
+          python3 - <<'PY'
+          import csv
+          from pathlib import Path
+
+          groups = [
+              Path("python/serial"),
+              Path("c/serial"),
+              Path("cpp/serial"),
+              Path("c/openmp"),
+              Path("cpp/openmp"),
+              Path("python/mpi"),
+              Path("c/mpi"),
+              Path("cpp/mpi"),
+          ]
+
+          errors = []
+          for group in groups:
+              summaries = sorted((group / "results" / "data").glob("study_summary_*.csv"))
+              summaries += sorted((group / "results").glob("study_summary_*.csv"))
+              summaries = [path for path in summaries if path.is_file() and path.stat().st_size > 0]
+              if not summaries:
+                  errors.append(f"{group}: no non-empty study summary was generated")
+                  continue
+
+              readable_rows = 0
+              for summary in summaries:
+                  with summary.open(encoding="utf-8", newline="") as file:
+                      readable_rows += sum(1 for _ in csv.DictReader(file))
+              if readable_rows < 1:
+                  errors.append(f"{group}: summary files contain no data rows")
+                  continue
+
+              print(f"Verified {group}: {len(summaries)} summary file(s), {readable_rows} row(s).")
+
+          if errors:
+              raise SystemExit("CPU smoke verification failed:\n- " + "\n- ".join(errors))
+          PY
