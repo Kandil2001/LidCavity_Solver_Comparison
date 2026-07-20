@@ -1,0 +1,6 @@
+# CPU smoke-workflow environment established 2026-07-20.
+matplotlib==3.11.1
+mpi4py==4.1.2
+numpy==2.4.6
+pandas==3.0.3
+tabulate==0.10.0
