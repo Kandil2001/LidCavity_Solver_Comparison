@@ -24,13 +24,14 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: .github/requirements-ci.txt
 
-      - name: Install OpenMPI and Python dependencies
+      - name: Install OpenMPI and pinned Python dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y openmpi-bin libopenmpi-dev
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt -r python/mpi/requirements.txt
+          python -m pip install -r .github/requirements-ci.txt
           python -m pip check
 
       - name: Run available CPU smoke cases
