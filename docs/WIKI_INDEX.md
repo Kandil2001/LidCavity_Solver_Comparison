@@ -6,6 +6,9 @@ This work-in-progress repository keeps version-controlled documentation in `docs
 
 | Document | Purpose |
 |---|---|
+| [`PAPER_ROADMAP.md`](PAPER_ROADMAP.md) | Staged plan for turning the project into a reproducible software and benchmark paper |
+| [`../benchmark/NUMERICAL_SPECIFICATION.md`](../benchmark/NUMERICAL_SPECIFICATION.md) | Draft frozen numerical method, validation protocol, language scope, and timing rules for the paper |
+| [`../benchmark/paper_cases.yaml`](../benchmark/paper_cases.yaml) | Machine-readable draft paper case matrix and convergence targets |
 | [`CURRENT_BENCHMARK_RESULTS.md`](CURRENT_BENCHMARK_RESULTS.md) | Current dataset, interim runtime measurements, convergence interpretation, and remaining work |
 | [`PROJECT_OVERVIEW.md`](PROJECT_OVERVIEW.md) | Project and numerical-method overview |
 | [`IMPLEMENTATION_LAYOUT.md`](IMPLEMENTATION_LAYOUT.md) | Folder layout and implementation structure |
@@ -38,10 +41,11 @@ This work-in-progress repository keeps version-controlled documentation in `docs
 ## Suggested reading path
 
 1. Read the root `README.md` for project scope and status.
-2. Read `CURRENT_BENCHMARK_RESULTS.md` for the current measurements and limitations.
-3. Check `comparison/figures/report_pngs/` for runtime and residual figures.
-4. Check `comparison/figures/physics_final/` for streamlines, vectors, contours, and centerline comparisons.
-5. Read `HOW_TO_PRESENT_THIS_PROJECT.md` before describing the project in a CV, interview, or public post.
+2. Read `PAPER_ROADMAP.md` and the benchmark numerical specification before changing solver behaviour or starting new final runs.
+3. Read `CURRENT_BENCHMARK_RESULTS.md` for the current pilot measurements and limitations.
+4. Check `comparison/figures/report_pngs/` for runtime and residual figures.
+5. Check `comparison/figures/physics_final/` for streamlines, vectors, contours, and centerline comparisons.
+6. Read `HOW_TO_PRESENT_THIS_PROJECT.md` before describing the project in a CV, interview, or public post.
 
 ## Why this is not a separate GitHub Wiki
 
