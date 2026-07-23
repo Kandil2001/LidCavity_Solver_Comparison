@@ -96,7 +96,13 @@ static Result solve_lid_cavity(int N, int Re, std::string scheme, std::string pr
         }
         prev_mass = Rc_mass;
 
-        if (Rc_mass < cfg.tol_mass && std::max(Ru, Rv) < cfg.tol_velocity) {
+        const bool velocity_converged = std::max(Ru, Rv) < cfg.tol_velocity;
+        const bool continuity_converged = cfg.use_divergence_convergence
+            ? Rc_div < cfg.tol_divergence
+            : Rc_mass < cfg.tol_mass;
+        const bool pressure_converged = !cfg.require_pressure_convergence || pinfo.converged;
+
+        if (velocity_converged && continuity_converged && pressure_converged) {
             status = "converged";
             break;
         }
@@ -111,6 +117,8 @@ static Result solve_lid_cavity(int N, int Re, std::string scheme, std::string pr
 
     result.iterations = iter;
     result.status = status;
+    result.execution_completed = status != "diverged";
+    result.outer_converged = status == "converged";
     result.stagnation_counter = stagnation_counter;
 
     result.x.resize(N);
@@ -135,6 +143,10 @@ static Result solve_lid_cavity(int N, int Re, std::string scheme, std::string pr
     result.final_Rv = result.Rv.empty() ? 0.0 : result.Rv.back();
     result.final_Rc_mass = result.Rc_mass.empty() ? 0.0 : result.Rc_mass.back();
     result.final_Rc_div = result.Rc_div.empty() ? 0.0 : result.Rc_div.back();
+    result.final_pressure_converged = result.poisson_converged.empty() ? false : result.poisson_converged.back();
+    result.final_poisson_relative_residual = result.poisson_relative_residual.empty()
+        ? std::numeric_limits<double>::infinity()
+        : result.poisson_relative_residual.back();
 
     if (!result.poisson_iters.empty()) {
         result.avg_poisson_iters = std::accumulate(result.poisson_iters.begin(), result.poisson_iters.end(), 0.0)
@@ -148,4 +160,3 @@ static Result solve_lid_cavity(int N, int Re, std::string scheme, std::string pr
 
     return result;
 }
-
