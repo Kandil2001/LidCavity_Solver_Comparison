@@ -32,6 +32,15 @@ The contribution is the transparent cross-language implementation, numerical-equ
 
 The MATLAB and Octave code remains in the repository as previous work, but is not required for the paper because it cannot be executed consistently on Stromboli.
 
+## Stromboli operating rule
+
+Stromboli is a run-only machine for this project. Do not clone, initialize, fetch,
+pull, checkout, switch branches, create worktrees, or commit with Git there.
+
+Prepare a source-only archive locally, transfer it with `scp`, extract each
+snapshot into a separate timestamped directory, and return results with `scp` or
+`rsync`. See [`STROMBOLI_NO_GIT.md`](STROMBOLI_NO_GIT.md).
+
 ## Phase 0 — Preserve current work
 
 - [ ] Allow already-running jobs to finish.
@@ -41,7 +50,13 @@ The MATLAB and Octave code remains in the repository as previous work, but is no
 
 ## Phase 1 — Confirm available software
 
-Run on Stromboli:
+Package the branch locally with:
+
+```bash
+python3 scripts/package_paper_snapshot.py
+```
+
+Copy and extract the snapshot on Stromboli without Git, then run:
 
 ```bash
 bash scripts/check_paper_toolchain.sh \
@@ -85,8 +100,8 @@ Required changes:
 - [ ] Rename velocity-change quantities so they are not called momentum residuals.
 - [ ] Tighten and consistently report the pressure Poisson residual.
 - [ ] Reuse a previous pressure-correction estimate where appropriate.
-- [ ] Require pressure convergence in the outer convergence decision.
-- [ ] Add explicit booleans for outer and pressure convergence.
+- [x] Require pressure convergence in the paper-protocol outer convergence decision.
+- [x] Add explicit booleans for outer and pressure convergence.
 - [ ] Export solver time separately from file-output time.
 - [ ] Export complete run metadata.
 - [ ] Demonstrate stable, repeatable convergence for the first target case.
@@ -143,7 +158,7 @@ After running the toolchain check:
 - [ ] Use at least five measured repetitions.
 - [ ] Disable field output inside timed sections.
 - [ ] Preserve every raw timing.
-- [ ] Record compiler, interpreter, node, CPU, commit, thread, and rank metadata.
+- [ ] Record compiler, interpreter, node, CPU, source snapshot, thread, and rank metadata.
 - [ ] Exclude non-converged runs from performance ranking.
 - [ ] Report median and interquartile range.
 
@@ -157,4 +172,4 @@ After running the toolchain check:
 
 ## Immediate next task
 
-The next code change should be limited to the C++ serial solver and its output schema. The immediate success condition is one fully converged `N=65`, `Re=100`, central/RBSOR result with separate pressure and outer convergence reporting.
+The next numerical change should remain limited to the C++ serial solver and its output schema. The immediate success condition is one fully converged `N=65`, `Re=100`, central/RBSOR result with separate pressure and outer convergence reporting.
