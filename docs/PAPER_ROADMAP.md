@@ -158,7 +158,7 @@ After running the toolchain check:
 - [ ] Use at least five measured repetitions.
 - [ ] Disable field output inside timed sections.
 - [ ] Preserve every raw timing.
-- [ ] Record compiler, interpreter, node, CPU, source snapshot, thread, and rank metadata.
+- [ ] Record compiler, interpreter, node, CPU, snapshot identifier, thread, and rank metadata.
 - [ ] Exclude non-converged runs from performance ranking.
 - [ ] Report median and interquartile range.
 
