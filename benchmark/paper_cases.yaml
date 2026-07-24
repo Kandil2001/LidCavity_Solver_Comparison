@@ -1,0 +1,127 @@
+schema_version: 1
+status: draft
+purpose: >-
+  Reproducible cross-language benchmark of one simple two-dimensional
+  incompressible lid-driven-cavity pressure-correction algorithm.
+
+paper_scope:
+  core_serial:
+    required:
+      - python_serial
+      - c_serial
+      - cpp_serial
+    conditional:
+      - rust_serial
+  shared_memory:
+    required:
+      - c_openmp
+      - cpp_openmp
+    conditional:
+      - rust_rayon
+  throughput_parallelism:
+    - c_mpi
+    - cpp_mpi
+    - python_mpi
+  external_reference:
+    - openfoam
+  excluded_from_main_paper:
+    - matlab
+    - octave
+    - cuda
+
+scope_notes:
+  matlab_octave: >-
+    Existing MATLAB and Octave implementations remain in the repository, but
+    are excluded from the main paper benchmark because the target Stromboli
+    environment does not provide them.
+  rust: >-
+    Rust is included only when rustc and cargo are available on the target
+    machine or can be installed in user space without changing the benchmark
+    hardware.
+  openfoam: >-
+    OpenFOAM is an external engineering reference. It is compared for solution
+    quality and end-to-end runtime, not as an identical implementation of the
+    in-house pressure-correction algorithm.
+  mpi: >-
+    Current MPI implementations distribute independent cases. Results must be
+    reported as parameter-sweep throughput, not single-domain CFD scaling.
+  cuda: >-
+    CUDA remains outside the first paper because its pressure solver is not yet
+    numerically equivalent to the CPU implementations.
+
+physics:
+  problem: two_dimensional_lid_driven_cavity
+  cavity_length: 1.0
+  lid_velocity: 1.0
+  density: 1.0
+  precision: float64
+  reynolds_numbers: [100, 400, 1000]
+
+numerics:
+  method_name: explicit_pressure_correction
+  grid: uniform_cartesian_collocated
+  grid_sizes: [33, 65, 129, 257]
+  convection_scheme: central
+  diffusion_scheme: central
+  pressure_solver: RBSOR
+  pressure_initial_guess: previous_outer_correction
+  time_step:
+    type: adaptive_pseudo_time
+    cfl: 0.25
+  stopping_criteria:
+    velocity_update_linf: 1.0e-8
+    maximum_divergence: 1.0e-6
+    poisson_relative_residual: 1.0e-8
+    require_pressure_convergence: true
+    require_all_outer_criteria: true
+  iteration_limits:
+    outer_maximum: 50000
+    poisson_maximum: 5000
+  note: >-
+    Tolerances are initial paper targets and must be confirmed by a tolerance
+    sensitivity study before the benchmark is frozen.
+
+result_status_fields:
+  - execution_status
+  - outer_converged
+  - pressure_converged
+  - validation_status
+
+validation:
+  benchmark: Ghia_1982
+  sample_exact_centerlines: true
+  report_metrics:
+    - u_centerline_l1
+    - u_centerline_l2
+    - u_centerline_linf
+    - v_centerline_l1
+    - v_centerline_l2
+    - v_centerline_linf
+    - primary_vortex_center
+  verification:
+    operator_tests: true
+    systematic_grid_refinement: true
+
+performance:
+  warmup_runs: 1
+  measured_repetitions: 5
+  timed_output: disabled
+  report:
+    - solver_runtime_seconds
+    - runtime_per_outer_iteration
+    - pressure_solver_runtime_seconds
+    - outer_iterations
+    - total_poisson_iterations
+    - median
+    - interquartile_range
+  exclude_from_runtime_ranking:
+    - non_converged_cases
+    - runs_with_missing_metadata
+
+pilot_data:
+  current_long_running_jobs_label: pilot_v0
+  use_for_final_ranking: false
+  retain_for:
+    - convergence_diagnosis
+    - runtime_estimation
+    - pressure_solver_diagnosis

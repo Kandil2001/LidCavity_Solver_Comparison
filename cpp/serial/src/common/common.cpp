@@ -73,6 +73,9 @@ struct Config {
     double validation_v_L2_limit_Re1000 = 0.180;
 
     bool save_fields = true;
+    bool paper_protocol = false;
+    bool use_divergence_convergence = false;
+    bool require_pressure_convergence = false;
     std::string results_dir = "results";
     std::string data_dir = "results/data";
 };
@@ -98,6 +101,8 @@ struct Result {
     std::vector<double> x, y;
     Matrix u, v, p, speed, vorticity;
 
+    // Ru/Rv and Rc_* remain for backward-compatible CSV consumers. They are
+    // velocity-update and divergence-derived quantities, not true momentum residuals.
     std::vector<double> Ru, Rv, Rc_mass, Rc_div, dt, poisson_relative_residual;
     std::vector<int> poisson_iters;
     std::vector<bool> poisson_converged;
@@ -106,6 +111,10 @@ struct Result {
     int localMaxIter = 0;
     double runtime = 0.0;
     std::string status = "maxIter";
+    bool execution_completed = false;
+    bool outer_converged = false;
+    bool final_pressure_converged = false;
+    double final_poisson_relative_residual = std::numeric_limits<double>::infinity();
     double final_Ru = 0.0;
     double final_Rv = 0.0;
     double final_Rc_mass = 0.0;
@@ -170,4 +179,3 @@ static bool all_finite(const Matrix& m) {
     }
     return true;
 }
-
