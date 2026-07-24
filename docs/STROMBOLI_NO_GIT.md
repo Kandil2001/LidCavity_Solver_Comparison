@@ -46,7 +46,14 @@ when available locally, the source commit identifier.
 
 ## 2. Copy the snapshot to Stromboli
 
-From PowerShell, WSL, Linux, or macOS, replace the local file names as needed:
+Create the upload directory first:
+
+```bash
+ssh m2328670@stromboli.physik.uni-wuppertal.de "mkdir -p ~/uploads"
+```
+
+Then copy the archive, checksum, and extraction helper from PowerShell, WSL,
+Linux, or macOS:
 
 ```bash
 scp dist/lidcavity-paper-snapshot-*.tar.gz \
@@ -54,12 +61,9 @@ scp dist/lidcavity-paper-snapshot-*.tar.gz \
 
 scp dist/lidcavity-paper-snapshot-*.tar.gz.sha256 \
   m2328670@stromboli.physik.uni-wuppertal.de:~/uploads/
-```
 
-Create `~/uploads` first when necessary:
-
-```bash
-ssh m2328670@stromboli.physik.uni-wuppertal.de "mkdir -p ~/uploads"
+scp scripts/unpack_paper_snapshot.sh \
+  m2328670@stromboli.physik.uni-wuppertal.de:~/uploads/
 ```
 
 This uses SSH and SCP only. It does not use Git on Stromboli.
@@ -76,7 +80,10 @@ bash ~/uploads/unpack_paper_snapshot.sh \
   /beegfs/kandil/paper_runs
 ```
 
-When the helper script itself was not copied separately, extract directly:
+The helper verifies the SHA-256 checksum when the sidecar file is present and
+extracts the source into a new timestamped directory.
+
+Direct extraction is also possible:
 
 ```bash
 run_dir=/beegfs/kandil/paper_runs/LidCavity_Paper_$(date -u +%Y%m%dT%H%M%SZ)
