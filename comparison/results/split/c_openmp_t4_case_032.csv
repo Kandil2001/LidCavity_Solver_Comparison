@@ -1,0 +1,2 @@
+CaseID,Implementation,N,Re,Scheme,PressureSolver,Status,Quality,Iterations,LocalMaxIter,FinalRu,FinalRv,FinalRcMass,FinalRcDiv,Runtime_s,AvgPoissonIterations,AvgPoissonRelResidual,PressureSaturationRatio,HasGhia,ValidationPass,Ghia_u_L2,Ghia_v_L2,Ghia_u_Linf,Ghia_v_Linf,Ghia_u_L2_Limit,Ghia_v_L2_Limit
+32,openmp_c,128,400,central,RBSOR,maxIter,validated_but_not_converged,8500,8500,2.77515413115e-05,2.42671167981e-05,1.33651816586e-08,0.000215567014971,1543.30865516,585.088235294,9.29992719373e-05,0,1,1,0.0538817994075,0.0651806476726,0.116777427621,0.104634775905,0.09,0.12

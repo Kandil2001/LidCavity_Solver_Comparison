@@ -1,0 +1,52 @@
+# C Serial Solver
+
+**Role:** Compiled serial CPU implementation  
+**Language/platform:** C
+
+This folder contains the serial C implementation. It is the low-level CPU baseline used for runtime and output comparison.
+
+## Run
+
+```bash
+make smoke
+make quick
+```
+
+## Single case example
+
+```bash
+make run N=64 RE=100 SCHEME=central PRESSURE=RBGS
+```
+
+## Folder layout
+
+| Path | Purpose |
+|---|---|
+| `Makefile` | Build and run commands |
+| `src/lid_cavity.c` | Single translation-unit entry file |
+| `src/app/` | Command-line interface |
+| `src/common/` | Shared structs and utilities |
+| `src/core/` | Matrix, operators, and solver loop |
+| `src/post/` | Validation and CSV output |
+| `postprocess/` | Plotting scripts |
+| `results/` | Generated CSV, figures, scaling, and logs |
+
+## Output
+
+Generated files follow the same convention used across the repository:
+
+```text
+results/data/      CSV field data, residual histories, and summary tables
+results/figures/   generated plots
+results/scaling/   OpenMP, MPI, or CUDA scaling files when available
+results/logs/      optional run logs
+```
+
+## Notes
+
+- The source is split into small fragments and included into one translation unit to keep the build simple.
+- This is one compiled serial C baseline.
+- Older labels such as `serial_c_looped` and `serial_c_vectorized` are accepted as aliases only; they run the same C solver path.
+- Real shared-memory and distributed-memory parallelism are handled in the separate `openmp/` and `mpi/` folders.
+
+For the full project overview, see the root `README.md`.

@@ -1,0 +1,12 @@
+solver_group,needs_improvement,validated_but_not_converged
+c_mpi,14,22
+c_openmp_t4,14,22
+c_serial,14,22
+cpp_mpi,14,22
+cpp_openmp_t4,14,22
+cpp_serial,14,22
+octave_looped,16,18
+octave_vectorized,18,18
+python_looped,12,8
+python_mpi,20,16
+python_vectorized,14,22

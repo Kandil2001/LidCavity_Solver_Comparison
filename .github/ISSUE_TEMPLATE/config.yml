@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: mailto:a.akandil@outlook.com
+    about: Please report security issues privately by email.
+  - name: Current benchmark overview
+    url: https://github.com/Kandil2001/LidCavity_Solver_Comparison/blob/main/docs/CURRENT_BENCHMARK_RESULTS.md
+    about: Read the current work-in-progress benchmark summary before opening result-interpretation issues.
+  - name: Community discussions
+    url: https://github.com/Kandil2001/LidCavity_Solver_Comparison/blob/main/docs/COMMUNITY.md
+    about: Use the community guide for questions, ideas, polls, and show-and-tell topics.
