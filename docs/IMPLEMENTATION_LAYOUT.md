@@ -1,53 +1,103 @@
 # Implementation layout
 
-The repository is organised so that every implementation feels like the same project written for a different platform.
+The repository contains an original cross-language solver tree and a later organized domain-scaling source tree. These are related projects, but they currently use different numerical formulations.
 
-## Standard implementation structure
+See [`BENCHMARK_TRACKS.md`](BENCHMARK_TRACKS.md) before moving code or comparing results.
 
-Most implementation folders follow this pattern:
+## Track A — original pressure-correction implementations
+
+The root-level implementation folders are the canonical source for the original cross-language workflow:
 
 ```text
-README.md        What this implementation does and how to run it
-Makefile         Common build/run commands
-src/             Solver source code
-postprocess/     Plotting or post-processing scripts
-results/         Generated outputs, kept mostly empty in Git
+matlab/
+python/serial/
+python/mpi/
+c/serial/
+c/openmp/
+c/mpi/
+cpp/serial/
+cpp/openmp/
+cpp/mpi/
+cuda/
+```
+
+Most folders follow:
+
+```text
+README.md        implementation notes and commands
+Makefile         build and run commands
+src/             solver source code
+postprocess/     plotting and post-processing scripts
+results/         generated outputs
+```
+
+The original `python/mpi`, `c/mpi`, and `cpp/mpi` implementations distribute independent cases over MPI ranks. They are not spatial domain-decomposition solvers.
+
+## Track B — organized domain-scaling source tree
+
+The later streamfunction–vorticity implementations are stored under `src/`:
+
+```text
+src/c/
+src/cpp/
+src/python/
+```
+
+This tree contains implementation families such as:
+
+```text
+openmp_domain_looped/
+openmp_domain_vectorized/
+mpi_domain_looped/
+mpi_domain_vectorized/
+hybrid_mpi_openmp_looped/
+hybrid_mpi_openmp_vectorized/
+```
+
+Run and Slurm scripts for this track must reference the `src/...` paths. Older paths such as `c/mpi_domain_looped` or `cpp/openmp_domain_vectorized` refer to the pre-organization layout and should not be introduced into new scripts.
+
+The associated case definitions, HPC scripts, and archived results are stored under:
+
+```text
+data/cases/
+hpc/stromboli/
+results/final/
+results/audits/
 ```
 
 ## Standard result structure
 
+Implementation-local generated outputs generally use:
+
 ```text
-results/data/      CSV summaries, field data, residual histories
+results/data/      CSV summaries and field data
 results/figures/   generated plots
-results/scaling/   OpenMP, MPI, or CUDA scaling tables
-results/logs/      optional logs from long runs
+results/scaling/   scaling tables
+results/logs/      run logs
 ```
 
-## MATLAB layout
-
-MATLAB follows the same idea as the compiled and Python implementations, but keeps its application scripts under `src/app/`:
+Repository-level retained archives are intentionally separate:
 
 ```text
-matlab/README.md
-matlab/Makefile
-matlab/main.m                 compatibility entry point
-matlab/run_quick.m            compatibility entry point
-matlab/run_medium.m           compatibility entry point
-matlab/run_smoke.m            compatibility entry point
-matlab/src/app/               entry scripts and configuration
-matlab/src/core/              numerical operations and SIMPLE loop
-matlab/src/studies/           single-case and parametric-study drivers
-matlab/src/validation/        Ghia benchmark data and validation helpers
-matlab/postprocess/           MATLAB plotting functions
-matlab/results/               generated output folders
+comparison/results/   pressure-correction pilot results
+comparison/figures/   pressure-correction pilot figures
+results/final/        streamfunction–vorticity scaling archive
+results/cuda/         CUDA summaries and validation tables
 ```
 
-The maintained MATLAB source code is under `src/`. The root-level MATLAB files are kept only so that someone opening the `matlab/` folder directly can run simple commands such as `run_quick`.
+## MATLAB note
 
-## C implementation note
+The maintained MATLAB pressure-correction source is under `matlab/src/`. Root-level MATLAB entry files are compatibility wrappers for direct use of the `matlab/` folder.
 
-The C solver is one compiled serial baseline. Older names such as `serial_c_looped` and `serial_c_vectorized` are accepted as aliases for compatibility, but they are not two separate C algorithms.
+## C and C++ naming note
 
-## MPI implementation note
+In the original pressure-correction track, the C and C++ serial/OpenMP implementations are single compiled baselines. Older labels that contain `looped` or `vectorized` may be accepted as aliases, but they do not represent separate numerical algorithms.
 
-The MPI folders distribute independent benchmark cases across ranks. This is useful for parameter sweeps, but it is not domain decomposition.
+In the domain-scaling track, `looped` and `vectorized` identify distinct kernel organizations and must remain explicit in result tables.
+
+## Path policy
+
+- Use root-level `c/`, `cpp/`, and `python/` for the original pressure-correction workflow.
+- Use `src/c/`, `src/cpp/`, and `src/python/` for the streamfunction–vorticity domain workflow.
+- Do not silently copy or mix implementations between tracks.
+- Every result-processing script must state which track it expects.
