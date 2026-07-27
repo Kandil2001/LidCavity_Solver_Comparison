@@ -1,39 +1,32 @@
-# Current Benchmark Results
+# Current benchmark results
 
-> **Project status:** Work in progress. This document records the current CPU benchmark dataset and interpretation. It is not a frozen final release.
+> **Project status:** Work in progress. This document records the evidence currently retained in the repository. It is not a frozen final benchmark or paper dataset.
 
-## Benchmark scope
+The repository contains two numerically different tracks. See [`BENCHMARK_TRACKS.md`](BENCHMARK_TRACKS.md) before interpreting or combining results.
 
-The benchmark compares the same two-dimensional incompressible lid-driven cavity problem across multiple implementations and programming models.
+## 1. Pressure-correction cross-language pilot
+
+### Matrix
 
 | Parameter | Values |
 |---|---|
 | Grid size | `N = 32, 64, 128` |
 | Reynolds number | `Re = 100, 400, 1000` |
-| Convection schemes | `upwind`, `central` |
-| Pressure solvers | `RBGS`, `RBSOR` |
-| OpenMP setting | 4 threads |
-| MPI setting | case-level parameter-study distribution |
+| Convection | `upwind`, `central` |
+| Pressure solver | `RBGS`, `RBSOR` |
+| OpenMP setting | 4 threads in the cleaned pilot export |
+| Original MPI setting | independent cases distributed across ranks |
 
-The current dataset was generated on the Stromboli university cluster.
-
-The cleaned result export is stored in:
+Retained files:
 
 ```text
 comparison/results/final_clean/
-```
-
-The folder name is retained from the current workflow and does not mean that the full project or benchmark protocol is final.
-
-Selected figures are stored in:
-
-```text
+comparison/results/physics_fields/
 comparison/figures/report_pngs/
-comparison/figures/final_clean/
 comparison/figures/physics_final/
 ```
 
-## Execution-status summary
+### Execution completeness
 
 | Solver group | Executed cases | Status |
 |---|---:|---|
@@ -49,13 +42,11 @@ comparison/figures/physics_final/
 | `octave_looped` | 34 / 36 | incomplete |
 | `python_mpi` | 36 / 72 | incomplete |
 
-An execution-complete case reached the end of its configured run. This does not automatically mean that the case met a residual-convergence criterion.
+Execution-complete means that the configured run ended and a result row was produced. It does not automatically mean that the numerical solution converged.
 
-Incomplete groups remain in the tables for transparency but are excluded from the current complete-group ranking.
+### Interim execution-time summary
 
-## Interim runtime summary
-
-Median runtime over the collected case rows:
+Median runtime over the collected rows:
 
 | Rank | Solver group | Rows | Median runtime [s] |
 |---:|---|---:|---:|
@@ -71,111 +62,123 @@ Median runtime over the collected case rows:
 | 10 | `python_looped` | 20 | 4820.14 |
 | 11 | `octave_looped` | 34 | 6611.03 |
 
-The current ranking among execution-complete groups is:
+These values are specific to the collected termination behaviour, hardware, and software environment. They are not final time-to-convergence rankings.
 
-1. `c_openmp_t4`
-2. `cpp_openmp_t4`
-3. `c_serial`
-4. `c_mpi`
-5. `cpp_mpi`
-6. `cpp_serial`
-7. `python_vectorized`
-8. `octave_vectorized`
+### Convergence and validation
 
-These values are specific to the collected hardware, software, parameters, and termination behavior. They are interim execution-time measurements, not a final time-to-convergence ranking.
-
-## Convergence and validation status
-
-The cleaned tables include `AvgPoissonRelResidual` and quality labels.
-
-For the main execution-complete groups, the median `AvgPoissonRelResidual` is approximately:
-
-```text
-9.30e-05
-```
-
-Quality counts are stored in:
-
-```text
-comparison/results/final_clean/quality_counts_by_solver.csv
-```
-
-For the complete C, C++, and vectorized Python groups, the current quality split is mostly:
+For the main complete C, C++, OpenMP, and vectorized Python/Octave groups, the current quality split is typically:
 
 ```text
 14 cases: needs_improvement
 22 cases: validated_but_not_converged
+0 cases: converged_and_validated
 ```
 
-This means:
+The retained cases can show useful Ghia profile agreement while still reaching the maximum iteration count. Profile validation and solver convergence must remain separate.
 
-- some cases show useful agreement with the selected Ghia profile thresholds
-- some cases reach the maximum iteration limit before meeting the configured convergence criteria
-- profile agreement and residual convergence must be reported separately
-- the benchmark is useful for implementation and runtime comparison, but the final scientific interpretation is still being refined
-
-## Representative physics outputs
-
-Representative C++ OpenMP outputs are stored in:
+Representative fields and Ghia plots are available under:
 
 ```text
 comparison/results/physics_fields/
 comparison/figures/physics_final/
 ```
 
-They include:
+## 2. Streamfunction–vorticity domain-scaling archive
 
-- velocity-magnitude contours
-- pressure contours
-- vorticity contours
-- streamlines
-- velocity-vector fields
-- residual histories
-- Ghia centerline plots for `u(y)` and `v(x)`
+### Scope
 
-The representative high-resolution case uses:
+The organized `src/` implementations use a streamfunction–vorticity formulation and repeated fixed-step runs over 18 physical/configuration cases.
+
+Main retained files:
 
 ```text
-N = 128
-Re = 1000
-Scheme = central
-Pressure solver = RBSOR
-Implementation = C++ OpenMP
+results/final/README_FINAL_STATUS.md
+results/final/comparisons/
+results/final/cpu_case_summaries/
+results/final/figures/
+results/audits/
 ```
 
-## Current interpretation
+### Collected row status
 
-The collected data shows that the compiled implementations are faster than the interpreted workflows for the tested setup. The current lowest median runtime belongs to `c_openmp_t4`, followed by `cpp_openmp_t4`.
+| Family | Successful rows | Failed or time-limited rows | Notes |
+|---|---:|---:|---|
+| OpenMP | 2,160 | 0 | complete execution archive for the configured C/C++ domain solvers |
+| MPI domain | 1,061 | 2,140 | case 13 includes salvaged successful rows |
+| Hybrid MPI + threading | 1,044 | 2,100 | case 13 includes salvaged successful rows |
 
-C++ OpenMP remains the main practical direction for further solver development because it combines strong performance with clearer structure and maintainability than plain C.
+In this archive, `success` means that the process returned successfully and produced a summary row. The solvers use configured step counts, so success is not a universal convergence flag.
 
-Python remains useful for prototyping, automation, and post-processing.
+### Scaling interpretation
 
-The MPI implementations distribute independent benchmark cases across ranks. They accelerate parameter sweeps but are not domain-decomposition CFD solvers.
+The OpenMP archive is the cleanest execution dataset. Larger cases show useful speedup up to moderate thread counts, followed by lower efficiency at higher counts. Small cases are often dominated by parallel overhead.
 
-These observations remain provisional until the project includes repeated timings, complete hardware and compiler metadata, and a finalized convergence-aware comparison protocol.
+The MPI and hybrid archives have high failure or time-limit rates and should not be used as the headline comparison without rerunning a smaller, verified matrix.
 
-## Accurate project wording
+Current strong-scaling reports also need to show the pressure solver explicitly. RBGS and RBSOR are distinct configurations and must not appear as duplicate unlabeled rows.
 
-> Work-in-progress multi-language CFD/HPC benchmark for the 2D lid-driven cavity problem, comparing MATLAB/Octave, Python, C, C++, OpenMP, MPI, and a CUDA prototype with runtime tables, residual summaries, Ghia centerline comparisons, and representative flow-field visualizations.
+### Exploratory runtime tables
+
+Some retained comparison tables select the minimum runtime across broad backend and case groups. Those tables can collapse language, kernel style, pressure solver, core count, and repetition into one value.
+
+Use them for data exploration only. Paper-quality processing must preserve the full configuration and report repeated-run medians and variability.
+
+## 3. CUDA A100 archive
+
+The current exact RBGS/RBSOR CUDA archive contains 108 rows across 18 cases and two pressure solvers.
+
+All current rows have:
+
+```text
+ValidationPass = 0
+```
+
+Retained files:
+
+```text
+results/cuda/cuda_validation_summary.csv
+results/cuda/cuda_cpu_exact_full_summary.csv
+results/final/comparisons/cuda_runtime_summary.csv
+```
+
+The CUDA timings may be studied as experimental implementation measurements. They must not be presented as validated CPU-versus-GPU speedups.
+
+## What the repository currently supports
+
+- compiled C and C++ implementations are faster than the interpreted loop-based workflows in the original pilot setup;
+- the OpenMP domain archive is substantially more complete than the MPI and hybrid archives;
+- larger OpenMP cases can benefit from moderate thread counts;
+- high thread counts can lose efficiency because of overhead and synchronization;
+- RBSOR often executes faster than RBGS in the archived fixed-step runs, subject to numerical-equivalence checks;
+- the current CUDA archive requires numerical repair and revalidation.
+
+## What it does not currently support
+
+- one final fastest-language ranking;
+- a final time-to-convergence comparison;
+- a validated CPU-versus-GPU speedup;
+- a fair combined ranking of pressure-correction and streamfunction–vorticity solvers;
+- a publishable conclusion based only on minimum observed runtimes.
 
 ## Files to inspect first
 
 | File or folder | Purpose |
 |---|---|
-| `comparison/results/final_clean/runtime_summary_fixed.csv` | current runtime table |
-| `comparison/results/final_clean/completeness_summary_fixed.csv` | execution-complete and incomplete groups |
-| `comparison/results/final_clean/residual_summary_by_solver.csv` | residual summary |
-| `comparison/results/final_clean/quality_counts_by_solver.csv` | quality-category summary |
-| `comparison/figures/report_pngs/` | runtime, residual, and completeness figures |
-| `comparison/figures/physics_final/` | streamlines, contours, vectors, and validation plots |
+| `docs/BENCHMARK_TRACKS.md` | boundary between the numerical tracks |
+| `comparison/results/final_clean/` | original pressure-correction pilot summaries |
+| `comparison/figures/physics_final/` | representative fields and Ghia comparisons |
+| `results/final/README_FINAL_STATUS.md` | domain archive execution completeness |
+| `results/final/comparisons/cpu_completeness_status.csv` | per-case success and failure counts |
+| `results/final/cpu_all_best_by_solver.csv` | detailed fixed-configuration scaling summaries |
+| `results/cuda/cuda_validation_summary.csv` | current CUDA Ghia validation status |
 
-## Work remaining before a versioned final benchmark
+## Work remaining before reruns
 
-- separate execution, convergence, and validation flags consistently
-- add repeated timing measurements and variability statistics
-- store compiler, hardware, thread, rank, and commit metadata
-- improve high-Reynolds-number convergence behavior
-- define the final fair-comparison protocol
-- verify numerical equivalence of the CUDA prototype
-- publish a versioned release
+- normalize domain-solver paths after the `src/` reorganization;
+- repair aggregation so pressure solver, kernel, language, and core count remain explicit;
+- regenerate corrected tables and figures from existing raw rows;
+- separate process completion, convergence, validation, timeout, and runtime-validity fields;
+- add schema and path checks to CI;
+- clean committed caches, binaries, and backup files.
+
+After those repository tasks, the paper work should return to one converged and validated C++ serial reference case before any large rerun matrix is submitted.
