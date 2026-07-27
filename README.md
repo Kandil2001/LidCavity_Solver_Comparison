@@ -1,176 +1,174 @@
 # Lid-Driven Cavity Solver Comparison
 
-![Status](https://img.shields.io/badge/Status-Work%20in%20Progress-orange)
-![MATLAB/Octave](https://img.shields.io/badge/MATLAB%2FOctave-reference-orange)
-![Python](https://img.shields.io/badge/Python-serial%20%7C%20MPI-yellow)
+![Status](https://img.shields.io/badge/Status-research%20benchmark-orange)
+![Python](https://img.shields.io/badge/Python-serial%20%7C%20MPI%20%7C%20hybrid-yellow)
 ![C](https://img.shields.io/badge/C-serial%20%7C%20OpenMP%20%7C%20MPI-blue)
 ![C++](https://img.shields.io/badge/C%2B%2B-serial%20%7C%20OpenMP%20%7C%20MPI-blue)
-![CUDA](https://img.shields.io/badge/CUDA-GPU%20prototype-green)
+![CUDA](https://img.shields.io/badge/CUDA-A100%20dataset-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-> **Project status:** This benchmark is still being developed. The current code, figures, and runtime tables document the work completed so far, but the benchmark methodology and final interpretation are not frozen yet.
+A research and learning repository for the two-dimensional incompressible lid-driven cavity problem, with implementations in Python, C, C++, MATLAB/Octave, MPI, OpenMP, hybrid parallel models, and CUDA.
 
-A solver-focused CFD/HPC benchmark for the two-dimensional incompressible lid-driven cavity problem.
+> **Scientific status:** The repository contains substantial code, execution logs, validation plots, and repeated performance measurements. It does **not** yet contain one frozen, fully verified, convergence-controlled benchmark suitable for a final cross-language paper. In the current result files, a successful process execution is not automatically a numerically converged or validated CFD solution.
 
-The project implements the same benchmark across MATLAB/Octave, Python, C, C++, OpenMP, MPI, and a CUDA prototype. Its purpose is to compare numerical implementation, code structure, validation metrics, runtime behavior, and parallel execution across several programming models.
+## Repository at a glance
 
-## Current scope
+The repository now contains two related but numerically different benchmark tracks.
 
-- SIMPLE-style pressure-correction workflow for incompressible flow
-- MATLAB/Octave, Python, C, and C++ implementations
-- Serial, OpenMP, MPI, and CUDA-oriented workflows
-- Parameter studies over mesh size, Reynolds number, convection scheme, and pressure solver
-- Residual, runtime, validation, quality, and completion summaries
-- Ghia centerline comparison
-- Slurm workflows for the Stromboli university cluster
-- Reproducible CSV-based comparison and plotting
+| Track | Numerical formulation | Main locations | Purpose | Current status |
+|---|---|---|---|---|
+| Cross-language solver track | Explicit pseudo-time pressure-correction / projection-style method | `matlab/`, `python/`, `c/`, `cpp/`, `cuda/`, `comparison/` | Compare language implementations, residual histories, Ghia profiles, and runtime | Useful pilot dataset; many cases reached their iteration limit before convergence |
+| Domain-scaling track | Streamfunction–vorticity formulation for the CPU domain solvers | `src/`, `hpc/`, `results/final/` | Repeated OpenMP, MPI, and hybrid scaling experiments | Large performance dataset; execution completeness and numerical validation still need to be separated carefully |
 
-## Important interpretation note
+These tracks must not be combined into a single “fastest solver” claim without first matching the numerical method, stopping condition, output definition, and validation protocol.
 
-A case that reaches the end of its configured run is recorded as **execution-complete**. This does not automatically mean that it satisfies a numerical convergence criterion.
+The CPU domain solvers use streamfunction–vorticity, while the current CUDA A100 files are labelled as projection-based RBGS/RBSOR implementations. Their runtimes are therefore engineering measurements from different formulations, not an apples-to-apples CPU/GPU algorithm comparison.
 
-The benchmark is being improved to separate:
+## Current evidence
 
-- execution status
-- residual convergence
-- validation-threshold status
-- runtime
-- iteration count
-- hardware and compiler configuration
+### 1. Cross-language pressure-correction pilot
 
-Until that separation is complete, the current runtime rankings should be read as **interim computational measurements**, not as a final time-to-convergence comparison.
-
-## Repository structure
-
-```text
-matlab/          MATLAB/Octave reference workflow
-python/          Python serial and MPI implementations
-c/               C serial, OpenMP, and MPI implementations
-cpp/             C++ serial, OpenMP, and MPI implementations
-cuda/            CUDA prototype
-comparison/      comparison scripts, current tables, and report figures
-docs/            project notes, methodology, results, and reporting guides
-jobs/            Slurm/HPC helper scripts
-scripts/         root-level helper scripts
-```
-
-Most implementation folders follow this layout:
-
-```text
-README.md        implementation-specific notes
-Makefile         build and run commands
-src/             solver source code
-postprocess/     plotting and post-processing scripts
-results/         generated local outputs, mostly ignored by Git
-```
-
-## Numerical benchmark
-
-The physical case is the classical lid-driven cavity:
-
-- square cavity
-- moving top lid
-- no-slip side and bottom walls
-- incompressible flow
-- Reynolds-number-based test cases
-- centerline velocity comparison with Ghia et al.
-
-The common pressure-correction workflow is:
-
-1. apply velocity and pressure boundary conditions
-2. predict the velocity field
-3. solve the pressure-correction equation
-4. correct velocity and pressure
-5. calculate residuals and validation metrics
-6. export structured result files
-
-## Current benchmark setup
+The original benchmark matrix uses:
 
 | Parameter | Values |
 |---|---|
 | Grid size | `N = 32, 64, 128` |
 | Reynolds number | `Re = 100, 400, 1000` |
-| Convection schemes | `upwind`, `central` |
-| Pressure solvers | `RBGS`, `RBSOR` |
-| OpenMP setting | 4 threads |
-| MPI setting | case-level parameter-study distribution |
+| Convection | `upwind`, `central` |
+| Pressure solver | `RBGS`, `RBSOR` |
+| OpenMP | 4 threads in the cleaned pilot dataset |
+| MPI | Case-level parameter-study distribution |
 
-The current cleaned result export is stored in:
+The cleaned pilot data is stored under:
 
 ```text
 comparison/results/final_clean/
-```
-
-The directory name is retained from the current workflow; it does not mean that the complete project or benchmark interpretation is final.
-
-Selected report figures are stored in:
-
-```text
 comparison/figures/report_pngs/
 comparison/figures/physics_final/
-comparison/figures/final_clean/
 ```
 
-## Current execution-status summary
+Several C, C++, OpenMP, and vectorized Python/Octave groups contain all 36 configured executions. However, the current quality counts for the main complete groups are typically:
 
-| Solver group | Executed cases | Current status |
-|---|---:|---|
-| `c_serial` | 36 / 36 | execution-complete |
-| `cpp_serial` | 36 / 36 | execution-complete |
-| `c_openmp_t4` | 36 / 36 | execution-complete |
-| `cpp_openmp_t4` | 36 / 36 | execution-complete |
-| `python_vectorized` | 36 / 36 | execution-complete |
-| `octave_vectorized` | 36 / 36 | execution-complete |
-| `c_mpi` | 36 / 36 | execution-complete |
-| `cpp_mpi` | 36 / 36 | execution-complete |
-| `python_looped` | 20 / 36 | incomplete |
-| `octave_looped` | 34 / 36 | incomplete |
-| `python_mpi` | 36 / 72 | incomplete |
+```text
+14 cases: needs_improvement
+22 cases: validated_but_not_converged
+0 cases: converged_and_validated
+```
 
-This table describes collected executions. Numerical convergence and validation status must be checked separately.
+The existing runtime table is therefore an **execution-time comparison**, not a final time-to-convergence ranking.
 
-## Interim runtime measurements
+### 2. Repeated CPU domain-scaling dataset
 
-The current median runtimes over the collected complete case sets are:
+The newer scaling archive contains 18 physical/configuration cases and repeated runs over multiple core counts.
 
-| Rank | Solver group | Median runtime [s] |
-|---:|---|---:|
-| 1 | `c_openmp_t4` | 236.76 |
-| 2 | `cpp_openmp_t4` | 284.40 |
-| 3 | `c_serial` | 486.39 |
-| 4 | `c_mpi` | 487.40 |
-| 5 | `cpp_mpi` | 630.38 |
-| 6 | `cpp_serial` | 631.80 |
-| 7 | `python_vectorized` | 1941.31 |
-| 8 | `octave_vectorized` | 2714.37 |
+| Family | Successful rows | Failed or time-limited rows | Interpretation |
+|---|---:|---:|---|
+| OpenMP | 2,160 | 0 | Complete execution dataset for the configured C/C++ domain solvers |
+| MPI | 1,061 | 2,140 | About one third of collected rows succeeded; case 13 includes salvaged successful rows |
+| Hybrid MPI + threading | 1,044 | 2,100 | About one third of collected rows succeeded; case 13 includes salvaged successful rows |
 
-These numbers are hardware- and configuration-specific. They currently compare collected executions and should not yet be interpreted as a final converged-solver ranking.
+Files:
 
-## Selected figures
+```text
+results/final/README_FINAL_STATUS.md
+results/final/comparisons/cpu_completeness_status.csv
+results/final/comparisons/cpu_successful_runtime_rows.csv
+results/final/cpu_case_summaries/
+results/final/figures/
+```
 
-### Runtime comparison
+The OpenMP dataset is the cleanest execution dataset in the repository. Representative large-grid reports show useful speedup up to a moderate thread count, followed by sharply decreasing efficiency at higher thread counts. Small cases are often dominated by threading overhead.
 
-![Median runtime by solver](comparison/figures/report_pngs/02_median_runtime_complete_solvers_only.png)
+### 3. CUDA A100 dataset
 
-### Ghia centerline comparison
+The exact RBGS/RBSOR CUDA archive contains 108 result rows across the 18 cases and two pressure solvers.
 
-![Ghia u centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_u.png)
+All 108 rows currently have:
 
-![Ghia v centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_v.png)
+```text
+ValidationPass = 0
+```
 
-### Representative high-Reynolds-number flow field
+The CUDA timings can be studied as implementation measurements, but they must not be presented as validated CFD performance results yet.
 
-![Streamlines](comparison/figures/physics_final/case_001_N128_Re1000_central_RBSOR_openmp_cpp_streamlines.png)
+Files:
 
-## Current observations
+```text
+results/cuda/cuda_validation_summary.csv
+results/cuda/cuda_cpu_exact_full_summary.csv
+results/final/comparisons/cuda_runtime_summary.csv
+```
 
-The collected measurements show that the compiled C and C++ implementations are faster than the Python and Octave workflows for the tested setup. OpenMP provides the lowest current median runtime among the complete CPU execution sets.
+## What can currently be concluded
 
-C++ with OpenMP remains the main direction for further solver development because it combines performance with clearer structure and maintainability. Python remains useful for prototyping, automation, and post-processing.
+The repository supports the following cautious conclusions:
 
-These observations remain provisional while convergence reporting, repeated measurements, and benchmark metadata are being improved.
+- The compiled C and C++ implementations are much faster than the interpreted loop-based workflows in the original pilot setup.
+- The repeated OpenMP domain runs are substantially more complete than the current MPI and hybrid datasets.
+- OpenMP scaling is useful for the larger configured cases, but efficiency decreases strongly when thread overhead and synchronization dominate.
+- The current Python MPI and hybrid domain runs have a high failure or time-limit rate and should not be used as the headline comparison.
+- RBSOR often has lower measured runtime than RBGS in the collected fixed-step domain runs, but accuracy and convergence equivalence must be checked before treating that as a final solver conclusion.
+- The CUDA data is not yet validated against the configured Ghia thresholds.
 
-## Quick start
+The repository does **not** yet support these claims:
+
+- a final fastest-language ranking;
+- a validated CPU-versus-GPU speedup;
+- a fair comparison between pressure-correction and streamfunction–vorticity implementations;
+- a final time-to-convergence result;
+- a publishable scaling conclusion based only on the minimum observed runtime.
+
+## Important reporting limitations
+
+### Execution success is not numerical convergence
+
+For the domain-scaling files, `status=success` means the command completed and produced a summary row. The runs use configured step counts and report final streamfunction/vorticity changes; they do not yet apply one common cross-language convergence decision.
+
+### Current “best runtime” tables are exploratory
+
+Some final comparison tables select the minimum successful runtime per backend and case. This can collapse language, kernel style, pressure solver, core count, and repeat into one value. A paper-quality result should instead compare fixed configurations using repeated measurements, medians, and uncertainty intervals.
+
+### Strong-scaling reports need a pressure-solver dimension
+
+The raw scaling summaries distinguish `RBGS` and `RBSOR`, but some Markdown reports and plots do not show the pressure solver in their grouping or legend. This creates duplicate-looking rows and can connect unrelated points in a plot.
+
+### The repository was reorganized after the original benchmark
+
+The root `Makefile` still controls the original top-level implementation folders. The newer organized source snapshot is under `src/`, while several scaling scripts still contain pre-reorganization paths. The domain-scaling workflow should be normalized before it is rerun from a clean checkout.
+
+## Repository structure
+
+```text
+README.md                 project overview and interpretation
+Makefile                  original cross-language workflow
+
+matlab/                   MATLAB/Octave pressure-correction reference
+python/                   original Python serial and case-level MPI solvers
+c/                        original C serial/OpenMP/case-level MPI solvers
+cpp/                      original C++ serial/OpenMP/case-level MPI solvers
+cuda/                     original CUDA/projection implementation
+comparison/               original comparison scripts, pilot tables, and figures
+
+src/                      organized domain-solver source snapshot
+hpc/stromboli/            Slurm scripts for repeated scaling studies
+data/cases/               fixed case definitions
+results/final/             repeated CPU/CUDA performance archive
+results/cuda/              CUDA summaries and Ghia validation table
+results/audits/            repository and result audits
+
+scripts/                  run, aggregation, audit, and post-processing tools
+docs/                     methodology and project documentation
+```
+
+## Quick start: original cross-language track
+
+Basic requirements:
+
+```text
+gcc / g++
+make
+python3
+```
 
 From the repository root:
 
@@ -179,165 +177,113 @@ make help
 make smoke-cpu
 ```
 
-`smoke-cpu` runs small CPU checks and skips optional tools that are unavailable.
-
-For a larger CPU run:
-
-```bash
-make quick-cpu
-```
-
-Run one implementation directly:
+Run one C++ serial smoke test:
 
 ```bash
 cd cpp/serial
-make quick
-```
-
-Run an OpenMP version:
-
-```bash
-cd cpp/openmp
-make quick OMP_NUM_THREADS=4
-```
-
-Run an MPI version:
-
-```bash
-cd c/mpi
-make quick NP=4
-```
-
-Run the CUDA prototype on a machine with an NVIDIA GPU and CUDA toolkit:
-
-```bash
-cd cuda
 make smoke
 ```
 
-## Run modes
-
-| Mode | Meaning |
-|---|---|
-| `smoke` | Very small build-and-start check |
-| `quick` | Reduced benchmark for fast checking |
-| `medium` | Larger development run |
-| `full` | Full configured parameter study |
-| `single` | One selected case |
-
-Example:
+Run a selected C++ case:
 
 ```bash
-cd c/serial
-make run N=128 RE=400 SCHEME=upwind PRESSURE=RBGS
+cd cpp/serial
+make run N=64 RE=100 SCHEME=central PRESSURE=RBSOR
 ```
 
-## Running on Stromboli
-
-The Stromboli helper scripts are kept in `jobs/` and `scripts/`.
-
-```bash
-bash scripts/run_stromboli_all.sh smoke
-```
-
-For a longer run that survives a dropped SSH connection:
-
-```bash
-nohup bash scripts/run_stromboli_all.sh quick > stromboli_quick.log 2>&1 &
-tail -f stromboli_quick.log
-```
-
-To skip CUDA on a CPU-only node:
-
-```bash
-RUN_CUDA=0 bash scripts/run_stromboli_all.sh quick
-```
-
-## Comparing results
-
-After running serial implementations:
-
-```bash
-make compare-serial MODE=quick
-make report-serial MODE=quick
-```
-
-Cases are matched by:
-
-```text
-mesh size, Reynolds number, convection scheme, pressure solver
-```
-
-## Parallelization scope
-
-### MPI
-
-The current MPI versions use case-level parallelism. Each rank receives independent benchmark cases. This accelerates parameter studies but is not spatial domain decomposition.
-
-### OpenMP
-
-The OpenMP versions parallelize CPU loops inside one shared-memory process. Very small cases may be slower because thread overhead dominates.
-
-### CUDA
-
-The CUDA implementation is a learning and comparison prototype. Its pressure-solver strategy is not yet identical to every CPU implementation, so direct performance comparisons require care.
-
-## Requirements
-
-Basic CPU runs require:
-
-```text
-gcc / g++
-make
-python3
-```
-
-Install plotting and comparison packages with:
+Install comparison and plotting packages with:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-Optional tools:
+Optional tools include GNU Octave or MATLAB, OpenMPI, `mpi4py`, and an NVIDIA CUDA toolkit.
+
+## Working with the archived scaling results
+
+Start with:
 
 ```text
-MATLAB or GNU Octave
-OpenMPI or another MPI implementation
-mpi4py
-NVIDIA GPU and CUDA toolkit
+results/final/README_FINAL_STATUS.md
+results/final/README_PLOTS_AND_COMPARISONS.md
+results/final/comparisons/cpu_completeness_status.csv
+results/final/cpu_all_best_by_solver.csv
+results/cuda/cuda_validation_summary.csv
 ```
 
-On Windows, WSL or another Linux-style terminal is recommended.
+Do not rely only on:
+
+```text
+results/final/comparisons/combined_best_runtime_by_case_backend.csv
+```
+
+That table records the minimum runtime found for each broad backend and case; it is useful for exploration but not a fair paper result.
+
+## Representative figures
+
+### Pressure-correction Ghia comparison
+
+![Ghia u centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_u.png)
+
+![Ghia v centerline validation](comparison/figures/physics_final/case_001_N64_Re100_central_RBSOR_openmp_cpp_ghia_v.png)
+
+### Domain-run completion summary
+
+![CPU execution status](results/final/figures/cpu_success_failed_overview.svg)
+
+## Paper-oriented development
+
+The paper-focused work is being developed separately in:
+
+```text
+agent/paper-benchmark-foundation
+```
+
+The intended paper contribution is not a new cavity algorithm. It is a reproducible comparison of the same simple pressure-correction algorithm in:
+
+- Python/NumPy;
+- C;
+- C++;
+- optional Rust, after toolchain availability is confirmed;
+- OpenFOAM as a separate external reference.
+
+MATLAB/Octave is retained as previous work but is not required for the main Stromboli paper matrix.
+
+Before the paper branch can be merged, it must be refreshed against the current `main` branch and must explicitly separate the new streamfunction–vorticity scaling archive from the pressure-correction paper protocol.
+
+## Required work before publication
+
+1. Select one numerical formulation for the headline cross-language comparison.
+2. Produce one fully converged and validated C++ serial reference case.
+3. Add analytical operator and Poisson verification tests.
+4. Use odd grids or interpolation for exact cavity centerlines.
+5. Apply the same boundary conditions, initialization, stopping conditions, and precision in every language.
+6. Compare converged fields across languages before timing them.
+7. Record solver time separately from output and process startup.
+8. Use a warm-up plus repeated measurements and report median, IQR, and hardware/compiler metadata.
+9. Fix scaling reports so pressure solver, language, kernel style, and core configuration are never collapsed accidentally.
+10. Validate CPU and CUDA results using the same physical and numerical acceptance rules before making a GPU speedup claim.
+11. Normalize the post-reorganization paths under `src/` and remove generated binaries, caches, and duplicate source snapshots from the publication release.
+12. Create a tagged release with archived raw data and a DOI.
 
 ## Documentation
 
 | File | Purpose |
 |---|---|
-| `docs/PROJECT_OVERVIEW.md` | Numerical and project overview |
-| `docs/IMPLEMENTATION_LAYOUT.md` | Standard implementation layout |
-| `docs/RESULTS_GUIDE.md` | Explanation of result files and figures |
-| `docs/RUNNING_ON_HPC.md` | HPC and Stromboli notes |
-| `docs/HOW_TO_PRESENT_THIS_PROJECT.md` | Accurate wording for CVs, interviews, and posts |
-| `docs/COMMUNITY.md` | Discussion categories and community guidance |
-| `comparison/README.md` | Comparison-script workflow |
-
-## Roadmap before the benchmark is considered complete
-
-- separate execution, convergence, and validation status in every summary
-- add repeated timing runs and variability statistics
-- record compiler, hardware, thread, rank, and commit metadata
-- improve high-Reynolds-number convergence behavior
-- define one fair cross-language comparison protocol
-- review the CUDA numerical equivalence
-- reduce root-level script duplication
-- publish a versioned benchmark release
+| `docs/CURRENT_BENCHMARK_RESULTS.md` | Original pressure-correction pilot results |
+| `docs/PROJECT_OVERVIEW.md` | Original numerical-method overview |
+| `docs/RESULTS_GUIDE.md` | Original result-file guide |
+| `docs/RUNNING_ON_HPC.md` | HPC notes |
+| `results/final/README_FINAL_STATUS.md` | Current repeated CPU/CUDA execution status |
+| `results/final/README_PLOTS_AND_COMPARISONS.md` | Current final-archive table and figure index |
+| `results/audits/` | Detailed result and repository audits |
 
 ## References
 
-- Ghia, U., Ghia, K. N., and Shin, C. T. (1982). High-Re solutions for incompressible flow using the Navier-Stokes equations and a multigrid method. *Journal of Computational Physics*, 48(3), 387-411.
+- Ghia, U., Ghia, K. N., and Shin, C. T. (1982). High-Re solutions for incompressible flow using the Navier–Stokes equations and a multigrid method. *Journal of Computational Physics*, 48(3), 387–411.
 - Patankar, S. V. (1980). *Numerical Heat Transfer and Fluid Flow*. Hemisphere Publishing.
 - Versteeg, H. K., and Malalasekera, W. (2007). *An Introduction to Computational Fluid Dynamics: The Finite Volume Method*. Pearson.
-- Ferziger, J. H., Peric, M., and Street, R. L. (2020). *Computational Methods for Fluid Dynamics*. Springer.
+- Ferziger, J. H., Perić, M., and Street, R. L. (2020). *Computational Methods for Fluid Dynamics*. Springer.
 
 ## Author
 
