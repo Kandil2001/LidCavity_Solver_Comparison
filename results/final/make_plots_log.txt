@@ -1,0 +1,11 @@
+WARNING: matplotlib is not available. CSV comparison tables will be created, but plots will be skipped.
+No module named 'matplotlib'
+CPU successful rows: 4265
+CPU completeness table: comparison/results/final_cpu_cuda_merged/comparisons/cpu_result_completeness_status.csv
+
+============================================================
+DONE: final comparison tables and plots
+Tables: comparison/results/final_cpu_cuda_merged/comparisons
+Figures: comparison/results/final_cpu_cuda_merged/figures
+Summary: comparison/results/final_cpu_cuda_merged/README_PLOTS_AND_COMPARISONS.md
+============================================================

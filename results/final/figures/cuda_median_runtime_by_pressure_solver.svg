@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="520" viewBox="0 0 950 520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="475.0" y="35" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold">CUDA median runtime by pressure solver</text>
+<text x="20" y="235.0" text-anchor="middle" transform="rotate(-90 20 235.0)" font-family="Arial" font-size="14">Median runtime [s]</text>
+<line x1="95" y1="70" x2="95" y2="400" stroke="black"/>
+<line x1="95" y1="400" x2="920" y2="400" stroke="black"/>
+<rect x="107.0" y="116.2" width="394.5" height="283.8" fill="#4C78A8"/>
+<text x="304.2" y="110.2" text-anchor="middle" font-family="Arial" font-size="11">6.24</text>
+<text x="304.2" y="418" text-anchor="end" transform="rotate(-45 304.2 418)" font-family="Arial" font-size="12">RBGS</text>
+<rect x="513.5" y="113.0" width="394.5" height="287.0" fill="#4C78A8"/>
+<text x="710.8" y="107.0" text-anchor="middle" font-family="Arial" font-size="11">6.3</text>
+<text x="710.8" y="418" text-anchor="end" transform="rotate(-45 710.8 418)" font-family="Arial" font-size="12">RBSOR</text>
+</svg>

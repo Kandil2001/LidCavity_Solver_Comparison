@@ -1,0 +1,9 @@
+case_id,solver_group,language,parallel_model,kernel_style,N,Re,scheme,pressure,steps,poisson_iters,total_cores,mpi_ranks,threads_per_rank,runs,runtime_min_s,runtime_mean_s,runtime_median_s,baseline_cores,baseline_runtime_s,speedup_vs_baseline,parallel_efficiency,best_total_cores,best_runtime_median_s
+case1_N64_Re1000_upwind_steps2000_p250,c_openmp_domain_looped,c,openmp_domain,looped,64,1000,upwind,RBGS,2000,250,4,1,4,3,3.37001542,3.408771628,3.413004797,1,4.755216327,1.39326,0.348316,4,3.413004797
+case1_N64_Re1000_upwind_steps2000_p250,c_openmp_domain_looped,c,openmp_domain,looped,64,1000,upwind,RBSOR,2000,250,4,1,4,3,2.128027845,2.258904532,2.311604246,1,3.228699084,1.39674,0.349184,4,2.311604246
+case1_N64_Re1000_upwind_steps2000_p250,c_openmp_domain_vectorized,c,openmp_domain,vectorized,64,1000,upwind,RBGS,2000,250,2,1,2,3,3.04423932,3.04934092,3.045843158,1,3.647479232,1.19753,0.598763,2,3.045843158
+case1_N64_Re1000_upwind_steps2000_p250,c_openmp_domain_vectorized,c,openmp_domain,vectorized,64,1000,upwind,RBSOR,2000,250,2,1,2,3,1.999333143,2.006028424,2.00194392,1,2.436716609,1.21718,0.608588,2,2.00194392
+case1_N64_Re1000_upwind_steps2000_p250,cpp_openmp_domain_looped,cpp,openmp_domain,looped,64,1000,upwind,RBGS,2000,250,4,1,4,3,3.189011153,3.259816023,3.287738558,1,4.754315577,1.44607,0.361519,4,3.287738558
+case1_N64_Re1000_upwind_steps2000_p250,cpp_openmp_domain_looped,cpp,openmp_domain,looped,64,1000,upwind,RBSOR,2000,250,4,1,4,3,2.102531914,2.129114038,2.108026784,1,3.223827653,1.52931,0.382328,4,2.108026784
+case1_N64_Re1000_upwind_steps2000_p250,cpp_openmp_domain_vectorized,cpp,openmp_domain,vectorized,64,1000,upwind,RBGS,2000,250,4,1,4,3,2.966218766,3.053680866,3.079591881,1,3.645957578,1.18391,0.295977,4,3.079591881
+case1_N64_Re1000_upwind_steps2000_p250,cpp_openmp_domain_vectorized,cpp,openmp_domain,vectorized,64,1000,upwind,RBSOR,2000,250,4,1,4,3,1.923250195,1.993325721,2.017353326,1,2.439206306,1.20911,0.302278,4,2.017353326

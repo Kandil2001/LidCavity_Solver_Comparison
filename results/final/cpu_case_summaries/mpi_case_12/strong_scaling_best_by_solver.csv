@@ -1,0 +1,5 @@
+case_id,solver_group,language,parallel_model,kernel_style,N,Re,scheme,pressure,steps,poisson_iters,total_cores,mpi_ranks,threads_per_rank,runs,runtime_min_s,runtime_mean_s,runtime_median_s,baseline_cores,baseline_runtime_s,speedup_vs_baseline,parallel_efficiency,best_total_cores,best_runtime_median_s
+case1_N64_Re1000_central_steps2000_p250,python_mpi_domain_looped,python,mpi_domain,looped,64,1000,central,RBGS,2000,250,16,16,1,3,131.9205234,133.1529115,133.2877743,1,1557.593077,11.6859,0.730371,16,133.2877743
+case1_N64_Re1000_central_steps2000_p250,python_mpi_domain_looped,python,mpi_domain,looped,64,1000,central,RBSOR,2000,250,16,16,1,3,79.31944561,80.83820637,81.32203317,1,938.9941032,11.5466,0.721663,16,81.32203317
+case1_N64_Re1000_central_steps2000_p250,python_mpi_domain_vectorized,python,mpi_domain,vectorized,64,1000,central,RBGS,2000,250,16,16,1,3,32.17399502,32.21493165,32.21647263,1,83.08071756,2.57883,0.161177,16,32.21647263
+case1_N64_Re1000_central_steps2000_p250,python_mpi_domain_vectorized,python,mpi_domain,vectorized,64,1000,central,RBSOR,2000,250,16,16,1,3,19.24970675,19.30985395,19.32176948,1,49.41563225,2.55751,0.159844,16,19.32176948

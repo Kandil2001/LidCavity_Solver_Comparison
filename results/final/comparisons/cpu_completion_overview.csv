@@ -1,0 +1,4 @@
+SourceFamily,SuccessRows,FailedRows,OtherStatusRows
+hybrid,1044,2100,0
+mpi,1061,2140,0
+openmp,2160,0,0

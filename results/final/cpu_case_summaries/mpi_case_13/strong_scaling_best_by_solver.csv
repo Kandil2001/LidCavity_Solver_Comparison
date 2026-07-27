@@ -1,0 +1,2 @@
+language,case_id,N,Re,scheme,mpi_ranks,successful_repeats,Runtime_s_mean,Runtime_s_std,Runtime_s_min,Runtime_s_max
+python,case1_N128_Re100_upwind_steps2500_p250,128,100,upwind,16,8,1417.3806605041127,1281.9300027275046,210.91074252130002,3009.1954729557

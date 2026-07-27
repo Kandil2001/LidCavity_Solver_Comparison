@@ -1,0 +1,167 @@
+#!/bin/bash
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
+PYTHON=${PYTHON:-python3}
+RANKS=${RANKS:-"1 2 4 8 16"}
+THREADS_LIST=${THREADS_LIST:-"1 2 4 8 16"}
+# Hybrid pairs are written as MPI-ranks x threads-per-rank. Default total cores: 1,2,4,8,16.
+HYBRID_PAIRS=${HYBRID_PAIRS:-"1x1 1x2 2x2 4x2 4x4"}
+# Format per case: N:Re:scheme:steps:poisson_iters. Keep fixed problem size for strong scaling.
+CASES=${CASES:-"64:100:upwind:1000:200 128:1000:upwind:2000:250"}
+POISSON_SOLVERS=${POISSON_SOLVERS:-"RBGS RBSOR"}
+SOR_OMEGA=${SOR_OMEGA:-1.7}
+REPEATS=${REPEATS:-1}
+RESET_RESULTS=${RESET_RESULTS:-1}
+CONTINUE_ON_ERROR=${CONTINUE_ON_ERROR:-1}
+RUN_MPI=${RUN_MPI:-1}
+RUN_HYBRID=${RUN_HYBRID:-1}
+RUN_OPENMP=${RUN_OPENMP:-1}
+RUN_ORIGINAL_OPENMP_CONTEXT=${RUN_ORIGINAL_OPENMP_CONTEXT:-0}
+MAKE_JOBS=${MAKE_JOBS:-1}
+PLOTS=${PLOTS:-1}
+
+export OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-1}
+export MKL_NUM_THREADS=${MKL_NUM_THREADS:-1}
+export NUMEXPR_NUM_THREADS=${NUMEXPR_NUM_THREADS:-1}
+
+OUT_DIR="comparison/results/strong_scaling"
+LOG_DIR="logs/strong_scaling"
+mkdir -p "$OUT_DIR" "$LOG_DIR"
+if [[ "$RESET_RESULTS" == "1" || "$RESET_RESULTS" == "true" ]]; then
+    rm -f "$OUT_DIR"/strong_scaling_raw.csv "$OUT_DIR"/strong_scaling_summary.csv "$OUT_DIR"/strong_scaling_best_by_solver.csv "$OUT_DIR"/strong_scaling_report.md
+fi
+RUN_LOG="$LOG_DIR/strong_scaling_$(date +%Y%m%d_%H%M%S).log"
+: > "$RUN_LOG"
+log(){ echo "$@" | tee -a "$RUN_LOG"; }
+
+log "Strong-scaling study"
+log "RANKS=$RANKS"
+log "THREADS_LIST=$THREADS_LIST"
+log "HYBRID_PAIRS=$HYBRID_PAIRS"
+log "CASES=$CASES"
+log "POISSON_SOLVERS=$POISSON_SOLVERS SOR_OMEGA=$SOR_OMEGA"
+log "REPEATS=$REPEATS RUN_MPI=$RUN_MPI RUN_HYBRID=$RUN_HYBRID RUN_OPENMP=$RUN_OPENMP RUN_ORIGINAL_OPENMP_CONTEXT=$RUN_ORIGINAL_OPENMP_CONTEXT"
+log "Host: $(hostname)"
+log "Start: $(date)"
+
+# solver_group|dir|language|parallel_model|kernel_style|summary_path
+MPI_SOLVERS=(
+"c_mpi_domain_looped|c/mpi_domain_looped|c|mpi_domain|looped|c/mpi_domain_looped/results/data/c_mpi_domain_looped_summary.csv"
+"c_mpi_domain_vectorized|c/mpi_domain_vectorized|c|mpi_domain|vectorized|c/mpi_domain_vectorized/results/data/c_mpi_domain_vectorized_summary.csv"
+"cpp_mpi_domain_looped|cpp/mpi_domain_looped|cpp|mpi_domain|looped|cpp/mpi_domain_looped/results/data/cpp_mpi_domain_looped_summary.csv"
+"cpp_mpi_domain_vectorized|cpp/mpi_domain_vectorized|cpp|mpi_domain|vectorized|cpp/mpi_domain_vectorized/results/data/cpp_mpi_domain_vectorized_summary.csv"
+"python_mpi_domain_looped|python/mpi_domain_looped|python|mpi_domain|looped|python/mpi_domain_looped/results/data/python_mpi_domain_looped_summary.csv"
+"python_mpi_domain_vectorized|python/mpi_domain_vectorized|python|mpi_domain|vectorized|python/mpi_domain_vectorized/results/data/python_mpi_domain_vectorized_summary.csv"
+)
+HYBRID_SOLVERS=(
+"c_hybrid_mpi_openmp_looped|c/hybrid_mpi_openmp_looped|c|hybrid_mpi_openmp|looped|c/hybrid_mpi_openmp_looped/results/data/c_hybrid_mpi_openmp_looped_summary.csv"
+"c_hybrid_mpi_openmp_vectorized|c/hybrid_mpi_openmp_vectorized|c|hybrid_mpi_openmp|vectorized|c/hybrid_mpi_openmp_vectorized/results/data/c_hybrid_mpi_openmp_vectorized_summary.csv"
+"cpp_hybrid_mpi_openmp_looped|cpp/hybrid_mpi_openmp_looped|cpp|hybrid_mpi_openmp|looped|cpp/hybrid_mpi_openmp_looped/results/data/cpp_hybrid_mpi_openmp_looped_summary.csv"
+"cpp_hybrid_mpi_openmp_vectorized|cpp/hybrid_mpi_openmp_vectorized|cpp|hybrid_mpi_openmp|vectorized|cpp/hybrid_mpi_openmp_vectorized/results/data/cpp_hybrid_mpi_openmp_vectorized_summary.csv"
+"python_hybrid_mpi_threaded_looped|python/hybrid_mpi_openmp_looped|python|hybrid_mpi_threaded|looped|python/hybrid_mpi_openmp_looped/results/data/python_hybrid_mpi_threaded_looped_summary.csv"
+"python_hybrid_mpi_threaded_vectorized|python/hybrid_mpi_openmp_vectorized|python|hybrid_mpi_threaded|vectorized|python/hybrid_mpi_openmp_vectorized/results/data/python_hybrid_mpi_threaded_vectorized_summary.csv"
+)
+OPENMP_SOLVERS=(
+# New OpenMP-only streamfunction-vorticity domain solvers for apples-to-apples comparison with MPI/hybrid domain family.
+"c_openmp_domain_looped|c/openmp_domain_looped|c|openmp_domain|looped|c/openmp_domain_looped/results/data/c_openmp_domain_looped_summary.csv"
+"c_openmp_domain_vectorized|c/openmp_domain_vectorized|c|openmp_domain|vectorized|c/openmp_domain_vectorized/results/data/c_openmp_domain_vectorized_summary.csv"
+"cpp_openmp_domain_looped|cpp/openmp_domain_looped|cpp|openmp_domain|looped|cpp/openmp_domain_looped/results/data/cpp_openmp_domain_looped_summary.csv"
+"cpp_openmp_domain_vectorized|cpp/openmp_domain_vectorized|cpp|openmp_domain|vectorized|cpp/openmp_domain_vectorized/results/data/cpp_openmp_domain_vectorized_summary.csv"
+)
+if [[ "$RUN_ORIGINAL_OPENMP_CONTEXT" == "1" || "$RUN_ORIGINAL_OPENMP_CONTEXT" == "true" ]]; then
+    OPENMP_SOLVERS+=(
+    "c_openmp_original_simple|c/openmp|c|openmp_original_simple|original_simple|c/openmp/results/data/study_summary_single.csv"
+    "cpp_openmp_original_simple|cpp/openmp|cpp|openmp_original_simple|original_simple|cpp/openmp/results/data/study_summary_single.csv"
+    )
+fi
+
+append_row(){
+    local solver="$1" lang="$2" model="$3" kernel="$4" summary="$5" case_id="$6" N="$7" RE="$8" scheme="$9" steps="${10}" piters="${11}" ranks="${12}" threads="${13}" cores="${14}" rep="${15}" status="${16}"
+    "$PYTHON" scripts/append_strong_scaling_result.py \
+        --summary "$summary" --out-dir "$OUT_DIR" \
+        --solver-group "$solver" --language "$lang" --parallel-model "$model" --kernel-style "$kernel" \
+        --case-id "$case_id" --N "$N" --Re "$RE" --scheme "$scheme" --pressure "$poisson_solver" \
+        --steps "$steps" --poisson-iters "$piters" --mpi-ranks "$ranks" --threads-per-rank "$threads" --total-cores "$cores" \
+        --repeat "$rep" --status "$status" --log-file "$RUN_LOG" | tee -a "$RUN_LOG"
+}
+
+run_one(){
+    local solver="$1" dir="$2" lang="$3" model="$4" kernel="$5" summary="$6" case_id="$7" N="$8" RE="$9" scheme="${10}" steps="${11}" piters="${12}" ranks="${13}" threads="${14}" cores="${15}" rep="${16}"
+    rm -f "$summary"
+    log ""
+    log "===== $solver case=$case_id cores=$cores ranks=$ranks threads=$threads repeat=$rep ====="
+    local rc=0
+    if [[ "$model" == openmp* ]]; then
+        OMP_NUM_THREADS="$threads" make -C "$dir" run OMP_NUM_THREADS="$threads" N="$N" RE="$RE" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
+    elif [[ "$model" == "hybrid_mpi_threaded" ]]; then
+        NUMBA_NUM_THREADS="$threads" make -C "$dir" run PYTHON="$PYTHON" NP="$ranks" NUMBA_NUM_THREADS="$threads" N="$N" RE="$RE" STEPS="$steps" POISSON_ITERS="$piters" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
+    elif [[ "$model" == "hybrid_mpi_openmp" ]]; then
+        OMP_NUM_THREADS="$threads" make -C "$dir" run NP="$ranks" OMP_NUM_THREADS="$threads" N="$N" RE="$RE" STEPS="$steps" POISSON_ITERS="$piters" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
+    else
+        make -C "$dir" run PYTHON="$PYTHON" NP="$ranks" N="$N" RE="$RE" STEPS="$steps" POISSON_ITERS="$piters" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
+    fi
+    local status="success"
+    if [[ "$rc" != "0" ]]; then
+        status="failed"
+        log "FAILED: $solver rc=$rc"
+    fi
+    append_row "$solver" "$lang" "$model" "$kernel" "$summary" "$case_id" "$N" "$RE" "$scheme" "$steps" "$piters" "$ranks" "$threads" "$cores" "$rep" "$status"
+    if [[ "$rc" != "0" && "$CONTINUE_ON_ERROR" != "1" && "$CONTINUE_ON_ERROR" != "true" ]]; then
+        exit "$rc"
+    fi
+}
+
+case_index=0
+for case_spec in $CASES; do
+    case_index=$((case_index+1))
+    IFS=':' read -r N RE scheme steps piters <<< "$case_spec"
+    case_id="case${case_index}_N${N}_Re${RE}_${scheme}_steps${steps}_p${piters}"
+    log ""
+    log "############################"
+    log "Case $case_id"
+    log "############################"
+
+    for rep in $(seq 1 "$REPEATS"); do
+        for poisson_solver in $POISSON_SOLVERS; do
+        if [[ "$RUN_MPI" == "1" || "$RUN_MPI" == "true" ]]; then
+            for entry in "${MPI_SOLVERS[@]}"; do
+                IFS='|' read -r solver dir lang model kernel summary <<< "$entry"
+                for ranks in $RANKS; do
+                    run_one "$solver" "$dir" "$lang" "$model" "$kernel" "$summary" "$case_id" "$N" "$RE" "$scheme" "$steps" "$piters" "$ranks" 1 "$ranks" "$rep"
+                done
+            done
+        fi
+        if [[ "$RUN_HYBRID" == "1" || "$RUN_HYBRID" == "true" ]]; then
+            for entry in "${HYBRID_SOLVERS[@]}"; do
+                IFS='|' read -r solver dir lang model kernel summary <<< "$entry"
+                for pair in $HYBRID_PAIRS; do
+                    ranks="${pair%x*}"
+                    threads="${pair#*x}"
+                    cores=$((ranks * threads))
+                    run_one "$solver" "$dir" "$lang" "$model" "$kernel" "$summary" "$case_id" "$N" "$RE" "$scheme" "$steps" "$piters" "$ranks" "$threads" "$cores" "$rep"
+                done
+            done
+        fi
+        if [[ "$RUN_OPENMP" == "1" || "$RUN_OPENMP" == "true" ]]; then
+            for entry in "${OPENMP_SOLVERS[@]}"; do
+                IFS='|' read -r solver dir lang model kernel summary <<< "$entry"
+                for threads in $THREADS_LIST; do
+                    run_one "$solver" "$dir" "$lang" "$model" "$kernel" "$summary" "$case_id" "$N" "$RE" "$scheme" "$steps" "$piters" 1 "$threads" "$threads" "$rep"
+                done
+            done
+        fi
+        done
+    done
+done
+
+log ""
+log "===== Computing strong-scaling report ====="
+if [[ "$PLOTS" == "1" || "$PLOTS" == "true" ]]; then
+    "$PYTHON" scripts/compute_strong_scaling.py --plots 2>&1 | tee -a "$RUN_LOG"
+else
+    "$PYTHON" scripts/compute_strong_scaling.py 2>&1 | tee -a "$RUN_LOG"
+fi
+log "Finished: $(date)"
+log "Report: $OUT_DIR/strong_scaling_report.md"

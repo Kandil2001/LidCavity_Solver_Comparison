@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="520" viewBox="0 0 950 520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="475.0" y="35" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold">CPU successful rows by backend</text>
+<text x="20" y="235.0" text-anchor="middle" transform="rotate(-90 20 235.0)" font-family="Arial" font-size="14">Successful rows</text>
+<line x1="95" y1="70" x2="95" y2="400" stroke="black"/>
+<line x1="95" y1="400" x2="920" y2="400" stroke="black"/>
+<rect x="107.0" y="261.3" width="259.0" height="138.7" fill="#4C78A8"/>
+<text x="236.5" y="255.3" text-anchor="middle" font-family="Arial" font-size="11">1.04e+03</text>
+<text x="236.5" y="418" text-anchor="end" transform="rotate(-45 236.5 418)" font-family="Arial" font-size="12">hybrid</text>
+<rect x="378.0" y="259.0" width="259.0" height="141.0" fill="#4C78A8"/>
+<text x="507.5" y="253.0" text-anchor="middle" font-family="Arial" font-size="11">1.06e+03</text>
+<text x="507.5" y="418" text-anchor="end" transform="rotate(-45 507.5 418)" font-family="Arial" font-size="12">mpi</text>
+<rect x="649.0" y="113.0" width="259.0" height="287.0" fill="#4C78A8"/>
+<text x="778.5" y="107.0" text-anchor="middle" font-family="Arial" font-size="11">2.16e+03</text>
+<text x="778.5" y="418" text-anchor="end" transform="rotate(-45 778.5 418)" font-family="Arial" font-size="12">openmp</text>
+</svg>

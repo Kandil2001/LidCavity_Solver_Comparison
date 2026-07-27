@@ -1,0 +1,4 @@
+family,success_rows,failed_rows
+hybrid,1044,2100
+mpi,1061,2140
+openmp,2160,0

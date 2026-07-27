@@ -1,0 +1,2 @@
+Implementation,N,Re,Scheme,Steps,PoissonIters,MPIRanks,ThreadsPerRank,KernelStyle,Runtime_s,FinalOmegaChange,FinalPsiChange,MaxVelocity
+python_mpi_domain_vectorized,128,100,upwind,2500,250,16,1,vectorized,210.9107425213,1.0951880283e+03,1.2220964213e-06,1.0000000000e+00

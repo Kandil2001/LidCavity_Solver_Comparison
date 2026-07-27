@@ -1,0 +1,2 @@
+Implementation,N,Re,Scheme,PoissonSolver,SOROmega,Steps,PoissonIters,OMPThreads,Runtime_s,FinalOmegaChange,FinalPsiChange,MaxVelocity
+c_openmp_domain_looped,128,1000,central,rbsor,1.700,2000,250,16,10.2571705766,1.1513753005e-02,9.8280990829e-07,8.7707046081e-01

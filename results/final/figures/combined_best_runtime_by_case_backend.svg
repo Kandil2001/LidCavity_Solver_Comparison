@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="620" viewBox="0 0 1050 620">
+<rect width="100%" height="100%" fill="white"/>
+<text x="525.0" y="35" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold">Best runtime by backend and case</text>
+<text x="20" y="305.0" text-anchor="middle" transform="rotate(-90 20 305.0)" font-family="Arial" font-size="14">Best runtime [s]</text>
+<line x1="95" y1="70" x2="95" y2="540" stroke="black"/>
+<line x1="95" y1="540" x2="870" y2="540" stroke="black"/>
+<line x1="95.0" y1="540" x2="95.0" y2="546" stroke="black"/>
+<text x="95.0" y="564" text-anchor="middle" font-family="Arial" font-size="12">1</text>
+<line x1="140.6" y1="540" x2="140.6" y2="546" stroke="black"/>
+<text x="140.6" y="564" text-anchor="middle" font-family="Arial" font-size="12">2</text>
+<line x1="186.2" y1="540" x2="186.2" y2="546" stroke="black"/>
+<text x="186.2" y="564" text-anchor="middle" font-family="Arial" font-size="12">3</text>
+<line x1="231.8" y1="540" x2="231.8" y2="546" stroke="black"/>
+<text x="231.8" y="564" text-anchor="middle" font-family="Arial" font-size="12">4</text>
+<line x1="277.4" y1="540" x2="277.4" y2="546" stroke="black"/>
+<text x="277.4" y="564" text-anchor="middle" font-family="Arial" font-size="12">5</text>
+<line x1="322.9" y1="540" x2="322.9" y2="546" stroke="black"/>
+<text x="322.9" y="564" text-anchor="middle" font-family="Arial" font-size="12">6</text>
+<line x1="368.5" y1="540" x2="368.5" y2="546" stroke="black"/>
+<text x="368.5" y="564" text-anchor="middle" font-family="Arial" font-size="12">7</text>
+<line x1="414.1" y1="540" x2="414.1" y2="546" stroke="black"/>
+<text x="414.1" y="564" text-anchor="middle" font-family="Arial" font-size="12">8</text>
+<line x1="459.7" y1="540" x2="459.7" y2="546" stroke="black"/>
+<text x="459.7" y="564" text-anchor="middle" font-family="Arial" font-size="12">9</text>
+<line x1="505.3" y1="540" x2="505.3" y2="546" stroke="black"/>
+<text x="505.3" y="564" text-anchor="middle" font-family="Arial" font-size="12">10</text>
+<line x1="550.9" y1="540" x2="550.9" y2="546" stroke="black"/>
+<text x="550.9" y="564" text-anchor="middle" font-family="Arial" font-size="12">11</text>
+<line x1="596.5" y1="540" x2="596.5" y2="546" stroke="black"/>
+<text x="596.5" y="564" text-anchor="middle" font-family="Arial" font-size="12">12</text>
+<line x1="642.1" y1="540" x2="642.1" y2="546" stroke="black"/>
+<text x="642.1" y="564" text-anchor="middle" font-family="Arial" font-size="12">13</text>
+<line x1="687.6" y1="540" x2="687.6" y2="546" stroke="black"/>
+<text x="687.6" y="564" text-anchor="middle" font-family="Arial" font-size="12">14</text>
+<line x1="733.2" y1="540" x2="733.2" y2="546" stroke="black"/>
+<text x="733.2" y="564" text-anchor="middle" font-family="Arial" font-size="12">15</text>
+<line x1="778.8" y1="540" x2="778.8" y2="546" stroke="black"/>
+<text x="778.8" y="564" text-anchor="middle" font-family="Arial" font-size="12">16</text>
+<line x1="824.4" y1="540" x2="824.4" y2="546" stroke="black"/>
+<text x="824.4" y="564" text-anchor="middle" font-family="Arial" font-size="12">17</text>
+<line x1="870.0" y1="540" x2="870.0" y2="546" stroke="black"/>
+<text x="870.0" y="564" text-anchor="middle" font-family="Arial" font-size="12">18</text>
+<polyline points="95.0,326.7 140.6,329.2 186.2,339.1 231.8,345.5 277.4,321.0 322.9,333.8 368.5,264.8 414.1,265.7 459.7,277.6 505.3,278.3 550.9,259.4 596.5,256.4 642.1,70.0 687.6,169.6 733.2,163.2 778.8,160.2 824.4,152.6 870.0,144.1" fill="none" stroke="#4C78A8" stroke-width="3"/>
+<circle cx="95.0" cy="326.7" r="4" fill="#4C78A8"/>
+<circle cx="140.6" cy="329.2" r="4" fill="#4C78A8"/>
+<circle cx="186.2" cy="339.1" r="4" fill="#4C78A8"/>
+<circle cx="231.8" cy="345.5" r="4" fill="#4C78A8"/>
+<circle cx="277.4" cy="321.0" r="4" fill="#4C78A8"/>
+<circle cx="322.9" cy="333.8" r="4" fill="#4C78A8"/>
+<circle cx="368.5" cy="264.8" r="4" fill="#4C78A8"/>
+<circle cx="414.1" cy="265.7" r="4" fill="#4C78A8"/>
+<circle cx="459.7" cy="277.6" r="4" fill="#4C78A8"/>
+<circle cx="505.3" cy="278.3" r="4" fill="#4C78A8"/>
+<circle cx="550.9" cy="259.4" r="4" fill="#4C78A8"/>
+<circle cx="596.5" cy="256.4" r="4" fill="#4C78A8"/>
+<circle cx="642.1" cy="70.0" r="4" fill="#4C78A8"/>
+<circle cx="687.6" cy="169.6" r="4" fill="#4C78A8"/>
+<circle cx="733.2" cy="163.2" r="4" fill="#4C78A8"/>
+<circle cx="778.8" cy="160.2" r="4" fill="#4C78A8"/>
+<circle cx="824.4" cy="152.6" r="4" fill="#4C78A8"/>
+<circle cx="870.0" cy="144.1" r="4" fill="#4C78A8"/>
+<rect x="895" y="83" width="14" height="14" fill="#4C78A8"/>
+<text x="915" y="95" font-family="Arial" font-size="13">CPU Hybrid</text>
+<polyline points="95.0,332.4 140.6,334.7 186.2,344.7 231.8,351.2 277.4,326.4 322.9,339.1 368.5,282.7 414.1,284.0 459.7,295.2 505.3,296.3 550.9,277.4 596.5,274.4 642.1,117.1 687.6,216.3 733.2,209.6 778.8,206.9 824.4,199.0 870.0,190.7" fill="none" stroke="#F58518" stroke-width="3"/>
+<circle cx="95.0" cy="332.4" r="4" fill="#F58518"/>
+<circle cx="140.6" cy="334.7" r="4" fill="#F58518"/>
+<circle cx="186.2" cy="344.7" r="4" fill="#F58518"/>
+<circle cx="231.8" cy="351.2" r="4" fill="#F58518"/>
+<circle cx="277.4" cy="326.4" r="4" fill="#F58518"/>
+<circle cx="322.9" cy="339.1" r="4" fill="#F58518"/>
+<circle cx="368.5" cy="282.7" r="4" fill="#F58518"/>
+<circle cx="414.1" cy="284.0" r="4" fill="#F58518"/>
+<circle cx="459.7" cy="295.2" r="4" fill="#F58518"/>
+<circle cx="505.3" cy="296.3" r="4" fill="#F58518"/>
+<circle cx="550.9" cy="277.4" r="4" fill="#F58518"/>
+<circle cx="596.5" cy="274.4" r="4" fill="#F58518"/>
+<circle cx="642.1" cy="117.1" r="4" fill="#F58518"/>
+<circle cx="687.6" cy="216.3" r="4" fill="#F58518"/>
+<circle cx="733.2" cy="209.6" r="4" fill="#F58518"/>
+<circle cx="778.8" cy="206.9" r="4" fill="#F58518"/>
+<circle cx="824.4" cy="199.0" r="4" fill="#F58518"/>
+<circle cx="870.0" cy="190.7" r="4" fill="#F58518"/>
+<rect x="895" y="107" width="14" height="14" fill="#F58518"/>
+<text x="915" y="119" font-family="Arial" font-size="13">CPU MPI</text>
+<polyline points="95.0,512.1 140.6,513.7 186.2,514.7 231.8,518.4 277.4,526.9 322.9,540.0 368.5,413.8 414.1,411.9 459.7,409.3 505.3,407.8 550.9,425.8 596.5,420.8 642.1,420.4 687.6,348.2 733.2,348.4 778.8,344.8 824.4,359.2 870.0,352.5" fill="none" stroke="#54A24B" stroke-width="3"/>
+<circle cx="95.0" cy="512.1" r="4" fill="#54A24B"/>
+<circle cx="140.6" cy="513.7" r="4" fill="#54A24B"/>
+<circle cx="186.2" cy="514.7" r="4" fill="#54A24B"/>
+<circle cx="231.8" cy="518.4" r="4" fill="#54A24B"/>
+<circle cx="277.4" cy="526.9" r="4" fill="#54A24B"/>
+<circle cx="322.9" cy="540.0" r="4" fill="#54A24B"/>
+<circle cx="368.5" cy="413.8" r="4" fill="#54A24B"/>
+<circle cx="414.1" cy="411.9" r="4" fill="#54A24B"/>
+<circle cx="459.7" cy="409.3" r="4" fill="#54A24B"/>
+<circle cx="505.3" cy="407.8" r="4" fill="#54A24B"/>
+<circle cx="550.9" cy="425.8" r="4" fill="#54A24B"/>
+<circle cx="596.5" cy="420.8" r="4" fill="#54A24B"/>
+<circle cx="642.1" cy="420.4" r="4" fill="#54A24B"/>
+<circle cx="687.6" cy="348.2" r="4" fill="#54A24B"/>
+<circle cx="733.2" cy="348.4" r="4" fill="#54A24B"/>
+<circle cx="778.8" cy="344.8" r="4" fill="#54A24B"/>
+<circle cx="824.4" cy="359.2" r="4" fill="#54A24B"/>
+<circle cx="870.0" cy="352.5" r="4" fill="#54A24B"/>
+<rect x="895" y="131" width="14" height="14" fill="#54A24B"/>
+<text x="915" y="143" font-family="Arial" font-size="13">CPU OpenMP</text>
+<polyline points="95.0,409.7 140.6,410.4 186.2,409.5 231.8,410.6 277.4,349.9 322.9,349.6 368.5,408.5 414.1,408.6 459.7,408.8 505.3,408.8 550.9,348.5 596.5,348.4 642.1,332.2 687.6,330.9 733.2,332.2 778.8,331.9 824.4,288.0 870.0,288.4" fill="none" stroke="#E45756" stroke-width="3"/>
+<circle cx="95.0" cy="409.7" r="4" fill="#E45756"/>
+<circle cx="140.6" cy="410.4" r="4" fill="#E45756"/>
+<circle cx="186.2" cy="409.5" r="4" fill="#E45756"/>
+<circle cx="231.8" cy="410.6" r="4" fill="#E45756"/>
+<circle cx="277.4" cy="349.9" r="4" fill="#E45756"/>
+<circle cx="322.9" cy="349.6" r="4" fill="#E45756"/>
+<circle cx="368.5" cy="408.5" r="4" fill="#E45756"/>
+<circle cx="414.1" cy="408.6" r="4" fill="#E45756"/>
+<circle cx="459.7" cy="408.8" r="4" fill="#E45756"/>
+<circle cx="505.3" cy="408.8" r="4" fill="#E45756"/>
+<circle cx="550.9" cy="348.5" r="4" fill="#E45756"/>
+<circle cx="596.5" cy="348.4" r="4" fill="#E45756"/>
+<circle cx="642.1" cy="332.2" r="4" fill="#E45756"/>
+<circle cx="687.6" cy="330.9" r="4" fill="#E45756"/>
+<circle cx="733.2" cy="332.2" r="4" fill="#E45756"/>
+<circle cx="778.8" cy="331.9" r="4" fill="#E45756"/>
+<circle cx="824.4" cy="288.0" r="4" fill="#E45756"/>
+<circle cx="870.0" cy="288.4" r="4" fill="#E45756"/>
+<rect x="895" y="155" width="14" height="14" fill="#E45756"/>
+<text x="915" y="167" font-family="Arial" font-size="13">CUDA A100</text>
+<text x="482.5" y="595" text-anchor="middle" font-family="Arial" font-size="14">Case index</text>
+</svg>
