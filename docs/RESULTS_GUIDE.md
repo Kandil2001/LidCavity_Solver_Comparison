@@ -1,77 +1,157 @@
 # Results guide
 
-Each implementation writes outputs to its own `results/` folder. This avoids mixing files from different languages and makes comparisons easier.
+This repository retains results from two numerical tracks. Always identify the track before comparing files.
 
-## Standard result folders
+See [`BENCHMARK_TRACKS.md`](BENCHMARK_TRACKS.md) for the numerical boundary between the pressure-correction and streamfunction–vorticity datasets.
+
+## Track A — pressure-correction pilot results
+
+Implementation-local outputs are written under each original top-level solver folder:
 
 ```text
-results/data/      CSV summaries, field data, residual histories, validation data
-results/figures/   velocity plots, residual plots, validation plots
-results/scaling/   OpenMP, MPI, or CUDA scaling tables
-results/logs/      optional long-run logs
+results/data/      summaries, fields, residual histories, validation data
+results/figures/   field, residual, and validation plots
+results/scaling/   implementation-specific scaling tables
+results/logs/      optional run logs
 ```
 
-## Comparison workflow
+Repository-level retained pilot outputs are under:
 
-1. Run at least one serial implementation.
-2. Run another implementation with the same mode.
-3. From the repository root, run:
+```text
+comparison/results/final_clean/
+comparison/results/physics_fields/
+comparison/figures/report_pngs/
+comparison/figures/physics_final/
+```
+
+### Original serial comparison
+
+From the repository root:
 
 ```bash
 make compare-serial MODE=quick
 make report-serial MODE=quick
 ```
 
-The comparison scripts match cases by setup:
+Cases are matched by:
 
 ```text
 mesh size, Reynolds number, convection scheme, pressure solver
 ```
 
-This is safer than matching only by case number or file order.
+The current pilot tables separate implementations by language and execution mode, but many cases reached their iteration limit. Treat their runtimes as execution-time measurements, not final time-to-convergence results.
 
+## Track B — fixed-step domain-scaling archive
 
-## Automated studies
+The organized streamfunction–vorticity source tree writes local outputs below `src/.../results/`. Selected repeated data is retained under:
 
-Grid convergence from the repository root:
+```text
+results/final/cpu_case_summaries/
+results/final/comparisons/
+results/final/figures/
+results/audits/
+```
+
+The current archived families are:
+
+```text
+OpenMP domain
+MPI domain decomposition
+hybrid MPI + threading
+```
+
+The runs use configured step counts. In the raw scaling files, `status=success` means that the program completed and produced a summary row. It does not establish one common convergence decision.
+
+## CUDA archive
+
+CUDA summaries and Ghia validation tables are stored under:
+
+```text
+results/cuda/
+results/final/comparisons/
+```
+
+The current A100 RBGS/RBSOR validation rows do not pass the configured Ghia thresholds. Keep CUDA runtime and validation reporting separate.
+
+## Status terminology
+
+Use separate fields and wording for:
+
+```text
+ExecutionCompleted
+OuterConverged
+PressureConverged
+ValidationPassed
+TimedOut
+RuntimeValid
+```
+
+When an archived file does not contain enough information to reconstruct a numerical status, record `unknown`; do not infer convergence from process completion.
+
+## Performance aggregation rules
+
+Paper-quality performance tables should preserve:
+
+```text
+NumericalTrack
+Language
+Implementation
+ParallelModel
+KernelStyle
+PressureSolver
+N
+Re
+Scheme
+TotalCores
+MPIRanks
+ThreadsPerRank
+Repeat
+```
+
+For each fixed configuration, report at least:
+
+```text
+run count
+minimum
+median
+mean
+standard deviation
+interquartile range
+maximum
+```
+
+Use the median and variability for conclusions. A table that selects only the minimum runtime across language, kernel, pressure solver, or core count is exploratory and must not be presented as a fair ranking.
+
+## Strong-scaling reports
+
+Strong-scaling tables and plots must include the pressure solver in their grouping and labels. RBGS and RBSOR rows must not appear as duplicate unlabeled entries or be connected as one curve.
+
+Speedup must use the smallest available core count for the same:
+
+```text
+case
+solver implementation
+kernel style
+pressure solver
+```
+
+## Automated studies in the original track
+
+Grid trend:
 
 ```bash
 make grid-convergence
 ```
 
-This writes CSV and PNG files to:
-
-```text
-comparison/results/grid_convergence/
-```
-
-The observed order is based on centerline L2 errors against the Ghia benchmark data. It is useful for comparing grid trends, but it is not the same as a manufactured-solution accuracy proof.
-
-Automatic validation plots:
+Validation plots:
 
 ```bash
 make validation-plots
 python3 scripts/plot_validation_centerlines.py --Re 100 --N 64
 ```
 
-Parallel scaling plots:
-
-```bash
-make scaling-openmp
-make scaling-mpi MODE=quick
-```
-
-OpenMP scaling is a fixed-case strong-scaling check. MPI scaling is case-level parameter-sweep scaling, not one-domain domain-decomposition scaling.
-
-## Reading runtime results
-
-Use runtime trends carefully:
-
-- smoke runs check that the code starts; they are not reliable performance measurements
-- OpenMP can be slower on very small grids because thread overhead dominates
-- MPI speedup here means faster parameter studies, not faster solution of one domain
-- CUDA should be tested only on a real NVIDIA GPU with the CUDA toolkit installed
+These are useful development checks, but Ghia comparison is validation rather than formal code verification. Manufactured or analytical operator tests are still required for a publishable verification claim.
 
 ## Git policy
 
-Generated result files are ignored by Git by default. Keep only selected final plots or tables that are worth showing in the main README.
+Generated outputs are ignored by default. Retain only selected raw evidence, summaries, and figures that are documented and needed to reproduce a reported conclusion. Do not commit caches, binaries, or temporary backup scripts.
