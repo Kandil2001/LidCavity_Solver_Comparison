@@ -22,19 +22,39 @@ jobs:
       - name: Check backup files in scripts
         run: python scripts/check_repository_consistency.py --check backup --path-prefix scripts
 
-      - name: Check backup files in C sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/c
+      - name: Check backup files in organized sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix src
 
-      - name: Check backup files in C++ sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/cpp
+      - name: Check backup files in legacy C sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix c
 
-      - name: Check backup files in Python sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/python
+      - name: Check backup files in legacy C++ sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix cpp
 
-      - name: Check backup files outside common source areas
+      - name: Check backup files in legacy Python sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix python
+
+      - name: Check backup files in MATLAB and CUDA sources
+        run: |
+          python scripts/check_repository_consistency.py --check backup --path-prefix matlab
+          python scripts/check_repository_consistency.py --check backup --path-prefix cuda
+
+      - name: Check backup files in HPC and jobs
+        run: |
+          python scripts/check_repository_consistency.py --check backup --path-prefix hpc
+          python scripts/check_repository_consistency.py --check backup --path-prefix jobs
+
+      - name: Check backup files in results and comparison
+        run: |
+          python scripts/check_repository_consistency.py --check backup --path-prefix results
+          python scripts/check_repository_consistency.py --check backup --path-prefix comparison
+
+      - name: Check backup files in remaining repository areas
         run: >-
           python scripts/check_repository_consistency.py --check backup
-          --exclude-prefix scripts --exclude-prefix src/c --exclude-prefix src/cpp --exclude-prefix src/python
+          --exclude-prefix scripts --exclude-prefix src --exclude-prefix c --exclude-prefix cpp
+          --exclude-prefix python --exclude-prefix matlab --exclude-prefix cuda --exclude-prefix hpc
+          --exclude-prefix jobs --exclude-prefix results --exclude-prefix comparison
 
       - name: Set up Python
         uses: actions/setup-python@v5
