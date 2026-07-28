@@ -1,4 +1,4 @@
-name: Apply canonical domain benchmark cleanup
+name: Prepare canonical domain benchmark tree
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  apply-cleanup:
+  prepare-tree:
     if: github.head_ref == 'agent/repository-cleanup-v1' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
@@ -31,12 +31,68 @@ jobs:
             scripts/check_repository_consistency.py scripts/check_smoke_outputs.py \
             scripts/generate_selected_results.py hpc/stromboli/run_strong_scaling_all.sbatch
           rm -rf .cleanup .github/workflows/apply-repository-cleanup.yml
-
-      - name: Commit canonical repository structure
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet && exit 0
-          git commit -m "Make spatial domain decomposition the canonical MPI track"
-          git push origin HEAD:agent/repository-cleanup-v1
+
+      - name: Upload final Git tree objects
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import subprocess
+          import urllib.request
+
+          repo = os.environ["REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          api = f"https://api.github.com/repos/{repo}/git"
+
+          def call(method, url, payload=None):
+              data = None if payload is None else json.dumps(payload).encode()
+              req = urllib.request.Request(url, data=data, method=method)
+              req.add_header("Authorization", f"Bearer {token}")
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("X-GitHub-Api-Version", "2022-11-28")
+              with urllib.request.urlopen(req) as response:
+                  return json.load(response)
+
+          base_tree = subprocess.check_output(
+              ["git", "rev-parse", "HEAD^{tree}"], text=True
+          ).strip()
+          raw = subprocess.check_output(
+              ["git", "diff", "--cached", "--no-renames", "--name-status", "-z"]
+          ).decode().split("\0")
+
+          entries = []
+          index = 0
+          while index < len(raw) - 1:
+              status = raw[index]
+              path = raw[index + 1]
+              index += 2
+              if status == "D":
+                  entries.append({"path": path, "mode": "100644", "type": "blob", "sha": None})
+                  continue
+
+              staged = subprocess.check_output(
+                  ["git", "ls-files", "-s", "--", path], text=True
+              ).strip()
+              mode = staged.split()[0]
+              with open(path, "rb") as file:
+                  content = base64.b64encode(file.read()).decode()
+              blob = call("POST", f"{api}/blobs", {"content": content, "encoding": "base64"})
+              entries.append({"path": path, "mode": mode, "type": "blob", "sha": blob["sha"]})
+
+          tree = call("POST", f"{api}/trees", {"base_tree": base_tree, "tree": entries})
+          with open("final-tree-sha.txt", "w", encoding="utf-8") as file:
+              file.write(tree["sha"] + "\n")
+          print(f"Prepared final tree {tree['sha']} with {len(entries)} changed paths")
+          PY
+
+      - name: Upload final tree SHA
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-domain-tree
+          path: final-tree-sha.txt
+          if-no-files-found: error
