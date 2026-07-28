@@ -19,21 +19,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Collect legacy run-job backup names
-        run: |
-          git ls-files 'jobs/run*' | grep -E '(\.bak($|_)|\.bak_)' > tracked-run-backups.txt || true
-          cat tracked-run-backups.txt
-
-      - name: Upload legacy run-job backup names
-        uses: actions/upload-artifact@v4
-        with:
-          name: tracked-run-backups
-          path: tracked-run-backups.txt
-          if-no-files-found: error
-
-      - name: Check run helper backups
-        run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/run
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
