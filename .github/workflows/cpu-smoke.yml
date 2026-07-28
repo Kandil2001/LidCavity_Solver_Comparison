@@ -1,4 +1,4 @@
-name: Prepare canonical domain benchmark tree
+name: Diagnose canonical domain tree upload
 
 on:
   pull_request:
@@ -38,11 +38,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          python3 - <<'PY'
+          python3 - <<'PY' > tree-upload.log 2>&1 || true
           import base64
           import json
           import os
           import subprocess
+          import traceback
+          import urllib.error
           import urllib.request
 
           repo = os.environ["REPOSITORY"]
@@ -55,44 +57,60 @@ jobs:
               req.add_header("Authorization", f"Bearer {token}")
               req.add_header("Accept", "application/vnd.github+json")
               req.add_header("X-GitHub-Api-Version", "2022-11-28")
-              with urllib.request.urlopen(req) as response:
-                  return json.load(response)
+              try:
+                  with urllib.request.urlopen(req) as response:
+                      return json.load(response)
+              except urllib.error.HTTPError as error:
+                  print(f"HTTP {error.code} for {method} {url}")
+                  print(error.read().decode(errors="replace"))
+                  raise
 
-          base_tree = subprocess.check_output(
-              ["git", "rev-parse", "HEAD^{tree}"], text=True
-          ).strip()
-          raw = subprocess.check_output(
-              ["git", "diff", "--cached", "--no-renames", "--name-status", "-z"]
-          ).decode().split("\0")
-
-          entries = []
-          index = 0
-          while index < len(raw) - 1:
-              status = raw[index]
-              path = raw[index + 1]
-              index += 2
-              if status == "D":
-                  entries.append({"path": path, "mode": "100644", "type": "blob", "sha": None})
-                  continue
-
-              staged = subprocess.check_output(
-                  ["git", "ls-files", "-s", "--", path], text=True
+          try:
+              base_tree = subprocess.check_output(
+                  ["git", "rev-parse", "HEAD^{tree}"], text=True
               ).strip()
-              mode = staged.split()[0]
-              with open(path, "rb") as file:
-                  content = base64.b64encode(file.read()).decode()
-              blob = call("POST", f"{api}/blobs", {"content": content, "encoding": "base64"})
-              entries.append({"path": path, "mode": mode, "type": "blob", "sha": blob["sha"]})
+              raw = subprocess.check_output(
+                  ["git", "diff", "--cached", "--no-renames", "--name-status", "-z"]
+              ).decode().split("\0")
 
-          tree = call("POST", f"{api}/trees", {"base_tree": base_tree, "tree": entries})
-          with open("final-tree-sha.txt", "w", encoding="utf-8") as file:
-              file.write(tree["sha"] + "\n")
-          print(f"Prepared final tree {tree['sha']} with {len(entries)} changed paths")
+              entries = []
+              index = 0
+              while index < len(raw) - 1:
+                  status = raw[index]
+                  path = raw[index + 1]
+                  index += 2
+                  print(f"{status} {path}")
+                  if status == "D":
+                      entries.append({"path": path, "mode": "100644", "type": "blob", "sha": None})
+                      continue
+
+                  staged = subprocess.check_output(
+                      ["git", "ls-files", "-s", "--", path], text=True
+                  ).strip()
+                  mode = staged.split()[0]
+                  with open(path, "rb") as file:
+                      content = base64.b64encode(file.read()).decode()
+                  blob = call("POST", f"{api}/blobs", {"content": content, "encoding": "base64"})
+                  entries.append({"path": path, "mode": mode, "type": "blob", "sha": blob["sha"]})
+
+              tree = call("POST", f"{api}/trees", {"base_tree": base_tree, "tree": entries})
+              with open("final-tree-sha.txt", "w", encoding="utf-8") as file:
+                  file.write(tree["sha"] + "\n")
+              print(f"Prepared final tree {tree['sha']} with {len(entries)} changed paths")
+          except Exception:
+              traceback.print_exc()
           PY
+          cat tree-upload.log
 
-      - name: Upload final tree SHA
+      - name: Upload tree diagnostic
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: canonical-domain-tree
-          path: final-tree-sha.txt
-          if-no-files-found: error
+          name: canonical-domain-tree-diagnostic
+          path: |
+            tree-upload.log
+            final-tree-sha.txt
+          if-no-files-found: warn
+
+      - name: Require final tree
+        run: test -s final-tree-sha.txt
