@@ -19,9 +19,13 @@ jobs:
           ref: agent/repository-cleanup-v1
           fetch-depth: 0
 
-      - name: Apply prepared repository patch
+      - name: Reconstruct and apply prepared repository patch
         run: |
-          tar -xzf .cleanup/repository-cleanup-patch.tar.gz -C .
+          cat .cleanup/bigchunks/part* > /tmp/repository-cleanup-patch.b64
+          base64 --decode /tmp/repository-cleanup-patch.b64 > /tmp/repository-cleanup-patch.tar.gz
+          test "$(sha256sum /tmp/repository-cleanup-patch.tar.gz | awk '{print $1}')" = "1bfd723606c73264076a8a1b41c6c3bfe51009accbe16bfd07eeed85086894e8"
+          gzip -t /tmp/repository-cleanup-patch.tar.gz
+          tar -xzf /tmp/repository-cleanup-patch.tar.gz -C .
           chmod +x scripts/run_smoke_cpu.sh scripts/run_domain_solver_benchmark.sh \
             scripts/run_stromboli_all.sh scripts/run_parallel_scaling.py \
             scripts/check_repository_consistency.py scripts/check_smoke_outputs.py \
