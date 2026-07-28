@@ -19,8 +19,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check tracked backup files
-        run: python scripts/check_repository_consistency.py --check backup
+      - name: Check backup files in scripts
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix scripts
+
+      - name: Check backup files in C sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/c
+
+      - name: Check backup files in C++ sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/cpp
+
+      - name: Check backup files in Python sources
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix src/python
+
+      - name: Check backup files outside common source areas
+        run: >-
+          python scripts/check_repository_consistency.py --check backup
+          --exclude-prefix scripts --exclude-prefix src/c --exclude-prefix src/cpp --exclude-prefix src/python
 
       - name: Set up Python
         uses: actions/setup-python@v5
