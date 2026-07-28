@@ -43,7 +43,7 @@ results/final/                  complete archived fixed-step result package
 results/selected/               small README-facing result set
 scripts/                        build, run, checking, and post-processing tools
 
-a matlab/, python/serial/, c/serial/, c/openmp/, cpp/serial/, cpp/openmp/
+matlab/, python/serial/, c/serial/, c/openmp/, cpp/serial/, cpp/openmp/
                                earlier pressure-correction reference track
 ```
 
@@ -113,7 +113,7 @@ RBSOR
 - Python pure MPI outperforms the archived Python hybrid configuration for this workload.
 - The archived OpenMP package is complete: 2,160 successful rows and no failed rows.
 - The archived MPI and hybrid packages contain many failed or timed-out rows. Every retained successful distributed-memory row is Python.
-- Historical C/C++ MPI and hybrid jobs failed to rebuild. Their compiler-wrapper Makefiles are repaired in this branch, but those configurations must be rerun before a cross-language MPI comparison is reported.
+- Historical C/C++ MPI and hybrid performance jobs did not produce successful archived rows. Their compiler-wrapper Makefiles are repaired and now clean-build and pass smoke tests in CI, but full performance configurations must be rerun before a cross-language MPI comparison is reported.
 
 The generated source tables are in [`results/selected/`](results/selected/README.md). Regenerate them from the existing archive with:
 
@@ -184,7 +184,7 @@ Medians and variability are preferred over the minimum observed runtime.
 
 ## Current limitations and reruns still required
 
-1. Rebuild and rerun C and C++ MPI/hybrid domain cases after the compiler-wrapper repair.
+1. Rerun the full C and C++ MPI/hybrid performance matrices after the verified compiler-wrapper repair.
 2. Add one common convergence-controlled protocol before making time-to-solution claims.
 3. Validate the streamfunction–vorticity domain solvers against accepted cavity reference quantities.
 4. Repair and revalidate CUDA before reporting CPU/GPU speedup.
