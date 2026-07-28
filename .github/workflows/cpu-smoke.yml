@@ -35,8 +35,11 @@ jobs:
       - name: Check critical Python syntax
         run: python scripts/check_repository_consistency.py --check python
 
-      - name: Check tracked repository artifacts
-        run: python scripts/check_repository_consistency.py --check artifacts
+      - name: Check tracked Python caches
+        run: python scripts/check_repository_consistency.py --check cache
+
+      - name: Check tracked backup files
+        run: python scripts/check_repository_consistency.py --check backup
 
       - name: Install OpenMPI and pinned Python dependencies
         run: |
