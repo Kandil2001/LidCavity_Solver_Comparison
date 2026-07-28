@@ -19,40 +19,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check array job backups
-        run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/array
-
-      - name: Check language job backups
+      - name: Collect legacy run-job backup names
         run: |
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/c_
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/cpp_
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/python_
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/octave_
+          git ls-files 'jobs/run*' | grep -E '(\.bak($|_)|\.bak_)' > tracked-run-backups.txt || true
+          cat tracked-run-backups.txt
 
-      - name: Check submit and make helper backups
-        run: |
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/submit
-          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/make
+      - name: Upload legacy run-job backup names
+        uses: actions/upload-artifact@v4
+        with:
+          name: tracked-run-backups
+          path: tracked-run-backups.txt
+          if-no-files-found: error
 
       - name: Check run helper backups
         run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/run
-
-      - name: Check Stromboli environment backups
-        run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/strom
-
-      - name: Check test job backups
-        run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/test
-
-      - name: Check other jobs backups
-        run: >-
-          python scripts/check_repository_consistency.py --check backup --path-prefix jobs
-          --exclude-prefix jobs/array --exclude-prefix jobs/c_ --exclude-prefix jobs/cpp_
-          --exclude-prefix jobs/python_ --exclude-prefix jobs/octave_
-          --exclude-prefix jobs/submit --exclude-prefix jobs/make --exclude-prefix jobs/run
-          --exclude-prefix jobs/strom --exclude-prefix jobs/test
-
-      - name: Check all other backup files
-        run: python scripts/check_repository_consistency.py --check backup --exclude-prefix jobs
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -61,17 +41,8 @@ jobs:
           cache: pip
           cache-dependency-path: .github/requirements-ci.txt
 
-      - name: Check documentation and source structure
-        run: python scripts/check_repository_consistency.py --check structure
-
-      - name: Check shell paths and syntax
-        run: python scripts/check_repository_consistency.py --check shell
-
-      - name: Check critical Python syntax
-        run: python scripts/check_repository_consistency.py --check python
-
-      - name: Check tracked Python caches
-        run: python scripts/check_repository_consistency.py --check cache
+      - name: Check repository consistency
+        run: python scripts/check_repository_consistency.py
 
       - name: Install OpenMPI and pinned Python dependencies
         run: |
