@@ -118,7 +118,16 @@ def check_python() -> list[str]:
     return errors
 
 
-def check_cache() -> list[str]:
+def path_in_scope(relative: str, prefix: str | None, exclude_prefixes: list[str]) -> bool:
+    if prefix and not (relative == prefix or relative.startswith(prefix.rstrip("/") + "/")):
+        return False
+    return not any(
+        relative == excluded or relative.startswith(excluded.rstrip("/") + "/")
+        for excluded in exclude_prefixes
+    )
+
+
+def check_cache(prefix: str | None, exclude_prefixes: list[str]) -> list[str]:
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
@@ -126,13 +135,15 @@ def check_cache() -> list[str]:
 
     errors = []
     for relative in tracked:
+        if not path_in_scope(relative, prefix, exclude_prefixes):
+            continue
         path = Path(relative)
         if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
             errors.append(f"tracked Python cache artifact: {relative}")
     return errors
 
 
-def check_backup() -> list[str]:
+def check_backup(prefix: str | None, exclude_prefixes: list[str]) -> list[str]:
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
@@ -140,39 +151,48 @@ def check_backup() -> list[str]:
 
     errors = []
     for relative in tracked:
+        if not path_in_scope(relative, prefix, exclude_prefixes):
+            continue
         path = Path(relative)
         if path.suffix == ".bak" or ".bak_" in path.name:
             errors.append(f"tracked backup artifact: {relative}")
     return errors
 
 
-CHECKS = {
-    "structure": check_structure,
-    "shell": check_shell,
-    "python": check_python,
-    "cache": check_cache,
-    "backup": check_backup,
-}
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check repository structure without running CFD cases.")
     parser.add_argument(
         "--check",
-        choices=["all", *CHECKS],
+        choices=["all", "structure", "shell", "python", "cache", "backup"],
         default="all",
         help="Run one category or all checks.",
     )
+    parser.add_argument("--path-prefix", help="Limit cache or backup checks to a repository path prefix.")
+    parser.add_argument(
+        "--exclude-prefix",
+        action="append",
+        default=[],
+        help="Exclude a repository path prefix; may be supplied more than once.",
+    )
     args = parser.parse_args()
 
-    selected = list(CHECKS) if args.check == "all" else [args.check]
+    checks = {
+        "structure": check_structure,
+        "shell": check_shell,
+        "python": check_python,
+        "cache": lambda: check_cache(args.path_prefix, args.exclude_prefix),
+        "backup": lambda: check_backup(args.path_prefix, args.exclude_prefix),
+    }
+    selected = list(checks) if args.check == "all" else [args.check]
+
     errors = []
     for name in selected:
-        category_errors = CHECKS[name]()
+        category_errors = checks[name]()
         if category_errors:
             errors.extend(f"[{name}] {error}" for error in category_errors)
         else:
-            print(f"Repository consistency category passed: {name}")
+            scope = f" ({args.path_prefix})" if args.path_prefix else ""
+            print(f"Repository consistency category passed: {name}{scope}")
 
     if errors:
         print("Repository consistency check failed:")
