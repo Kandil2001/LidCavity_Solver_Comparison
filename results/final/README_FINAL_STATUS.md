@@ -1,43 +1,53 @@
-# Final CPU + CUDA Result Status
+# Archived CPU and CUDA result status
 
-## CPU completeness
+> **Track:** These CPU results belong to the streamfunction–vorticity domain-scaling study. They are fixed-step execution measurements and are not the same numerical benchmark as the original pressure-correction solvers under the repository root.
 
-### OPENMP
-- Cases found: 18
-- Total successful raw rows: 2160
-- Total failed raw rows: 0
-- Missing summaries: 0
+See [`../../docs/BENCHMARK_TRACKS.md`](../../docs/BENCHMARK_TRACKS.md) before comparing these files with `comparison/results/`.
 
-### MPI
-- Cases found: 18
-- Total successful raw rows: 1061
-- Total failed raw rows: 2140
-- Missing summaries: 0
-- Note: case 13 was completed by salvaging successful rows only; failed/time-limited rows remain in the raw file.
+## CPU execution completeness
 
-### HYBRID
-- Cases found: 18
-- Total successful raw rows: 1044
-- Total failed raw rows: 2100
-- Missing summaries: 0
-- Note: case 13 was completed by salvaging successful rows only; failed/time-limited rows remain in the raw file.
+| Family | Cases found | Successful rows | Failed or time-limited rows | Notes |
+|---|---:|---:|---:|---|
+| OpenMP | 18 | 2,160 | 0 | Complete execution archive for the configured C/C++ domain solvers |
+| MPI domain | 18 | 1,061 | 2,140 | Case 13 contains salvaged successful rows |
+| Hybrid MPI + threading | 18 | 1,044 | 2,100 | Case 13 contains salvaged successful rows |
 
-## CUDA
+A successful row means the command completed and produced a readable summary. The domain solvers use configured step counts, so process success does not automatically establish numerical convergence or external validation.
 
-### New exact CUDA RBGS/RBSOR run
-- Rows including header equivalent: 109
-- PressureSolver RBGS: 54
-- PressureSolver RBSOR: 54
-- ValidationPass 0: 108
+## CUDA archive
 
-### Old Jacobi CUDA run
-- Rows including header equivalent: 23
-- PressureSolver JACOBI: 22
+### Exact CUDA RBGS/RBSOR run
 
-## Recommended usage
+- 108 data rows: 54 RBGS and 54 RBSOR.
+- All 108 rows currently have `ValidationPass = 0` under the configured Ghia thresholds.
 
-- Use OpenMP CPU, salvaged MPI/Hybrid summaries, and the new CUDA RBGS/RBSOR summary for runtime comparison.
-- Keep raw failed rows in the audit/completeness table.
-- Do not present MPI/Hybrid case 13 as fully clean; present it as partially salvaged from successful rows.
-- Do not present CUDA validation as passed; all 108 rows in the new RBGS/RBSOR run have ValidationPass = 0.
+### Older Jacobi CUDA run
 
+- 22 retained data rows.
+- Kept as historical prototype evidence.
+
+The CUDA implementation is projection-based and is not numerically identical to the streamfunction–vorticity CPU domain archive. CPU/CUDA runtime plots are therefore exploratory engineering measurements, not a validated same-algorithm speedup study.
+
+## Safe usage of this archive
+
+Use these files for:
+
+- execution completeness and failure-rate analysis;
+- fixed-step runtime distributions;
+- OpenMP, MPI, and hybrid scaling diagnostics;
+- RBGS versus RBSOR execution comparisons when the full configuration matches;
+- identifying cases that need rerunning.
+
+Do not use them alone for:
+
+- a final time-to-convergence ranking;
+- a final fastest-language claim;
+- a validated CPU-versus-GPU speedup;
+- a claim that `status=success` means the CFD solution converged;
+- a broad ranking based only on the minimum observed runtime.
+
+## Special cases
+
+- MPI and hybrid case 13 were partially salvaged from successful rows. Failed and time-limited rows remain part of the completeness record.
+- Current scaling reports should keep pressure solver, kernel style, language, core count, rank count, thread count, and repetition explicit.
+- Numerical convergence and validation fields should be added before any future final rerun matrix is interpreted scientifically.
