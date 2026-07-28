@@ -118,17 +118,29 @@ def check_python() -> list[str]:
     return errors
 
 
-def check_artifacts() -> list[str]:
-    errors = []
+def check_cache() -> list[str]:
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
         return [f"could not inspect tracked files: {error}"]
 
+    errors = []
     for relative in tracked:
         path = Path(relative)
         if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
             errors.append(f"tracked Python cache artifact: {relative}")
+    return errors
+
+
+def check_backup() -> list[str]:
+    try:
+        tracked = tracked_files()
+    except (OSError, subprocess.CalledProcessError) as error:
+        return [f"could not inspect tracked files: {error}"]
+
+    errors = []
+    for relative in tracked:
+        path = Path(relative)
         if path.suffix == ".bak" or ".bak_" in path.name:
             errors.append(f"tracked backup artifact: {relative}")
     return errors
@@ -138,7 +150,8 @@ CHECKS = {
     "structure": check_structure,
     "shell": check_shell,
     "python": check_python,
-    "artifacts": check_artifacts,
+    "cache": check_cache,
+    "backup": check_backup,
 }
 
 
