@@ -116,9 +116,15 @@ def main() -> int:
         if not path.is_file():
             errors.append(f"missing shell script: {relative}")
             continue
-        check = subprocess.run(["bash", "-n", str(path)], text=True, capture_output=True)
+        script_bytes = path.read_bytes().replace(b"\r\n", b"\n")
+        check = subprocess.run(
+            ["bash", "-n", "-s"],
+            input=script_bytes,
+            capture_output=True,
+        )
         if check.returncode:
-            errors.append(f"shell syntax error in {relative}: {check.stderr.strip()}")
+            stderr = check.stderr.decode("utf-8", errors="replace").strip()
+            errors.append(f"shell syntax error in {relative}: {stderr}")
 
     for relative in CRITICAL_PYTHON_SCRIPTS:
         path = ROOT / relative
