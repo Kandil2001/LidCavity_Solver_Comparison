@@ -19,14 +19,37 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Collect tracked-file manifest
-        run: git ls-files > repository-manifest.txt
+      - name: Collect cleanup inspection packages
+        run: |
+          git ls-files > repository-manifest.txt
+          tar -czf repository-text.tar.gz \
+            .github docs scripts jobs hpc \
+            README.md README_ONE_COMMAND.md README_RUN_ON_STROMBOLI.md \
+            Makefile PACKAGE_MANIFEST.txt CONTRIBUTING.md \
+            00_setup_lid_env.sh 01_prepare_stromboli.sh 02_test_one_case.sh \
+            03_submit_all.sh 04_merge_after_finish.sh RUN_EVERYTHING_ON_STROMBOLI.sh \
+            c/README.md c/serial/Makefile c/serial/README.md c/openmp/Makefile c/openmp/README.md c/mpi \
+            cpp/README.md cpp/serial/Makefile cpp/serial/README.md cpp/openmp/Makefile cpp/openmp/README.md cpp/mpi \
+            python/README.md python/serial/Makefile python/serial/README.md python/mpi \
+            src/c src/cpp src/python 2>/dev/null
+          tar -czf result-summaries.tar.gz \
+            results/final/comparisons \
+            results/final/cpu_case_summaries \
+            results/final/cpu_all_best_by_solver.csv \
+            results/final/README_FINAL_STATUS.md \
+            results/final/README_PLOTS_AND_COMPARISONS.md \
+            results/cuda \
+            comparison/results/final \
+            comparison/results/final_clean 2>/dev/null
 
-      - name: Upload tracked-file manifest
+      - name: Upload cleanup inspection packages
         uses: actions/upload-artifact@v4
         with:
-          name: repository-manifest
-          path: repository-manifest.txt
+          name: repository-cleanup-inspection
+          path: |
+            repository-manifest.txt
+            repository-text.tar.gz
+            result-summaries.tar.gz
           if-no-files-found: error
 
       - name: Set up Python
