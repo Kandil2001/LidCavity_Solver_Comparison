@@ -4,6 +4,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 PYTHON=${PYTHON:-python3}
+SRC_ROOT=${SRC_ROOT:-src}
 RANKS=${RANKS:-"1 2 4 8 16"}
 THREADS_LIST=${THREADS_LIST:-"1 2 4 8 16"}
 # Hybrid pairs are written as MPI-ranks x threads-per-rank. Default total cores: 1,2,4,8,16.
@@ -37,6 +38,7 @@ RUN_LOG="$LOG_DIR/strong_scaling_$(date +%Y%m%d_%H%M%S).log"
 log(){ echo "$@" | tee -a "$RUN_LOG"; }
 
 log "Strong-scaling study"
+log "SRC_ROOT=$SRC_ROOT"
 log "RANKS=$RANKS"
 log "THREADS_LIST=$THREADS_LIST"
 log "HYBRID_PAIRS=$HYBRID_PAIRS"
@@ -48,34 +50,48 @@ log "Start: $(date)"
 
 # solver_group|dir|language|parallel_model|kernel_style|summary_path
 MPI_SOLVERS=(
-"c_mpi_domain_looped|c/mpi_domain_looped|c|mpi_domain|looped|c/mpi_domain_looped/results/data/c_mpi_domain_looped_summary.csv"
-"c_mpi_domain_vectorized|c/mpi_domain_vectorized|c|mpi_domain|vectorized|c/mpi_domain_vectorized/results/data/c_mpi_domain_vectorized_summary.csv"
-"cpp_mpi_domain_looped|cpp/mpi_domain_looped|cpp|mpi_domain|looped|cpp/mpi_domain_looped/results/data/cpp_mpi_domain_looped_summary.csv"
-"cpp_mpi_domain_vectorized|cpp/mpi_domain_vectorized|cpp|mpi_domain|vectorized|cpp/mpi_domain_vectorized/results/data/cpp_mpi_domain_vectorized_summary.csv"
-"python_mpi_domain_looped|python/mpi_domain_looped|python|mpi_domain|looped|python/mpi_domain_looped/results/data/python_mpi_domain_looped_summary.csv"
-"python_mpi_domain_vectorized|python/mpi_domain_vectorized|python|mpi_domain|vectorized|python/mpi_domain_vectorized/results/data/python_mpi_domain_vectorized_summary.csv"
+"c_mpi_domain_looped|$SRC_ROOT/c/mpi_domain_looped|c|mpi_domain|looped|$SRC_ROOT/c/mpi_domain_looped/results/data/c_mpi_domain_looped_summary.csv"
+"c_mpi_domain_vectorized|$SRC_ROOT/c/mpi_domain_vectorized|c|mpi_domain|vectorized|$SRC_ROOT/c/mpi_domain_vectorized/results/data/c_mpi_domain_vectorized_summary.csv"
+"cpp_mpi_domain_looped|$SRC_ROOT/cpp/mpi_domain_looped|cpp|mpi_domain|looped|$SRC_ROOT/cpp/mpi_domain_looped/results/data/cpp_mpi_domain_looped_summary.csv"
+"cpp_mpi_domain_vectorized|$SRC_ROOT/cpp/mpi_domain_vectorized|cpp|mpi_domain|vectorized|$SRC_ROOT/cpp/mpi_domain_vectorized/results/data/cpp_mpi_domain_vectorized_summary.csv"
+"python_mpi_domain_looped|$SRC_ROOT/python/mpi_domain_looped|python|mpi_domain|looped|$SRC_ROOT/python/mpi_domain_looped/results/data/python_mpi_domain_looped_summary.csv"
+"python_mpi_domain_vectorized|$SRC_ROOT/python/mpi_domain_vectorized|python|mpi_domain|vectorized|$SRC_ROOT/python/mpi_domain_vectorized/results/data/python_mpi_domain_vectorized_summary.csv"
 )
 HYBRID_SOLVERS=(
-"c_hybrid_mpi_openmp_looped|c/hybrid_mpi_openmp_looped|c|hybrid_mpi_openmp|looped|c/hybrid_mpi_openmp_looped/results/data/c_hybrid_mpi_openmp_looped_summary.csv"
-"c_hybrid_mpi_openmp_vectorized|c/hybrid_mpi_openmp_vectorized|c|hybrid_mpi_openmp|vectorized|c/hybrid_mpi_openmp_vectorized/results/data/c_hybrid_mpi_openmp_vectorized_summary.csv"
-"cpp_hybrid_mpi_openmp_looped|cpp/hybrid_mpi_openmp_looped|cpp|hybrid_mpi_openmp|looped|cpp/hybrid_mpi_openmp_looped/results/data/cpp_hybrid_mpi_openmp_looped_summary.csv"
-"cpp_hybrid_mpi_openmp_vectorized|cpp/hybrid_mpi_openmp_vectorized|cpp|hybrid_mpi_openmp|vectorized|cpp/hybrid_mpi_openmp_vectorized/results/data/cpp_hybrid_mpi_openmp_vectorized_summary.csv"
-"python_hybrid_mpi_threaded_looped|python/hybrid_mpi_openmp_looped|python|hybrid_mpi_threaded|looped|python/hybrid_mpi_openmp_looped/results/data/python_hybrid_mpi_threaded_looped_summary.csv"
-"python_hybrid_mpi_threaded_vectorized|python/hybrid_mpi_openmp_vectorized|python|hybrid_mpi_threaded|vectorized|python/hybrid_mpi_openmp_vectorized/results/data/python_hybrid_mpi_threaded_vectorized_summary.csv"
+"c_hybrid_mpi_openmp_looped|$SRC_ROOT/c/hybrid_mpi_openmp_looped|c|hybrid_mpi_openmp|looped|$SRC_ROOT/c/hybrid_mpi_openmp_looped/results/data/c_hybrid_mpi_openmp_looped_summary.csv"
+"c_hybrid_mpi_openmp_vectorized|$SRC_ROOT/c/hybrid_mpi_openmp_vectorized|c|hybrid_mpi_openmp|vectorized|$SRC_ROOT/c/hybrid_mpi_openmp_vectorized/results/data/c_hybrid_mpi_openmp_vectorized_summary.csv"
+"cpp_hybrid_mpi_openmp_looped|$SRC_ROOT/cpp/hybrid_mpi_openmp_looped|cpp|hybrid_mpi_openmp|looped|$SRC_ROOT/cpp/hybrid_mpi_openmp_looped/results/data/cpp_hybrid_mpi_openmp_looped_summary.csv"
+"cpp_hybrid_mpi_openmp_vectorized|$SRC_ROOT/cpp/hybrid_mpi_openmp_vectorized|cpp|hybrid_mpi_openmp|vectorized|$SRC_ROOT/cpp/hybrid_mpi_openmp_vectorized/results/data/cpp_hybrid_mpi_openmp_vectorized_summary.csv"
+"python_hybrid_mpi_threaded_looped|$SRC_ROOT/python/hybrid_mpi_openmp_looped|python|hybrid_mpi_threaded|looped|$SRC_ROOT/python/hybrid_mpi_openmp_looped/results/data/python_hybrid_mpi_threaded_looped_summary.csv"
+"python_hybrid_mpi_threaded_vectorized|$SRC_ROOT/python/hybrid_mpi_openmp_vectorized|python|hybrid_mpi_threaded|vectorized|$SRC_ROOT/python/hybrid_mpi_openmp_vectorized/results/data/python_hybrid_mpi_threaded_vectorized_summary.csv"
 )
 OPENMP_SOLVERS=(
-# New OpenMP-only streamfunction-vorticity domain solvers for apples-to-apples comparison with MPI/hybrid domain family.
-"c_openmp_domain_looped|c/openmp_domain_looped|c|openmp_domain|looped|c/openmp_domain_looped/results/data/c_openmp_domain_looped_summary.csv"
-"c_openmp_domain_vectorized|c/openmp_domain_vectorized|c|openmp_domain|vectorized|c/openmp_domain_vectorized/results/data/c_openmp_domain_vectorized_summary.csv"
-"cpp_openmp_domain_looped|cpp/openmp_domain_looped|cpp|openmp_domain|looped|cpp/openmp_domain_looped/results/data/cpp_openmp_domain_looped_summary.csv"
-"cpp_openmp_domain_vectorized|cpp/openmp_domain_vectorized|cpp|openmp_domain|vectorized|cpp/openmp_domain_vectorized/results/data/cpp_openmp_domain_vectorized_summary.csv"
+"c_openmp_domain_looped|$SRC_ROOT/c/openmp_domain_looped|c|openmp_domain|looped|$SRC_ROOT/c/openmp_domain_looped/results/data/c_openmp_domain_looped_summary.csv"
+"c_openmp_domain_vectorized|$SRC_ROOT/c/openmp_domain_vectorized|c|openmp_domain|vectorized|$SRC_ROOT/c/openmp_domain_vectorized/results/data/c_openmp_domain_vectorized_summary.csv"
+"cpp_openmp_domain_looped|$SRC_ROOT/cpp/openmp_domain_looped|cpp|openmp_domain|looped|$SRC_ROOT/cpp/openmp_domain_looped/results/data/cpp_openmp_domain_looped_summary.csv"
+"cpp_openmp_domain_vectorized|$SRC_ROOT/cpp/openmp_domain_vectorized|cpp|openmp_domain|vectorized|$SRC_ROOT/cpp/openmp_domain_vectorized/results/data/cpp_openmp_domain_vectorized_summary.csv"
 )
 if [[ "$RUN_ORIGINAL_OPENMP_CONTEXT" == "1" || "$RUN_ORIGINAL_OPENMP_CONTEXT" == "true" ]]; then
     OPENMP_SOLVERS+=(
-    "c_openmp_original_simple|c/openmp|c|openmp_original_simple|original_simple|c/openmp/results/data/study_summary_single.csv"
-    "cpp_openmp_original_simple|cpp/openmp|cpp|openmp_original_simple|original_simple|cpp/openmp/results/data/study_summary_single.csv"
+    "c_openmp_original_pressure_correction|c/openmp|c|openmp_original_pressure_correction|original|c/openmp/results/data/study_summary_single.csv"
+    "cpp_openmp_original_pressure_correction|cpp/openmp|cpp|openmp_original_pressure_correction|original|cpp/openmp/results/data/study_summary_single.csv"
     )
 fi
+
+check_entries(){
+    local entry dir
+    for entry in "$@"; do
+        IFS='|' read -r _ dir _ <<< "$entry"
+        if [[ ! -f "$dir/Makefile" ]]; then
+            log "ERROR: missing solver Makefile: $dir/Makefile"
+            log "The organized domain solvers are expected under SRC_ROOT=$SRC_ROOT."
+            exit 2
+        fi
+    done
+}
+if [[ "$RUN_MPI" == "1" || "$RUN_MPI" == "true" ]]; then check_entries "${MPI_SOLVERS[@]}"; fi
+if [[ "$RUN_HYBRID" == "1" || "$RUN_HYBRID" == "true" ]]; then check_entries "${HYBRID_SOLVERS[@]}"; fi
+if [[ "$RUN_OPENMP" == "1" || "$RUN_OPENMP" == "true" ]]; then check_entries "${OPENMP_SOLVERS[@]}"; fi
 
 append_row(){
     local solver="$1" lang="$2" model="$3" kernel="$4" summary="$5" case_id="$6" N="$7" RE="$8" scheme="$9" steps="${10}" piters="${11}" ranks="${12}" threads="${13}" cores="${14}" rep="${15}" status="${16}"
@@ -91,10 +107,10 @@ run_one(){
     local solver="$1" dir="$2" lang="$3" model="$4" kernel="$5" summary="$6" case_id="$7" N="$8" RE="$9" scheme="${10}" steps="${11}" piters="${12}" ranks="${13}" threads="${14}" cores="${15}" rep="${16}"
     rm -f "$summary"
     log ""
-    log "===== $solver case=$case_id cores=$cores ranks=$ranks threads=$threads repeat=$rep ====="
+    log "===== $solver case=$case_id pressure=$poisson_solver cores=$cores ranks=$ranks threads=$threads repeat=$rep ====="
     local rc=0
     if [[ "$model" == openmp* ]]; then
-        OMP_NUM_THREADS="$threads" make -C "$dir" run OMP_NUM_THREADS="$threads" N="$N" RE="$RE" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
+        OMP_NUM_THREADS="$threads" make -C "$dir" run OMP_NUM_THREADS="$threads" N="$N" RE="$RE" STEPS="$steps" POISSON_ITERS="$piters" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
     elif [[ "$model" == "hybrid_mpi_threaded" ]]; then
         NUMBA_NUM_THREADS="$threads" make -C "$dir" run PYTHON="$PYTHON" NP="$ranks" NUMBA_NUM_THREADS="$threads" N="$N" RE="$RE" STEPS="$steps" POISSON_ITERS="$piters" SCHEME="$scheme" POISSON_SOLVER="$poisson_solver" SOR_OMEGA="$SOR_OMEGA" NO_FIELDS=1 -j"$MAKE_JOBS" 2>&1 | tee -a "$RUN_LOG" || rc=$?
     elif [[ "$model" == "hybrid_mpi_openmp" ]]; then
