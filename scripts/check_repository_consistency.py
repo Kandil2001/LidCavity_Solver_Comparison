@@ -95,11 +95,8 @@ def check_shell() -> list[str]:
         syntax = subprocess.run(["bash", "-n", str(path)], text=True, capture_output=True)
         if syntax.returncode != 0:
             errors.append(f"shell syntax error in {relative}: {syntax.stderr.strip()}")
-
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            if not any(token in line for token in LEGACY_DOMAIN_TOKENS):
-                continue
-            if "src/" not in line and "SRC_ROOT" not in line:
+            if any(token in line for token in LEGACY_DOMAIN_TOKENS) and "src/" not in line and "SRC_ROOT" not in line:
                 errors.append(f"legacy pre-src domain path in {relative}:{line_number}: {line.strip()}")
     return errors
 
@@ -118,8 +115,15 @@ def check_python() -> list[str]:
     return errors
 
 
-def path_in_scope(relative: str, prefix: str | None, exclude_prefixes: list[str]) -> bool:
-    if prefix and not (relative == prefix or relative.startswith(prefix.rstrip("/") + "/")):
+def path_in_scope(
+    relative: str,
+    path_prefix: str | None,
+    starts_with: str | None,
+    exclude_prefixes: list[str],
+) -> bool:
+    if path_prefix and not (relative == path_prefix or relative.startswith(path_prefix.rstrip("/") + "/")):
+        return False
+    if starts_with and not relative.startswith(starts_with):
         return False
     return not any(
         relative == excluded or relative.startswith(excluded.rstrip("/") + "/")
@@ -127,7 +131,12 @@ def path_in_scope(relative: str, prefix: str | None, exclude_prefixes: list[str]
     )
 
 
-def check_cache(prefix: str | None, exclude_prefixes: list[str]) -> list[str]:
+def artifact_files(
+    artifact_type: str,
+    path_prefix: str | None,
+    starts_with: str | None,
+    exclude_prefixes: list[str],
+) -> list[str]:
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
@@ -135,26 +144,12 @@ def check_cache(prefix: str | None, exclude_prefixes: list[str]) -> list[str]:
 
     errors = []
     for relative in tracked:
-        if not path_in_scope(relative, prefix, exclude_prefixes):
+        if not path_in_scope(relative, path_prefix, starts_with, exclude_prefixes):
             continue
         path = Path(relative)
-        if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+        if artifact_type == "cache" and ("__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}):
             errors.append(f"tracked Python cache artifact: {relative}")
-    return errors
-
-
-def check_backup(prefix: str | None, exclude_prefixes: list[str]) -> list[str]:
-    try:
-        tracked = tracked_files()
-    except (OSError, subprocess.CalledProcessError) as error:
-        return [f"could not inspect tracked files: {error}"]
-
-    errors = []
-    for relative in tracked:
-        if not path_in_scope(relative, prefix, exclude_prefixes):
-            continue
-        path = Path(relative)
-        if path.suffix == ".bak" or ".bak_" in path.name:
+        if artifact_type == "backup" and (path.suffix == ".bak" or ".bak_" in path.name):
             errors.append(f"tracked backup artifact: {relative}")
     return errors
 
@@ -167,7 +162,8 @@ def main() -> int:
         default="all",
         help="Run one category or all checks.",
     )
-    parser.add_argument("--path-prefix", help="Limit cache or backup checks to a repository path prefix.")
+    parser.add_argument("--path-prefix", help="Limit cache or backup checks to a path or directory.")
+    parser.add_argument("--path-starts-with", help="Limit cache or backup checks by literal path prefix.")
     parser.add_argument(
         "--exclude-prefix",
         action="append",
@@ -180,8 +176,8 @@ def main() -> int:
         "structure": check_structure,
         "shell": check_shell,
         "python": check_python,
-        "cache": lambda: check_cache(args.path_prefix, args.exclude_prefix),
-        "backup": lambda: check_backup(args.path_prefix, args.exclude_prefix),
+        "cache": lambda: artifact_files("cache", args.path_prefix, args.path_starts_with, args.exclude_prefix),
+        "backup": lambda: artifact_files("backup", args.path_prefix, args.path_starts_with, args.exclude_prefix),
     }
     selected = list(checks) if args.check == "all" else [args.check]
 
@@ -191,8 +187,8 @@ def main() -> int:
         if category_errors:
             errors.extend(f"[{name}] {error}" for error in category_errors)
         else:
-            scope = f" ({args.path_prefix})" if args.path_prefix else ""
-            print(f"Repository consistency category passed: {name}{scope}")
+            scope = args.path_prefix or args.path_starts_with or "repository"
+            print(f"Repository consistency category passed: {name} ({scope})")
 
     if errors:
         print("Repository consistency check failed:")
