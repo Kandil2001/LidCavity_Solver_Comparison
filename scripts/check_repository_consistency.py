@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import subprocess
 from pathlib import Path
 
@@ -73,17 +74,19 @@ def tracked_files() -> list[str]:
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
-def main() -> int:
-    errors: list[str] = []
-
+def check_structure() -> list[str]:
+    errors = []
     for relative in REQUIRED_DOCS:
         if not (ROOT / relative).is_file():
             errors.append(f"missing required documentation: {relative}")
-
     for relative in DOMAIN_SOLVER_DIRS:
         if not (ROOT / relative / "Makefile").is_file():
             errors.append(f"missing organized domain solver Makefile: {relative}/Makefile")
+    return errors
 
+
+def check_shell() -> list[str]:
+    errors = []
     for relative in ACTIVE_SHELL_SCRIPTS:
         path = ROOT / relative
         if not path.is_file():
@@ -96,10 +99,13 @@ def main() -> int:
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
             if not any(token in line for token in LEGACY_DOMAIN_TOKENS):
                 continue
-            # Organized paths may use either a literal src/ prefix or the configurable SRC_ROOT variable.
             if "src/" not in line and "SRC_ROOT" not in line:
                 errors.append(f"legacy pre-src domain path in {relative}:{line_number}: {line.strip()}")
+    return errors
 
+
+def check_python() -> list[str]:
+    errors = []
     for relative in CRITICAL_PYTHON_SCRIPTS:
         path = ROOT / relative
         if not path.is_file():
@@ -109,12 +115,15 @@ def main() -> int:
             compile(path.read_text(encoding="utf-8"), str(path), "exec")
         except SyntaxError as error:
             errors.append(f"Python syntax error in {relative}: {error}")
+    return errors
 
+
+def check_artifacts() -> list[str]:
+    errors = []
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
-        errors.append(f"could not inspect tracked files: {error}")
-        tracked = []
+        return [f"could not inspect tracked files: {error}"]
 
     for relative in tracked:
         path = Path(relative)
@@ -122,6 +131,35 @@ def main() -> int:
             errors.append(f"tracked Python cache artifact: {relative}")
         if path.suffix == ".bak" or ".bak_" in path.name:
             errors.append(f"tracked backup artifact: {relative}")
+    return errors
+
+
+CHECKS = {
+    "structure": check_structure,
+    "shell": check_shell,
+    "python": check_python,
+    "artifacts": check_artifacts,
+}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Check repository structure without running CFD cases.")
+    parser.add_argument(
+        "--check",
+        choices=["all", *CHECKS],
+        default="all",
+        help="Run one category or all checks.",
+    )
+    args = parser.parse_args()
+
+    selected = list(CHECKS) if args.check == "all" else [args.check]
+    errors = []
+    for name in selected:
+        category_errors = CHECKS[name]()
+        if category_errors:
+            errors.extend(f"[{name}] {error}" for error in category_errors)
+        else:
+            print(f"Repository consistency category passed: {name}")
 
     if errors:
         print("Repository consistency check failed:")
@@ -130,10 +168,6 @@ def main() -> int:
         return 1
 
     print("Repository consistency check passed.")
-    print(f"Checked {len(REQUIRED_DOCS)} documentation files.")
-    print(f"Checked {len(DOMAIN_SOLVER_DIRS)} organized domain solver directories.")
-    print(f"Checked {len(ACTIVE_SHELL_SCRIPTS)} shell scripts.")
-    print(f"Checked {len(CRITICAL_PYTHON_SCRIPTS)} Python scripts.")
     return 0
 
 
