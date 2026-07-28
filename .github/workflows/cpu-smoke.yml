@@ -21,7 +21,9 @@ jobs:
 
       - name: Collect cleanup inspection packages
         run: |
-          git ls-files > repository-manifest.txt
+          git fetch origin "$GITHUB_HEAD_REF" --depth=1
+          git rev-parse 'FETCH_HEAD^{tree}' > branch-tree-sha.txt
+          git ls-tree -r --name-only FETCH_HEAD > repository-manifest.txt
           tar -czf repository-text.tar.gz \
             .github docs scripts jobs hpc \
             README.md README_ONE_COMMAND.md README_RUN_ON_STROMBOLI.md \
@@ -47,6 +49,7 @@ jobs:
         with:
           name: repository-cleanup-inspection
           path: |
+            branch-tree-sha.txt
             repository-manifest.txt
             repository-text.tar.gz
             result-summaries.tar.gz
