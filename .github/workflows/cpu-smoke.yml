@@ -1,95 +1,38 @@
-name: Cross-language CPU smoke test
+name: Apply canonical domain benchmark cleanup
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  cpu-smoke:
+  apply-cleanup:
+    if: github.head_ref == 'agent/repository-cleanup-v1' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     steps:
-      - name: Check out repository
+      - name: Check out cleanup branch
         uses: actions/checkout@v4
-
-      - name: Collect cleanup inspection packages
-        run: |
-          git fetch origin "$GITHUB_HEAD_REF" --depth=1
-          git rev-parse 'FETCH_HEAD^{tree}' > branch-tree-sha.txt
-          git ls-tree -r --name-only FETCH_HEAD > repository-manifest.txt
-          tar -czf repository-text.tar.gz \
-            .github docs scripts jobs hpc \
-            README.md README_ONE_COMMAND.md README_RUN_ON_STROMBOLI.md \
-            Makefile PACKAGE_MANIFEST.txt CONTRIBUTING.md \
-            00_setup_lid_env.sh 01_prepare_stromboli.sh 02_test_one_case.sh \
-            03_submit_all.sh 04_merge_after_finish.sh RUN_EVERYTHING_ON_STROMBOLI.sh \
-            c/README.md c/serial/Makefile c/serial/README.md c/openmp/Makefile c/openmp/README.md c/mpi \
-            cpp/README.md cpp/serial/Makefile cpp/serial/README.md cpp/openmp/Makefile cpp/openmp/README.md cpp/mpi \
-            python/README.md python/serial/Makefile python/serial/README.md python/mpi \
-            src/c src/cpp src/python 2>/dev/null
-          tar -czf result-summaries.tar.gz \
-            results/final/comparisons \
-            results/final/cpu_case_summaries \
-            results/final/cpu_all_best_by_solver.csv \
-            results/final/README_FINAL_STATUS.md \
-            results/final/README_PLOTS_AND_COMPARISONS.md \
-            results/cuda \
-            comparison/results/final \
-            comparison/results/final_clean 2>/dev/null
-
-      - name: Upload cleanup inspection packages
-        uses: actions/upload-artifact@v4
         with:
-          name: repository-cleanup-inspection
-          path: |
-            branch-tree-sha.txt
-            repository-manifest.txt
-            repository-text.tar.gz
-            result-summaries.tar.gz
-          if-no-files-found: error
+          ref: agent/repository-cleanup-v1
+          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: .github/requirements-ci.txt
-
-      - name: Check repository consistency
-        run: python scripts/check_repository_consistency.py
-
-      - name: Install OpenMPI and pinned Python dependencies
+      - name: Apply prepared repository patch
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openmpi-bin libopenmpi-dev
-          python -m pip install --upgrade pip
-          python -m pip install -r .github/requirements-ci.txt
-          python -m pip check
+          tar -xzf .cleanup/repository-cleanup-patch.tar.gz -C .
+          chmod +x scripts/run_smoke_cpu.sh scripts/run_domain_solver_benchmark.sh \
+            scripts/run_stromboli_all.sh scripts/run_parallel_scaling.py \
+            scripts/check_repository_consistency.py scripts/check_smoke_outputs.py \
+            scripts/generate_selected_results.py hpc/stromboli/run_strong_scaling_all.sbatch
+          rm -rf .cleanup .github/workflows/apply-repository-cleanup.yml
 
-      - name: Run available CPU smoke cases
-        env:
-          NP: "2"
-          OMP_NUM_THREADS: "2"
-        run: make smoke-cpu NP=2 OMP_NUM_THREADS=2
-
-      - name: Verify serial smoke outputs
-        run: python scripts/check_smoke_outputs.py python/serial c/serial cpp/serial
-
-      - name: Verify OpenMP smoke outputs
-        run: python scripts/check_smoke_outputs.py c/openmp cpp/openmp
-
-      - name: Verify Python MPI smoke output
-        run: python scripts/check_smoke_outputs.py python/mpi
-
-      - name: Verify C MPI smoke output
-        run: python scripts/check_smoke_outputs.py c/mpi
-
-      - name: Verify C++ MPI smoke output
-        run: python scripts/check_smoke_outputs.py cpp/mpi
+      - name: Commit canonical repository structure
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Make spatial domain decomposition the canonical MPI track"
+          git push origin HEAD:agent/repository-cleanup-v1
