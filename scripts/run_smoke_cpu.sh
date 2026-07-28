@@ -3,59 +3,43 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
+MODE="${1:-reference}"
 
 run_make() {
     local folder="$1"
     shift
+    [[ -f "$folder/Makefile" ]] || { echo "Missing required Makefile: $folder/Makefile" >&2; return 1; }
     echo
     echo "==> $folder: make $*"
     make -C "$folder" "$@"
 }
 
-try_make() {
-    local folder="$1"
-    shift
-    if [ ! -d "$folder" ]; then
-        echo "Skipping $folder because the folder is missing."
-        return 0
-    fi
-    run_make "$folder" "$@"
-}
-
-echo "Running CPU smoke checks. Missing optional tools are skipped."
-
-if command -v matlab >/dev/null 2>&1 || command -v octave >/dev/null 2>&1; then
-    try_make matlab smoke ENGINE="${ENGINE:-auto}"
-else
-    echo "Skipping MATLAB/Octave smoke check because neither matlab nor octave was found."
-fi
-
-try_make python/serial smoke
-try_make c/serial smoke
-try_make cpp/serial smoke
-try_make c/openmp smoke OMP_NUM_THREADS="${OMP_NUM_THREADS:-4}"
-try_make cpp/openmp smoke OMP_NUM_THREADS="${OMP_NUM_THREADS:-4}"
-
-if command -v mpirun >/dev/null 2>&1 && command -v mpicc >/dev/null 2>&1; then
-    try_make c/mpi_domain smoke NP="${NP:-2}"
-    try_make c/hybrid_mpi_openmp smoke NP="${NP:-2}" OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}"
-else
-    echo "Skipping C domain MPI smoke checks because mpicc or mpirun was not found."
-fi
-
-if command -v mpirun >/dev/null 2>&1 && command -v mpicxx >/dev/null 2>&1; then
-    try_make cpp/mpi_domain smoke NP="${NP:-2}"
-    try_make cpp/hybrid_mpi_openmp smoke NP="${NP:-2}" OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}"
-else
-    echo "Skipping C++ domain MPI smoke checks because mpicxx or mpirun was not found."
-fi
-
-if command -v mpirun >/dev/null 2>&1 && python3 -c "import mpi4py" >/dev/null 2>&1; then
-    try_make python/mpi_domain smoke NP="${NP:-2}"
-    try_make python/hybrid_mpi_openmp smoke NP="${NP:-2}" NUMBA_NUM_THREADS="${NUMBA_NUM_THREADS:-2}"
-else
-    echo "Skipping Python domain MPI smoke checks because mpirun or mpi4py was not found."
-fi
-
-echo
-echo "CPU smoke checks finished."
+case "$MODE" in
+    reference)
+        echo "Running the pressure-correction serial/OpenMP reference smoke tests."
+        if command -v matlab >/dev/null 2>&1 || command -v octave >/dev/null 2>&1; then
+            run_make matlab smoke ENGINE="${ENGINE:-auto}"
+        else
+            echo "Skipping MATLAB/Octave because neither executable is available."
+        fi
+        run_make python/serial smoke NO_FIELDS=1
+        run_make c/serial smoke NO_FIELDS=1
+        run_make cpp/serial smoke NO_FIELDS=1
+        run_make c/openmp smoke OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}" NO_FIELDS=1
+        run_make cpp/openmp smoke OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}" NO_FIELDS=1
+        ;;
+    domain)
+        make smoke-domain \
+            NP="${NP:-2}" \
+            OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}" \
+            NUMBA_NUM_THREADS="${NUMBA_NUM_THREADS:-2}"
+        ;;
+    all)
+        "$0" reference
+        "$0" domain
+        ;;
+    *)
+        echo "Usage: $0 [reference|domain|all]" >&2
+        exit 2
+        ;;
+esac

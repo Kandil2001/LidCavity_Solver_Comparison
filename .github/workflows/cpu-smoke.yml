@@ -1,4 +1,4 @@
-name: Cross-language CPU smoke test
+name: CPU build and smoke tests
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   cpu-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Check out repository
@@ -34,48 +34,51 @@ jobs:
           python -m pip install -r .github/requirements-ci.txt
           python -m pip check
 
-      - name: Run available CPU smoke cases
+      - name: Check repository consistency
+        run: make check
+
+      - name: Clean rebuild compiled domain solvers
+        run: make rebuild-domain
+
+      - name: Smoke reference track
         env:
-          NP: "2"
           OMP_NUM_THREADS: "2"
-        run: make smoke-cpu NP=2 OMP_NUM_THREADS=2
+        run: make smoke-reference OMP_NUM_THREADS=2
 
-      - name: Verify solver-group outputs
-        run: |
-          python3 - <<'PY'
-          import csv
-          from pathlib import Path
+      - name: Verify reference outputs
+        run: python scripts/check_smoke_outputs.py python/serial c/serial cpp/serial c/openmp cpp/openmp
 
-          groups = [
-              Path("python/serial"),
-              Path("c/serial"),
-              Path("cpp/serial"),
-              Path("c/openmp"),
-              Path("cpp/openmp"),
-              Path("python/mpi"),
-              Path("c/mpi"),
-              Path("cpp/mpi"),
-          ]
+      - name: Smoke domain OpenMP
+        run: make smoke-domain-openmp OMP_NUM_THREADS=2
 
-          errors = []
-          for group in groups:
-              summaries = sorted((group / "results" / "data").glob("study_summary_*.csv"))
-              summaries += sorted((group / "results").glob("study_summary_*.csv"))
-              summaries = [path for path in summaries if path.is_file() and path.stat().st_size > 0]
-              if not summaries:
-                  errors.append(f"{group}: no non-empty study summary was generated")
-                  continue
+      - name: Verify domain OpenMP outputs
+        run: >-
+          python scripts/check_smoke_outputs.py
+          src/c/openmp_domain_looped src/c/openmp_domain_vectorized
+          src/cpp/openmp_domain_looped src/cpp/openmp_domain_vectorized
 
-              readable_rows = 0
-              for summary in summaries:
-                  with summary.open(encoding="utf-8", newline="") as file:
-                      readable_rows += sum(1 for _ in csv.DictReader(file))
-              if readable_rows < 1:
-                  errors.append(f"{group}: summary files contain no data rows")
-                  continue
+      - name: Smoke spatial MPI
+        run: make smoke-domain-mpi NP=2
 
-              print(f"Verified {group}: {len(summaries)} summary file(s), {readable_rows} row(s).")
+      - name: Verify spatial MPI outputs
+        run: >-
+          python scripts/check_smoke_outputs.py
+          src/c/mpi_domain_looped src/c/mpi_domain_vectorized
+          src/cpp/mpi_domain_looped src/cpp/mpi_domain_vectorized
+          src/python/mpi_domain_looped src/python/mpi_domain_vectorized
 
-          if errors:
-              raise SystemExit("CPU smoke verification failed:\n- " + "\n- ".join(errors))
-          PY
+      - name: Smoke hybrid domain decomposition
+        run: make smoke-domain-hybrid NP=2 OMP_NUM_THREADS=2 NUMBA_NUM_THREADS=2
+
+      - name: Verify hybrid outputs
+        run: >-
+          python scripts/check_smoke_outputs.py
+          src/c/hybrid_mpi_openmp_looped src/c/hybrid_mpi_openmp_vectorized
+          src/cpp/hybrid_mpi_openmp_looped src/cpp/hybrid_mpi_openmp_vectorized
+          src/python/hybrid_mpi_openmp_looped src/python/hybrid_mpi_openmp_vectorized
+
+      - name: Regenerate selected archived results
+        run: make selected-results
+
+      - name: Confirm selected result files are reproducible
+        run: git diff --exit-code -- results/selected

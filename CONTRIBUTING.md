@@ -1,83 +1,43 @@
 # Contributing
 
-Thank you for your interest in contributing to this lid-driven cavity CFD benchmark.
+Contributions should improve clarity, reproducibility, numerical verification, or benchmark quality without mixing incompatible methods.
 
-This project is primarily a portfolio and learning project, so contributions should keep the repository clear, reproducible, and scientifically honest.
+## Before changing solver behavior
 
-## Good contribution areas
+Document:
 
-Useful contributions include:
+- the affected implementation and numerical track;
+- the mathematical or algorithmic change;
+- expected effects on fields, convergence, and runtime;
+- which archived tables must be regenerated;
+- the verification used to establish correctness.
 
-- fixing build or runtime issues
-- improving documentation
-- improving reproducibility on Linux/HPC systems
-- adding small validation or plotting improvements
-- improving post-processing scripts
-- adding benchmark cases in a controlled way
-- improving code clarity without changing numerical behaviour silently
-
-## Before changing solver behaviour
-
-If a change affects numerical results, please document:
-
-- which implementation is affected
-- what changed numerically
-- whether the change affects runtime
-- whether the change affects validation against Ghia data
-- whether previous benchmark tables need to be regenerated
-
-## Development workflow
-
-1. Create a feature branch.
-2. Make focused changes.
-3. Run a smoke test when possible.
-4. Keep generated temporary outputs out of Git.
-5. Open a pull request with a clear summary.
-
-Example smoke commands:
+## Required checks
 
 ```bash
-make smoke-cpu
+make check
+make rebuild-domain
+make smoke-cpu NP=2 OMP_NUM_THREADS=2 NUMBA_NUM_THREADS=2
+make selected-results
+git diff --exit-code -- results/selected
 ```
 
-or for one implementation:
+A focused implementation can also be checked directly, for example:
 
 ```bash
-cd cpp/serial
-make smoke
+make -C src/cpp/mpi_domain_vectorized smoke NP=2
 ```
 
-## Generated files
+## Repository rules
 
-Do not commit large raw result folders, temporary work folders, build products, local logs, or packaged archives.
+- MPI implementations must spatially decompose one grid.
+- Do not add parameter-sweep scheduling as an MPI solver comparison.
+- Keep the pressure-correction and streamfunction–vorticity tracks separate.
+- Do not commit binaries, caches, backup files, temporary logs, or ad-hoc packaged archives.
+- Raw result archives must retain configuration and repetition metadata.
+- Headline results must use matched configurations and repeated statistics.
+- Do not present execution completion as numerical convergence or validation.
 
-The important final report folders currently kept in Git are:
+## Pull requests
 
-```text
-comparison/results/final_clean/
-comparison/results/physics_fields/
-comparison/figures/final_clean/
-comparison/figures/report_pngs/
-comparison/figures/physics_final/
-```
-
-## Code style
-
-General expectations:
-
-- use readable names
-- avoid unnecessary complexity
-- keep implementation-specific changes inside the relevant folder
-- document assumptions near the code that uses them
-- avoid claiming exact equivalence across languages unless it is actually verified
-
-## Scientific honesty
-
-This repository should be presented as a benchmark and learning project, not as a production-grade CFD solver.
-
-Important scope notes:
-
-- MPI is currently case-level parameter-study parallelism, not domain decomposition.
-- CUDA is a prototype and should be compared carefully.
-- Some cases reach the maximum iteration limit before full convergence.
-- Incomplete solver groups are retained for transparency but should not be used for the fair complete-solver ranking.
+Use a focused branch and explain what changed, why it changed, how it was tested, whether results changed, and what still requires HPC rerunning.

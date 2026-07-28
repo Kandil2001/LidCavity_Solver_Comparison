@@ -1,62 +1,60 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-NP=${NP:-4}
-OMP_NUM_THREADS=${OMP_NUM_THREADS:-2}
-NUMBA_NUM_THREADS=${NUMBA_NUM_THREADS:-2}
-N=${N:-64}
-RE=${RE:-100}
-STEPS=${STEPS:-1000}
-POISSON_ITERS=${POISSON_ITERS:-200}
-SCHEME=${SCHEME:-upwind}
-PYTHON=${PYTHON:-python3}
+NP="${NP:-4}"
+OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}"
+NUMBA_NUM_THREADS="${NUMBA_NUM_THREADS:-2}"
+N="${N:-64}"
+RE="${RE:-100}"
+STEPS="${STEPS:-1000}"
+POISSON_ITERS="${POISSON_ITERS:-200}"
+SCHEME="${SCHEME:-central}"
+POISSON_SOLVER="${POISSON_SOLVER:-RBSOR}"
+KERNEL_STYLE="${KERNEL_STYLE:-vectorized}"
+PYTHON="${PYTHON:-python3}"
 
-export OMP_NUM_THREADS
-export NUMBA_NUM_THREADS
-export OPENBLAS_NUM_THREADS=1
-export MKL_NUM_THREADS=1
-export NUMEXPR_NUM_THREADS=1
+case "$KERNEL_STYLE" in
+    looped|vectorized) ;;
+    *) echo "KERNEL_STYLE must be looped or vectorized" >&2; exit 2 ;;
+esac
 
-mkdir -p comparison/results/domain_clean logs
+required=(
+    "src/c/openmp_domain_${KERNEL_STYLE}"
+    "src/cpp/openmp_domain_${KERNEL_STYLE}"
+    "src/c/mpi_domain_${KERNEL_STYLE}"
+    "src/cpp/mpi_domain_${KERNEL_STYLE}"
+    "src/python/mpi_domain_${KERNEL_STYLE}"
+    "src/c/hybrid_mpi_openmp_${KERNEL_STYLE}"
+    "src/cpp/hybrid_mpi_openmp_${KERNEL_STYLE}"
+    "src/python/hybrid_mpi_openmp_${KERNEL_STYLE}"
+)
 
-RUN_LOG="comparison/results/domain_clean/domain_run_N${N}_Re${RE}_np${NP}_omp${OMP_NUM_THREADS}.log"
-: > "$RUN_LOG"
+for directory in "${required[@]}"; do
+    [[ -f "$directory/Makefile" ]] || { echo "Missing $directory/Makefile" >&2; exit 1; }
+done
 
-log() {
-  echo "$@" | tee -a "$RUN_LOG"
+common=(
+    "N=$N" "RE=$RE" "STEPS=$STEPS" "POISSON_ITERS=$POISSON_ITERS"
+    "SCHEME=$SCHEME" "POISSON_SOLVER=$POISSON_SOLVER" "NO_FIELDS=1"
+)
+
+run() {
+    local label="$1"
+    local directory="$2"
+    shift 2
+    echo
+    echo "==> $label"
+    make -C "$directory" run "${common[@]}" "$@"
 }
 
-run_cmd() {
-  local name="$1"
-  shift
-  log ""
-  log "===== $name ====="
-  log "Command: $*"
-  "$@" 2>&1 | tee -a "$RUN_LOG"
-}
-
-log "Domain-decomposition benchmark"
-log "NP=$NP OMP_NUM_THREADS=$OMP_NUM_THREADS NUMBA_NUM_THREADS=$NUMBA_NUM_THREADS N=$N RE=$RE STEPS=$STEPS POISSON_ITERS=$POISSON_ITERS SCHEME=$SCHEME"
-log "Host: $(hostname)"
-log "Start: $(date)"
-
-# Remove previous domain summary files for this clean run.
-rm -f c/mpi_domain/results/data/*.csv c/hybrid_mpi_openmp/results/data/*.csv       cpp/mpi_domain/results/data/*.csv cpp/hybrid_mpi_openmp/results/data/*.csv       python/mpi_domain/results/data/*.csv python/hybrid_mpi_openmp/results/data/*.csv
-
-run_cmd "C pure MPI domain" make -C c/mpi_domain run NP="$NP" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-run_cmd "C hybrid MPI+OpenMP domain" make -C c/hybrid_mpi_openmp run NP="$NP" OMP_NUM_THREADS="$OMP_NUM_THREADS" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-run_cmd "C++ pure MPI domain" make -C cpp/mpi_domain run NP="$NP" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-run_cmd "C++ hybrid MPI+OpenMP domain" make -C cpp/hybrid_mpi_openmp run NP="$NP" OMP_NUM_THREADS="$OMP_NUM_THREADS" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-run_cmd "Python pure MPI domain" make -C python/mpi_domain run PYTHON="$PYTHON" NP="$NP" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-run_cmd "Python hybrid MPI+threaded domain" make -C python/hybrid_mpi_openmp run PYTHON="$PYTHON" NP="$NP" NUMBA_NUM_THREADS="$NUMBA_NUM_THREADS" N="$N" RE="$RE" STEPS="$STEPS" POISSON_ITERS="$POISSON_ITERS" SCHEME="$SCHEME"
-
-log ""
-log "===== Compare domain solver times ====="
-$PYTHON scripts/compare_domain_solver_times.py 2>&1 | tee -a "$RUN_LOG"
-
-log ""
-log "Finished: $(date)"
-log "Report: comparison/results/domain_clean/domain_runtime_report.md"
+run "C OpenMP $KERNEL_STYLE" "src/c/openmp_domain_${KERNEL_STYLE}" "OMP_NUM_THREADS=$OMP_NUM_THREADS"
+run "C++ OpenMP $KERNEL_STYLE" "src/cpp/openmp_domain_${KERNEL_STYLE}" "OMP_NUM_THREADS=$OMP_NUM_THREADS"
+run "C spatial MPI $KERNEL_STYLE" "src/c/mpi_domain_${KERNEL_STYLE}" "NP=$NP"
+run "C++ spatial MPI $KERNEL_STYLE" "src/cpp/mpi_domain_${KERNEL_STYLE}" "NP=$NP"
+run "Python spatial MPI $KERNEL_STYLE" "src/python/mpi_domain_${KERNEL_STYLE}" "NP=$NP" "PYTHON=$PYTHON"
+run "C hybrid $KERNEL_STYLE" "src/c/hybrid_mpi_openmp_${KERNEL_STYLE}" "NP=$NP" "OMP_NUM_THREADS=$OMP_NUM_THREADS"
+run "C++ hybrid $KERNEL_STYLE" "src/cpp/hybrid_mpi_openmp_${KERNEL_STYLE}" "NP=$NP" "OMP_NUM_THREADS=$OMP_NUM_THREADS"
+run "Python hybrid $KERNEL_STYLE" "src/python/hybrid_mpi_openmp_${KERNEL_STYLE}" "NP=$NP" "NUMBA_NUM_THREADS=$NUMBA_NUM_THREADS" "PYTHON=$PYTHON"

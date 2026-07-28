@@ -1,0 +1,4 @@
+family,configured_rows,successful_rows,failed_or_timed_out_rows,complete_cases,success_rate
+hybrid,3144,1044,2100,0,0.3320610687022901
+mpi,3201,1061,2140,0,0.3314589190877851
+openmp,2160,2160,0,18,1.0

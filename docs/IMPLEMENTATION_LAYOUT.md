@@ -1,53 +1,47 @@
 # Implementation layout
 
-The repository is organised so that every implementation feels like the same project written for a different platform.
-
-## Standard implementation structure
-
-Most implementation folders follow this pattern:
+## Canonical domain implementations
 
 ```text
-README.md        What this implementation does and how to run it
-Makefile         Common build/run commands
-src/             Solver source code
-postprocess/     Plotting or post-processing scripts
-results/         Generated outputs, kept mostly empty in Git
+src/c/
+  openmp_domain_looped/
+  openmp_domain_vectorized/
+  mpi_domain_looped/
+  mpi_domain_vectorized/
+  hybrid_mpi_openmp_looped/
+  hybrid_mpi_openmp_vectorized/
+
+src/cpp/
+  same six variants
+
+src/python/
+  mpi_domain_looped/
+  mpi_domain_vectorized/
+  hybrid_mpi_openmp_looped/
+  hybrid_mpi_openmp_vectorized/
 ```
 
-## Standard result structure
+MPI variants divide one grid across ranks. Hybrid variants combine that spatial decomposition with threads inside each rank.
+
+## Reference implementations
 
 ```text
-results/data/      CSV summaries, field data, residual histories
-results/figures/   generated plots
-results/scaling/   OpenMP, MPI, or CUDA scaling tables
-results/logs/      optional logs from long runs
+matlab/
+python/serial/
+c/serial/
+c/openmp/
+cpp/serial/
+cpp/openmp/
 ```
 
-## MATLAB layout
+These belong to the earlier pressure-correction study.
 
-MATLAB follows the same idea as the compiled and Python implementations, but keeps its application scripts under `src/app/`:
+## Run and result locations
 
-```text
-matlab/README.md
-matlab/Makefile
-matlab/main.m                 compatibility entry point
-matlab/run_quick.m            compatibility entry point
-matlab/run_medium.m           compatibility entry point
-matlab/run_smoke.m            compatibility entry point
-matlab/src/app/               entry scripts and configuration
-matlab/src/core/              numerical operations and SIMPLE loop
-matlab/src/studies/           single-case and parametric-study drivers
-matlab/src/validation/        Ghia benchmark data and validation helpers
-matlab/postprocess/           MATLAB plotting functions
-matlab/results/               generated output folders
-```
+- `scripts/`: local build, smoke, benchmark, and post-processing tools.
+- `hpc/stromboli/`: maintained Slurm entry points.
+- `results/final/`: complete archived domain performance package.
+- `results/selected/`: reproducible README-facing subset.
+- `comparison/figures/physics_final/`: retained pressure-correction validation figures.
 
-The maintained MATLAB source code is under `src/`. The root-level MATLAB files are kept only so that someone opening the `matlab/` folder directly can run simple commands such as `run_quick`.
-
-## C implementation note
-
-The C solver is one compiled serial baseline. Older names such as `serial_c_looped` and `serial_c_vectorized` are accepted as aliases for compatibility, but they are not two separate C algorithms.
-
-## MPI implementation note
-
-The MPI folders distribute independent benchmark cases across ranks. This is useful for parameter sweeps, but it is not domain decomposition.
+Generated binaries, caches, backup files, and obsolete workflow snapshots are not tracked.

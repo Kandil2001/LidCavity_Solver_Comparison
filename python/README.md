@@ -1,14 +1,7 @@
-# Python Implementations
+# Python implementations
 
-This folder contains the Python versions of the lid-driven cavity solver.
+- `serial/`: earlier pressure-correction reference implementation.
+- `../src/python/mpi_domain_*`: spatial MPI domain decomposition using `mpi4py`.
+- `../src/python/hybrid_mpi_openmp_*`: spatial MPI with threaded local kernels.
 
-| Folder | Purpose |
-|---|---|
-| `serial/` | Readable NumPy-based serial implementation |
-| `mpi/` | Case-level MPI runner using `mpi4py` |
-
-Both Python folders follow the same project style as the compiled versions: `README.md`, `Makefile`, `src/`, `postprocess/`, and `results/`.
-
-The serial folder includes two comparison labels: `serial_python_vectorized` for the NumPy-style path and `serial_python_looped` for the more explicit loop-based path.
-
-Use Python when readability and quick post-processing matter more than maximum runtime performance.
+Use the root Makefile for smoke tests and selected-result regeneration.

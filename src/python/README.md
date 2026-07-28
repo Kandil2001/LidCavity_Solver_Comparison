@@ -1,14 +1,8 @@
-# Python Implementations
+# Python domain benchmark
 
-This folder contains the Python versions of the lid-driven cavity solver.
+This directory contains the canonical Python streamfunction–vorticity distributed implementations:
 
-| Folder | Purpose |
-|---|---|
-| `serial/` | Readable NumPy-based serial implementation |
-| `mpi/` | Case-level MPI runner using `mpi4py` |
+- spatial MPI looped/vectorized;
+- hybrid MPI + local threaded kernels, looped/vectorized.
 
-Both Python folders follow the same project style as the compiled versions: `README.md`, `Makefile`, `src/`, `postprocess/`, and `results/`.
-
-The serial folder includes two comparison labels: `serial_python_vectorized` for the NumPy-style path and `serial_python_looped` for the more explicit loop-based path.
-
-Use Python when readability and quick post-processing matter more than maximum runtime performance.
+Each rank owns a grid slab and exchanges halos with neighboring ranks. Use `make smoke-domain-mpi` and `make smoke-domain-hybrid` from the repository root.

@@ -1,77 +1,41 @@
 # Results guide
 
-Each implementation writes outputs to its own `results/` folder. This avoids mixing files from different languages and makes comparisons easier.
+## Start here
 
-## Standard result folders
+- `results/selected/README.md`: the compact reviewed result set used by the root README.
+- `results/selected/highlights.csv`: one best vectorized point per retained implementation.
+- `results/selected/scaling_case_n128_re400_central_rbsor.csv`: every scaling point for the selected case.
+- `results/selected/execution_completeness.csv`: archive-level success and failure totals.
 
-```text
-results/data/      CSV summaries, field data, residual histories, validation data
-results/figures/   velocity plots, residual plots, validation plots
-results/scaling/   OpenMP, MPI, or CUDA scaling tables
-results/logs/      optional long-run logs
-```
-
-## Comparison workflow
-
-1. Run at least one serial implementation.
-2. Run another implementation with the same mode.
-3. From the repository root, run:
+Regenerate these files without running CFD:
 
 ```bash
-make compare-serial MODE=quick
-make report-serial MODE=quick
+python3 scripts/generate_selected_results.py
 ```
 
-The comparison scripts match cases by setup:
+## Full domain archive
 
-```text
-mesh size, Reynolds number, convection scheme, pressure solver
-```
+- `results/final/cpu_case_summaries/`: per-case repeated scaling summaries.
+- `results/final/comparisons/`: completeness and combined archive tables.
+- `results/final/figures/`: detailed archived figures.
+- `results/final/README_FINAL_STATUS.md`: audit of the complete package.
 
-This is safer than matching only by case number or file order.
+The full archive is retained for traceability, but it is not all suitable for headline comparison.
 
+## Pressure-correction reference evidence
 
-## Automated studies
+- `comparison/results/physics_fields/`
+- `comparison/figures/physics_final/`
 
-Grid convergence from the repository root:
+These files belong to the earlier numerical method and are not merged with domain timings.
 
-```bash
-make grid-convergence
-```
+## CUDA
 
-This writes CSV and PNG files to:
+- `results/cuda/cuda_validation_summary.csv`
+- `results/cuda/cuda_cpu_exact_full_summary.csv`
 
-```text
-comparison/results/grid_convergence/
-```
+The archived CUDA validation does not currently pass, so CUDA is not included in selected performance results.
 
-The observed order is based on centerline L2 errors against the Ghia benchmark data. It is useful for comparing grid trends, but it is not the same as a manufactured-solution accuracy proof.
+## Reporting rule
 
-Automatic validation plots:
-
-```bash
-make validation-plots
-python3 scripts/plot_validation_centerlines.py --Re 100 --N 64
-```
-
-Parallel scaling plots:
-
-```bash
-make scaling-openmp
-make scaling-mpi MODE=quick
-```
-
-OpenMP scaling is a fixed-case strong-scaling check. MPI scaling is case-level parameter-sweep scaling, not one-domain domain-decomposition scaling.
-
-## Reading runtime results
-
-Use runtime trends carefully:
-
-- smoke runs check that the code starts; they are not reliable performance measurements
-- OpenMP can be slower on very small grids because thread overhead dominates
-- MPI speedup here means faster parameter studies, not faster solution of one domain
-- CUDA should be tested only on a real NVIDIA GPU with the CUDA toolkit installed
-
-## Git policy
-
-Generated result files are ignored by Git by default. Keep only selected final plots or tables that are worth showing in the main README.
+Never collapse language, kernel style, pressure solver, resource count, or repetition into one unlabeled minimum. Use matched configurations and report median plus variability.
