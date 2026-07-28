@@ -49,5 +49,11 @@ jobs:
       - name: Verify OpenMP smoke outputs
         run: python scripts/check_smoke_outputs.py c/openmp cpp/openmp
 
-      - name: Verify MPI smoke outputs
-        run: python scripts/check_smoke_outputs.py python/mpi c/mpi cpp/mpi
+      - name: Verify Python MPI smoke output
+        run: python scripts/check_smoke_outputs.py python/mpi
+
+      - name: Verify C MPI smoke output
+        run: python scripts/check_smoke_outputs.py c/mpi
+
+      - name: Verify C++ MPI smoke output
+        run: python scripts/check_smoke_outputs.py cpp/mpi
