@@ -29,7 +29,7 @@ The source rows are generated in `results/selected/` from the complete archive.
 | Spatial MPI | 1,061 | 2,140 |
 | Hybrid | 1,044 | 2,100 |
 
-The retained successful MPI and hybrid rows are Python. Historical C/C++ distributed runs failed to rebuild; their Makefiles are fixed, but their performance cases require rerunning.
+The retained successful MPI and hybrid rows are Python. The C/C++ spatial-MPI and hybrid implementations now clean-build and pass CI smoke tests, but full performance cases still require rerunning before a cross-language distributed-memory comparison is reported.
 
 ## Valid interpretation
 
