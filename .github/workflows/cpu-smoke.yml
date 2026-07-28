@@ -19,43 +19,33 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check backup files in scripts
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix scripts
+      - name: Check array job backups
+        run: python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/array
 
-      - name: Check backup files in organized sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix src
-
-      - name: Check backup files in legacy C sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix c
-
-      - name: Check backup files in legacy C++ sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix cpp
-
-      - name: Check backup files in legacy Python sources
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix python
-
-      - name: Check backup files in MATLAB and CUDA sources
+      - name: Check C and C++ job backups
         run: |
-          python scripts/check_repository_consistency.py --check backup --path-prefix matlab
-          python scripts/check_repository_consistency.py --check backup --path-prefix cuda
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/c_
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/cpp_
 
-      - name: Check backup files in HPC
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix hpc
-
-      - name: Check backup files in jobs
-        run: python scripts/check_repository_consistency.py --check backup --path-prefix jobs
-
-      - name: Check backup files in results and comparison
+      - name: Check Python and Octave job backups
         run: |
-          python scripts/check_repository_consistency.py --check backup --path-prefix results
-          python scripts/check_repository_consistency.py --check backup --path-prefix comparison
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/python_
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/octave_
 
-      - name: Check backup files in remaining repository areas
+      - name: Check submit and make helper backups
+        run: |
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/submit
+          python scripts/check_repository_consistency.py --check backup --path-starts-with jobs/make
+
+      - name: Check miscellaneous jobs backups
         run: >-
-          python scripts/check_repository_consistency.py --check backup
-          --exclude-prefix scripts --exclude-prefix src --exclude-prefix c --exclude-prefix cpp
-          --exclude-prefix python --exclude-prefix matlab --exclude-prefix cuda --exclude-prefix hpc
-          --exclude-prefix jobs --exclude-prefix results --exclude-prefix comparison
+          python scripts/check_repository_consistency.py --check backup --path-prefix jobs
+          --exclude-prefix jobs/array --exclude-prefix jobs/c_ --exclude-prefix jobs/cpp_
+          --exclude-prefix jobs/python_ --exclude-prefix jobs/octave_
+          --exclude-prefix jobs/submit --exclude-prefix jobs/make
+
+      - name: Check all other backup files
+        run: python scripts/check_repository_consistency.py --check backup --exclude-prefix jobs
 
       - name: Set up Python
         uses: actions/setup-python@v5
