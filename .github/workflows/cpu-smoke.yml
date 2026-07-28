@@ -26,8 +26,17 @@ jobs:
           cache: pip
           cache-dependency-path: .github/requirements-ci.txt
 
-      - name: Check repository consistency
-        run: python scripts/check_repository_consistency.py
+      - name: Check documentation and source structure
+        run: python scripts/check_repository_consistency.py --check structure
+
+      - name: Check shell paths and syntax
+        run: python scripts/check_repository_consistency.py --check shell
+
+      - name: Check critical Python syntax
+        run: python scripts/check_repository_consistency.py --check python
+
+      - name: Check tracked repository artifacts
+        run: python scripts/check_repository_consistency.py --check artifacts
 
       - name: Install OpenMPI and pinned Python dependencies
         run: |
