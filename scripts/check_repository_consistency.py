@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-REQUIRED_DOCS = [
+REQUIRED_FILES = [
     "README.md",
+    "Makefile",
     "docs/BENCHMARK_TRACKS.md",
     "docs/CURRENT_BENCHMARK_RESULTS.md",
     "docs/PROJECT_OVERVIEW.md",
     "docs/IMPLEMENTATION_LAYOUT.md",
     "docs/RESULTS_GUIDE.md",
+    "docs/RUNNING_ON_HPC.md",
+    "results/selected/README.md",
+    "results/selected/highlights.csv",
+    "scripts/generate_selected_results.py",
 ]
 
 DOMAIN_SOLVER_DIRS = [
@@ -36,6 +40,8 @@ DOMAIN_SOLVER_DIRS = [
 ]
 
 ACTIVE_SHELL_SCRIPTS = [
+    "scripts/run_smoke_cpu.sh",
+    "scripts/run_domain_solver_benchmark.sh",
     "scripts/run_strong_scaling_all.sh",
     "scripts/run_openmp_looped_vectorized_scaling.sh",
     "scripts/run_domain_kernel_matrix.sh",
@@ -46,157 +52,127 @@ ACTIVE_SHELL_SCRIPTS = [
 ]
 
 CRITICAL_PYTHON_SCRIPTS = [
+    "scripts/check_repository_consistency.py",
+    "scripts/check_smoke_outputs.py",
+    "scripts/generate_selected_results.py",
     "scripts/compute_strong_scaling.py",
     "scripts/compare_domain_kernel_matrix.py",
-    "scripts/check_repository_consistency.py",
+    "scripts/run_parallel_scaling.py",
 ]
 
-LEGACY_DOMAIN_TOKENS = [
-    "c/openmp_domain_",
-    "c/mpi_domain_",
-    "c/hybrid_mpi_openmp_",
-    "cpp/openmp_domain_",
-    "cpp/mpi_domain_",
-    "cpp/hybrid_mpi_openmp_",
-    "python/mpi_domain_",
-    "python/hybrid_mpi_openmp_",
+FORBIDDEN_PREFIXES = [
+    "c/mpi/",
+    "cpp/mpi/",
+    "python/mpi/",
+    "jobs/",
+    "comparison/results/final/",
+    "comparison/results/final_clean/",
+]
+
+FORBIDDEN_PATHS = {
+    "comparison/results/raw/c_mpi_r8_full.csv",
+    "comparison/results/raw/cpp_mpi_r8_full.csv",
+    "README_ONE_COMMAND.md",
+    "README_RUN_ON_STROMBOLI.md",
+    "RUN_EVERYTHING_ON_STROMBOLI.sh",
+    "01_prepare_stromboli.sh",
+    "03_submit_all.sh",
+    "scripts/submit_stromboli_full_data_first_no_cuda.sh",
+}
+
+TEXT_SUFFIXES = {".md", ".txt", ".py", ".sh", ".yml", ".yaml"}
+FORBIDDEN_TEXT = [
+    "python/mpi/",
+    "c/mpi/",
+    "cpp/mpi/",
+    "c_mpi,cpp_mpi,python_mpi",
 ]
 
 
 def tracked_files() -> list[str]:
     result = subprocess.run(
-        ["git", "ls-files"],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=True,
+        ["git", "ls-files"], cwd=ROOT, text=True, capture_output=True, check=True
     )
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
-def check_structure() -> list[str]:
-    errors = []
-    for relative in REQUIRED_DOCS:
+def read_text(relative: str) -> str:
+    return (ROOT / relative).read_text(encoding="utf-8", errors="replace")
+
+
+def main() -> int:
+    errors: list[str] = []
+
+    for relative in REQUIRED_FILES:
         if not (ROOT / relative).is_file():
-            errors.append(f"missing required documentation: {relative}")
-    for relative in DOMAIN_SOLVER_DIRS:
-        if not (ROOT / relative / "Makefile").is_file():
-            errors.append(f"missing organized domain solver Makefile: {relative}/Makefile")
-    return errors
+            errors.append(f"missing required file: {relative}")
 
+    for directory in DOMAIN_SOLVER_DIRS:
+        if not (ROOT / directory / "Makefile").is_file():
+            errors.append(f"missing domain Makefile: {directory}/Makefile")
 
-def check_shell() -> list[str]:
-    errors = []
     for relative in ACTIVE_SHELL_SCRIPTS:
         path = ROOT / relative
         if not path.is_file():
-            errors.append(f"missing active shell script: {relative}")
+            errors.append(f"missing shell script: {relative}")
             continue
-        syntax = subprocess.run(["bash", "-n", str(path)], text=True, capture_output=True)
-        if syntax.returncode != 0:
-            errors.append(f"shell syntax error in {relative}: {syntax.stderr.strip()}")
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            if any(token in line for token in LEGACY_DOMAIN_TOKENS) and "src/" not in line and "SRC_ROOT" not in line:
-                errors.append(f"legacy pre-src domain path in {relative}:{line_number}: {line.strip()}")
-    return errors
+        check = subprocess.run(["bash", "-n", str(path)], text=True, capture_output=True)
+        if check.returncode:
+            errors.append(f"shell syntax error in {relative}: {check.stderr.strip()}")
 
-
-def check_python() -> list[str]:
-    errors = []
     for relative in CRITICAL_PYTHON_SCRIPTS:
         path = ROOT / relative
         if not path.is_file():
-            errors.append(f"missing critical Python script: {relative}")
+            errors.append(f"missing Python script: {relative}")
             continue
         try:
             compile(path.read_text(encoding="utf-8"), str(path), "exec")
         except SyntaxError as error:
             errors.append(f"Python syntax error in {relative}: {error}")
-    return errors
 
-
-def path_in_scope(
-    relative: str,
-    path_prefix: str | None,
-    starts_with: str | None,
-    exclude_prefixes: list[str],
-) -> bool:
-    if path_prefix and not (relative == path_prefix or relative.startswith(path_prefix.rstrip("/") + "/")):
-        return False
-    if starts_with and not relative.startswith(starts_with):
-        return False
-    return not any(
-        relative == excluded or relative.startswith(excluded.rstrip("/") + "/")
-        for excluded in exclude_prefixes
-    )
-
-
-def artifact_files(
-    artifact_type: str,
-    path_prefix: str | None,
-    starts_with: str | None,
-    exclude_prefixes: list[str],
-) -> list[str]:
     try:
         tracked = tracked_files()
     except (OSError, subprocess.CalledProcessError) as error:
-        return [f"could not inspect tracked files: {error}"]
+        errors.append(f"could not inspect tracked files: {error}")
+        tracked = []
 
-    errors = []
     for relative in tracked:
-        if not path_in_scope(relative, path_prefix, starts_with, exclude_prefixes):
-            continue
         path = Path(relative)
-        if artifact_type == "cache" and ("__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}):
-            errors.append(f"tracked Python cache artifact: {relative}")
-        if artifact_type == "backup" and (path.suffix == ".bak" or ".bak_" in path.name):
-            errors.append(f"tracked backup artifact: {relative}")
-    return errors
+        if any(relative.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
+            errors.append(f"removed case-parallel/generated path is still tracked: {relative}")
+        if relative in FORBIDDEN_PATHS:
+            errors.append(f"obsolete workflow path is still tracked: {relative}")
+        if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+            errors.append(f"tracked Python cache: {relative}")
+        if path.suffix == ".bak" or ".bak_" in path.name:
+            errors.append(f"tracked backup file: {relative}")
 
+        if relative == "scripts/check_repository_consistency.py":
+            continue
+        if path.suffix.lower() not in TEXT_SUFFIXES or not (ROOT / relative).is_file():
+            continue
+        text = read_text(relative)
+        for token in FORBIDDEN_TEXT:
+            if token in text:
+                errors.append(f"obsolete case-parallel reference in {relative}: {token}")
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Check repository structure without running CFD cases.")
-    parser.add_argument(
-        "--check",
-        choices=["all", "structure", "shell", "python", "cache", "backup"],
-        default="all",
-        help="Run one category or all checks.",
-    )
-    parser.add_argument("--path-prefix", help="Limit cache or backup checks to a path or directory.")
-    parser.add_argument("--path-starts-with", help="Limit cache or backup checks by literal path prefix.")
-    parser.add_argument(
-        "--exclude-prefix",
-        action="append",
-        default=[],
-        help="Exclude a repository path prefix; may be supplied more than once.",
-    )
-    args = parser.parse_args()
-
-    checks = {
-        "structure": check_structure,
-        "shell": check_shell,
-        "python": check_python,
-        "cache": lambda: artifact_files("cache", args.path_prefix, args.path_starts_with, args.exclude_prefix),
-        "backup": lambda: artifact_files("backup", args.path_prefix, args.path_starts_with, args.exclude_prefix),
-    }
-    selected = list(checks) if args.check == "all" else [args.check]
-
-    errors = []
-    for name in selected:
-        category_errors = checks[name]()
-        if category_errors:
-            errors.extend(f"[{name}] {error}" for error in category_errors)
-        else:
-            scope = args.path_prefix or args.path_starts_with or "repository"
-            print(f"Repository consistency category passed: {name} ({scope})")
+    for relative in [
+        "src/c/mpi_domain_looped/Makefile",
+        "src/c/mpi_domain_vectorized/Makefile",
+        "src/c/hybrid_mpi_openmp_looped/Makefile",
+        "src/c/hybrid_mpi_openmp_vectorized/Makefile",
+    ]:
+        if (ROOT / relative).is_file() and "CC = mpicc" not in read_text(relative):
+            errors.append(f"C spatial-MPI Makefile must force the MPI wrapper: {relative}")
 
     if errors:
         print("Repository consistency check failed:")
-        for error in errors:
+        for error in sorted(set(errors)):
             print(f"- {error}")
         return 1
 
     print("Repository consistency check passed.")
+    print(f"Checked {len(tracked)} tracked files and {len(DOMAIN_SOLVER_DIRS)} domain implementations.")
     return 0
 
 

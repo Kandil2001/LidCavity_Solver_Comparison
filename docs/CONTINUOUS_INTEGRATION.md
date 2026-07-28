@@ -1,54 +1,15 @@
-# Continuous Integration
+# Continuous integration
 
-The repository includes a CPU-only GitHub Actions workflow at:
+The workflow in `.github/workflows/cpu-smoke.yml` verifies repository integrity and the complete small CPU implementation matrix.
 
-```text
-.github/workflows/cpu-smoke.yml
-```
+It performs:
 
-## What the workflow checks
+1. installation of OpenMPI and pinned Python dependencies;
+2. repository consistency checks;
+3. a clean rebuild of every compiled domain implementation;
+4. smoke execution of the pressure-correction serial/OpenMP reference track;
+5. smoke execution of domain OpenMP, spatial MPI, and hybrid implementations;
+6. readable summary-CSV verification for every tested implementation;
+7. regeneration of `results/selected/` and a Git diff check.
 
-The workflow installs OpenMPI and a pinned Python environment, then runs:
-
-```bash
-make smoke-cpu NP=2 OMP_NUM_THREADS=2
-```
-
-On the GitHub-hosted Linux runner, this exercises the available CPU groups:
-
-- Python serial
-- C serial
-- C++ serial
-- C OpenMP
-- C++ OpenMP
-- Python MPI with two ranks
-- C MPI with two ranks
-- C++ MPI with two ranks
-
-MATLAB/Octave is skipped when neither executable is available. CUDA is not part of this workflow because GitHub's standard hosted runner does not provide the project GPU environment.
-
-After execution, the workflow checks that each tested solver group produced at least one non-empty study summary containing data rows.
-
-## What a green workflow proves
-
-A green workflow proves that the tested CPU implementations can be built or imported, start their smallest configured case, finish that configured smoke run, and write readable summary output in the pinned CI environment.
-
-It does **not** prove that:
-
-- the full benchmark cases satisfy residual-convergence criteria
-- all implementations are numerically equivalent
-- current runtime rankings are portable to other hardware
-- MATLAB/Octave or CUDA paths are working
-- the project is ready for a stable benchmark release
-
-These distinctions match the repository's separation between execution completion, convergence, validation status, and performance measurement.
-
-## CI dependency baseline
-
-The workflow dependency versions are recorded in:
-
-```text
-.github/requirements-ci.txt
-```
-
-This file is intentionally separate from the general user-facing requirements files. It keeps the automated smoke environment stable without claiming that every scientific production run must use the same plotting-library versions.
+A green workflow proves that these small configured cases build, run, and generate parseable outputs in the pinned CI environment. It does not prove production-case convergence, physical validation, scalability on Stromboli, or CUDA correctness.

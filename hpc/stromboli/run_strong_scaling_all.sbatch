@@ -14,7 +14,7 @@ mkdir -p logs comparison/results/strong_scaling
 module load openmpi 2>/dev/null || module load mpi 2>/dev/null || true
 
 # Defaults can be overridden at submission time, for example:
-# sbatch --ntasks=16 jobs/run_strong_scaling_all.sbatch
+# sbatch hpc/stromboli/run_strong_scaling_all.sbatch
 export PYTHON=${PYTHON:-python3}
 export RANKS=${RANKS:-"1 2 4 8 16"}
 export THREADS_LIST=${THREADS_LIST:-"1 2 4 8 16"}

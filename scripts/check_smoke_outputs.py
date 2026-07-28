@@ -7,10 +7,13 @@ from pathlib import Path
 
 
 def find_summaries(group: Path) -> list[Path]:
-    candidates = []
-    candidates.extend(sorted((group / "results" / "data").glob("study_summary_*.csv")))
-    candidates.extend(sorted((group / "results").glob("study_summary_*.csv")))
-    return [path for path in candidates if path.is_file() and path.stat().st_size > 0]
+    candidates: set[Path] = set()
+    for root in (group / "results" / "data", group / "results"):
+        if not root.is_dir():
+            continue
+        candidates.update(root.glob("study_summary_*.csv"))
+        candidates.update(root.glob("*_summary.csv"))
+    return sorted(path for path in candidates if path.is_file() and path.stat().st_size > 0)
 
 
 def readable_rows(path: Path) -> int:
@@ -19,23 +22,21 @@ def readable_rows(path: Path) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Verify that smoke-test solver groups produced readable summaries.")
+    parser = argparse.ArgumentParser(description="Verify that solver smoke tests produced readable CSV summaries.")
     parser.add_argument("groups", nargs="+", help="Implementation directories to check.")
     args = parser.parse_args()
 
-    errors = []
+    errors: list[str] = []
     for raw_group in args.groups:
         group = Path(raw_group)
         summaries = find_summaries(group)
         if not summaries:
-            errors.append(f"{group}: no non-empty study summary was generated")
+            errors.append(f"{group}: no non-empty summary CSV was generated")
             continue
-
         rows = sum(readable_rows(summary) for summary in summaries)
         if rows < 1:
             errors.append(f"{group}: summary files contain no data rows")
             continue
-
         print(f"Verified {group}: {len(summaries)} summary file(s), {rows} row(s).")
 
     if errors:
@@ -43,7 +44,6 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-
     return 0
 
 

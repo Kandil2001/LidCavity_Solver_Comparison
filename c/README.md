@@ -1,17 +1,8 @@
-# C Implementations
+# C implementations
 
-This folder contains the C versions of the lid-driven cavity solver.
+- `serial/` and `openmp/`: earlier pressure-correction reference implementations.
+- `../src/c/openmp_domain_*`: canonical streamfunction–vorticity OpenMP benchmark.
+- `../src/c/mpi_domain_*`: spatial MPI domain decomposition.
+- `../src/c/hybrid_mpi_openmp_*`: spatial MPI plus OpenMP threads.
 
-| Folder | Purpose |
-|---|---|
-| `serial/` | Compiled serial CPU baseline |
-| `openmp/` | Shared-memory CPU threaded version |
-| `mpi/` | Case-level MPI runner for parameter studies |
-
-All C folders follow the same structure: `README.md`, `Makefile`, `src/`, `postprocess/`, and `results/`.
-
-## Important note about labels
-
-The C solver is one compiled baseline. Older names such as `serial_c_looped`, `serial_c_vectorized`, `openmp_c_looped`, and `openmp_c_vectorized_style` are accepted as aliases for backward compatibility, but they are not separate C algorithms.
-
-Use the serial version first, then compare against OpenMP and MPI.
+Use the root Makefile for clean builds and smoke tests.

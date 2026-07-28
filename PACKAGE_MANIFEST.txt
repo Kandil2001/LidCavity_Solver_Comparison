@@ -1,19 +1,27 @@
-Lid-Driven Cavity Solver Comparison - Final Package
+Canonical source
+- src/c/{openmp_domain,mpi_domain,hybrid_mpi_openmp}_{looped,vectorized}
+- src/cpp/{openmp_domain,mpi_domain,hybrid_mpi_openmp}_{looped,vectorized}
+- src/python/{mpi_domain,hybrid_mpi_openmp}_{looped,vectorized}
 
-Included:
-- C, C++, Python, Octave/MATLAB solver code
-- Serial, OpenMP, MPI implementations
-- Slurm job scripts
-- Comparison scripts
-- Final runtime/convergence/quality CSV summaries
-- Final PNG plots
-- Physics plot folders if generated
-- README/docs if present
+Reference source
+- matlab
+- python/serial
+- c/serial and c/openmp
+- cpp/serial and cpp/openmp
+- cuda
 
-Excluded:
-- temporary work folders
-- build folders and object files
-- Python virtual environments
-- caches
-- old zip/tar archives
-- huge raw temporary MPI folders
+Execution and processing
+- Makefile
+- scripts
+- hpc/stromboli
+
+Results
+- results/final: complete archived domain package
+- results/selected: reviewed README-facing subset
+- comparison/results/physics_fields and comparison/figures/physics_final: retained reference validation
+
+Documentation
+- README.md
+- docs
+- CONTRIBUTING.md
+- LICENSE

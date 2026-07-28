@@ -1,139 +1,59 @@
-# Running on a university or HPC machine
+# Running on Stromboli or another Slurm cluster
 
-Start with a smoke run. It checks that the folders compile and that the Python scripts can start.
+## Deployment rule
 
-```bash
-make smoke-cpu
-```
+Stromboli is a run-only target. Prepare and version the source on the local computer, package it, upload it with `scp`, and extract it into a new timestamped directory under `/beegfs/kandil`. Do not use Git on Stromboli and do not overwrite active result folders.
 
-For longer runs, use `nohup` or a batch system if the machine supports it.
+## Local preparation
 
 ```bash
-nohup make quick-cpu > quick_cpu.log 2>&1 &
+python3 scripts/check_repository_consistency.py
+python3 scripts/package_paper_snapshot.py   # available on the paper branch when needed
 ```
 
-Check the log while it is running:
+For the current repository, a normal source-only archive is also sufficient:
 
 ```bash
-tail -f quick_cpu.log
+tar --exclude='.git' --exclude='bin' --exclude='__pycache__' \
+    -czf lidcavity-domain-source.tar.gz .
+scp lidcavity-domain-source.tar.gz \
+    m2328670@stromboli.physik.uni-wuppertal.de:~/uploads/
 ```
 
-Show the last 300 lines:
+## On Stromboli
 
 ```bash
-tail -n 300 quick_cpu.log
+mkdir -p /beegfs/kandil/paper_runs
+run_dir="/beegfs/kandil/paper_runs/LidCavity_$(date -u +%Y%m%dT%H%M%SZ)"
+mkdir -p "$run_dir"
+tar -xzf ~/uploads/lidcavity-domain-source.tar.gz -C "$run_dir"
+cd "$run_dir"
 ```
 
-Check whether the process is still active:
+Check the toolchain and clean-build before submitting arrays:
 
 ```bash
-ps -f -u "$USER" | grep -E "lid_cavity|matlab|octave|python|make" | grep -v grep
+command -v gcc g++ mpicc mpicxx mpirun python3 sbatch
+make rebuild-domain
 ```
 
-
-
-## Full Stromboli workflow
-
-Use this from the repository root when you want one command that checks the available tools and runs what can run on the current node:
-
-```bash
-bash scripts/run_stromboli_all.sh smoke
-```
-
-For a longer run that survives a dropped SSH connection:
-
-```bash
-nohup bash scripts/run_stromboli_all.sh quick > stromboli_quick.log 2>&1 &
-tail -f stromboli_quick.log
-```
-
-The script attempts to make common cluster tools available, including the OpenMPI path observed on Stromboli-like machines:
+Maintained Slurm entry points are under:
 
 ```text
-/cluster/mpi/openmpi/4.1.8/bin
+hpc/stromboli/array_full_openmp_3rep.sbatch
+hpc/stromboli/array_full_mpi_3rep.sbatch
+hpc/stromboli/array_full_hybrid_3rep.sbatch
+hpc/stromboli/run_strong_scaling_all.sbatch
 ```
 
-It then runs Octave, serial CPU solvers, OpenMP solvers, MPI solvers, and CUDA when the required tools are available. Missing optional tools are reported and skipped.
+Submit only after the small local/interactive smoke test succeeds, and always write new results to a new run directory.
 
-To skip CUDA intentionally on a CPU-only node:
+## Retrieve results
+
+From the local computer:
 
 ```bash
-RUN_CUDA=0 bash scripts/run_stromboli_all.sh quick
+scp -r m2328670@stromboli.physik.uni-wuppertal.de:/beegfs/kandil/paper_runs/<RUN>/results ./results_from_stromboli
 ```
 
-## GNU Octave on Stromboli
-
-If MATLAB is not available on Stromboli, use GNU Octave for the `matlab/` reference solver.
-
-First check whether Octave is available:
-
-```bash
-module avail octave
-module load octave
-which octave
-octave --version
-```
-
-Then run the reference solver directly:
-
-```bash
-cd matlab
-make smoke ENGINE=octave
-make quick ENGINE=octave
-```
-
-Or use the helper from the repository root:
-
-```bash
-bash scripts/run_stromboli_octave.sh smoke
-bash scripts/run_stromboli_octave.sh quick
-```
-
-For a run that survives a dropped SSH connection:
-
-```bash
-nohup bash scripts/run_stromboli_octave.sh quick > octave_quick.log 2>&1 &
-tail -f octave_quick.log
-```
-
-Octave skips plot generation by default on the cluster and writes CSV/`.mat` outputs under `matlab/results/data/`. To force Octave plots, set:
-
-```bash
-OCTAVE_MAKE_FIGURES=1 bash scripts/run_stromboli_octave.sh quick
-```
-
-## MPI
-
-MPI runs need `mpirun` and usually `mpicc` for the C/C++ drivers.
-
-```bash
-which mpirun
-which mpicc
-```
-
-Then run for example:
-
-```bash
-cd c/mpi
-make quick NP=4
-```
-
-## CUDA
-
-CUDA runs need an NVIDIA GPU, `nvcc`, and access to the GPU from the current node.
-
-```bash
-cd cuda
-make check-cuda
-make smoke
-make scaling
-```
-
-From the repository root, you can also run:
-
-```bash
-make smoke-cuda
-make scaling-cuda
-```
-
-If `nvidia-smi` fails, the current node probably has no accessible NVIDIA GPU. In that case, skip `cuda/` on this node or move the run to a GPU node. The Stromboli all-in-one script automatically skips CUDA when the GPU tools are missing.
+Commit retrieved results locally after auditing completeness and metadata.

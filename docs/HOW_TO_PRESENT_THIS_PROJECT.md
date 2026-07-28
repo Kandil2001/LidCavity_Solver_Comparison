@@ -1,25 +1,21 @@
 # How to present this project
 
-Use wording that is technical, clear, and honest.
+## One-sentence description
 
-## Good short description
+A multi-language CFD/HPC benchmark for the lid-driven cavity that compares C, C++, and Python implementations using OpenMP, spatial MPI domain decomposition, and hybrid parallelism, with reproducible result processing and explicit separation of numerical methods.
 
-> I built a lid-driven cavity benchmark to compare the same CFD setup across MATLAB, Python, C, C++, OpenMP, MPI case-parallel runs, and a CUDA prototype. The project focuses on solver structure, validation against Ghia data, runtime comparison, and reproducible CSV/plot outputs.
+## Strong technical points
 
-## Good CV bullet
+- One-grid MPI domain decomposition with halo exchange.
+- Looped and vectorized kernel variants.
+- Repeated strong-scaling measurements with median and efficiency.
+- Automated repository, build, smoke-output, and result checks.
+- Separate pressure-correction validation evidence and streamfunction–vorticity performance evidence.
+- Honest treatment of failed builds and incomplete archives.
 
-> Developed a multi-language lid-driven cavity benchmark using MATLAB/Octave, Python, C, C++, OpenMP, MPI case-level parallelism, and CUDA; added automated Ghia validation plots, grid-convergence tables, and scaling plots using a consistent SIMPLE-style setup.
+## Do not claim yet
 
-## Good interview explanation
-
-> I wanted to show that I can take one CFD problem and implement it in several environments. MATLAB is the reference workflow, Python is readable and post-processing-friendly, C and C++ are compiled baselines, OpenMP tests shared-memory parallelism, MPI distributes independent cases, and CUDA is a GPU prototype. I also kept the comparison honest by matching cases through mesh, Reynolds number, scheme, and pressure solver instead of comparing files by order.
-
-## Avoid saying this
-
-Do not say that the project is a production CFD solver.
-
-Do not say that MPI is domain decomposition yet.
-
-Do not say that every MPI/OpenMP solver has true vectorized and looped implementations. Python and MATLAB/Octave have clearer loop/vectorized study paths. Python MPI can distribute those Python cases. C/C++ OpenMP and C/C++ MPI are single baseline implementations.
-
-Do not claim CUDA is automatically faster before running it on a suitable GPU and comparing the same cases carefully.
+- a final fastest-language result;
+- convergence-controlled time-to-solution;
+- a validated CUDA speedup;
+- a completed C/C++/Python MPI comparison.

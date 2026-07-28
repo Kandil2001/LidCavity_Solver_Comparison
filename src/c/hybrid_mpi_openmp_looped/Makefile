@@ -1,4 +1,4 @@
-CC ?= mpicc
+CC = mpicc
 CFLAGS ?= -O3 -std=c11 -Wall -Wextra -fopenmp
 NP ?= 4
 OMP_NUM_THREADS ?= 2
