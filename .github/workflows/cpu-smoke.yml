@@ -39,10 +39,11 @@ jobs:
           python scripts/check_repository_consistency.py --check backup --path-prefix matlab
           python scripts/check_repository_consistency.py --check backup --path-prefix cuda
 
-      - name: Check backup files in HPC and jobs
-        run: |
-          python scripts/check_repository_consistency.py --check backup --path-prefix hpc
-          python scripts/check_repository_consistency.py --check backup --path-prefix jobs
+      - name: Check backup files in HPC
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix hpc
+
+      - name: Check backup files in jobs
+        run: python scripts/check_repository_consistency.py --check backup --path-prefix jobs
 
       - name: Check backup files in results and comparison
         run: |
