@@ -26,6 +26,9 @@ jobs:
           cache: pip
           cache-dependency-path: .github/requirements-ci.txt
 
+      - name: Check repository consistency
+        run: python scripts/check_repository_consistency.py
+
       - name: Install OpenMPI and pinned Python dependencies
         run: |
           sudo apt-get update
